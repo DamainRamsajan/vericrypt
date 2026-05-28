@@ -130,7 +130,7 @@ pqcrypto-sphincsplus = "0.8"
 pqcrypto-traits = "0.3"
 
 # CycloneDX CBOM
-cyclonedx-rs = "0.6"
+cyclonedx-bom = "0.6"
 
 # Compression
 zstd = "0.13"
@@ -1024,7 +1024,7 @@ use crate::graph::CryptoGraph;
 /// - PQC algorithms use CycloneDX Cryptography Registry names
 pub fn generate_cbom(graph: &CryptoGraph) -> Result<String, VeriCryptError> {
     // Build a CycloneDX 1.7 document with cryptographic-asset-inventory type.
-    // Full implementation uses cyclonedx-rs with the CBOM extension.
+    // Full implementation uses cyclonedx-bom with the CBOM extension.
     let cbom = serde_json::json!({
         "bomFormat": "CycloneDX",
         "specVersion": "1.7",

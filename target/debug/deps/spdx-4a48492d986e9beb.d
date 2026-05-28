@@ -1,0 +1,12 @@
+/workspaces/vericrypt/target/debug/deps/spdx-4a48492d986e9beb.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/error.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression/minimize.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression/parser.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/identifiers.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/lexer.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/licensee.rs
+
+/workspaces/vericrypt/target/debug/deps/libspdx-4a48492d986e9beb.rmeta: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/error.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression/minimize.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression/parser.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/identifiers.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/lexer.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/licensee.rs
+
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/lib.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/error.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression/minimize.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/expression/parser.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/identifiers.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/lexer.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spdx-0.10.9/src/licensee.rs:

@@ -1,0 +1,84 @@
+[package]
+name = "vericrypt"
+version = "0.1.0"
+edition = "2024"
+description = "Post-quantum cryptographic compliance engine — single air-gapped binary"
+license = "UNLICENSED"
+repository = "https://github.com/intellica-ai-llc/vericrypt"
+
+[[bin]]
+name = "vericrypt"
+path = "src/main.rs"
+
+[[bin]]
+name = "vericrypt-verify"
+path = "src/verify_main.rs"
+
+[dependencies]
+csv = "1"
+walkdir = "2"
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+thiserror = "2"
+
+# UUID generation
+uuid = { version = "1", features = ["v4"] }
+
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Hashing
+blake3 = "1"
+
+# Hex encoding
+hex = "0.4"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+
+# Random number generation
+rand = "0.8"
+
+# Certificate parsing
+x509-parser = "0.17"
+rustls-pemfile = "2"
+der = "0.7"
+
+# TLS probing
+tokio-rustls = "0.26"
+
+# Knowledge graph
+petgraph = "0.6"
+
+# PQC signatures (NIST FIPS 204 / SLH-DSA)
+pqcrypto-sphincsplus = "0.8"
+pqcrypto-traits = "0.3"
+
+# CycloneDX CBOM
+cyclonedx-bom = "0.6"
+
+# Compression
+zstd = "0.13"
+
+# TEE attestation (Linux only — conditional)
+[target.'cfg(target_os = "linux")'.dependencies]
+# Direct ioctl interface for /dev/tdx_guest and /dev/sev-guest
+nix = { version = "0.29", features = ["ioctl"] }
+
+[dev-dependencies]
+tempfile = "3"
+criterion = "0.5"
+
+[[bench]]
+name = "scan_benchmarks"
+harness = false

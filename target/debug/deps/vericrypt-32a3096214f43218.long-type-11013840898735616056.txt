@@ -1,0 +1,9 @@
+(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)
+(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)
+(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)
+cyclonedx_bom::specs::common::vulnerability_analysis::v1_4::ImpactAnalysisResponse
+cyclonedx_bom::specs::common::vulnerability_analysis::v1_5::ImpactAnalysisResponse
+cyclonedx_bom::specs::v1_5::data_governance::DataGovernance
+jsonschema::output::OutputUnit<jsonschema::output::Annotations<'a>>
+jsonschema::output::OutputUnit<jsonschema::output::ErrorDescription>
+tracing_serde::fields::SerializeFieldMap<'a, Attributes<'_>>

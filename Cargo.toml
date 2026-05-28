@@ -1,0 +1,34 @@
+[workspace]
+members = ["crates/vericrypt"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "UNLICENSED"
+repository = "https://github.com/intellica-ai-llc/vericrypt"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+blake3 = "1"
+hex = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+rand = "0.8"
+x509-parser = "0.17"
+rustls-pemfile = "2"
+der = "0.7"
+tokio = { version = "1", features = ["full"] }
+petgraph = "0.6"
+ed25519-dalek = "2"
+walkdir = "2"
+csv = "1"
+ipnet = "2"
+which = "7"
+hostname = "0.4"
+dirs = "6"
+zstd = "0.13"
