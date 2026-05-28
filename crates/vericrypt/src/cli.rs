@@ -20,6 +20,7 @@ pub enum Commands {
 }
 
 #[derive(clap::Args)]
+#[derive(Debug)]
 pub struct ScanArgs {
     /// Directory containing certificates to scan
     #[arg(long)]

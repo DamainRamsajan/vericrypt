@@ -1,13 +1,13 @@
 {
   "batch": 0,
   "name": "pre-flight-validation",
-  "timestamp": "2026-05-28T17:30:00Z",
+  "timestamp": "2026-05-28T19:42:22Z",
   "workspace_root": "/workspaces/vericrypt",
   "toolchain": "stable-x86_64-unknown-linux-gnu",
   "required_toolchain": "stable",
   "workspace_members_count": 1,
   "stubs_detected": 0,
   "cross_compilation_targets_installed": 3,
-  "cargo_toml_hash": "4941b334fb557b9dda6cf75ab3ab1236d6511bf9718e5eb15d9a826486f0684e",
+  "cargo_toml_hash": "ebfa2f79e7cb130054e446ca8667fa474be92eab467661cdfc5ffce3176492b4",
   "status": "PASSED"
 }

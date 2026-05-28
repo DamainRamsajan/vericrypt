@@ -15,8 +15,6 @@ name = "vericrypt-verify"
 path = "src/verify_main.rs"
 
 [dependencies]
-csv = "1"
-walkdir = "2"
 # CLI
 clap = { version = "4", features = ["derive"] }
 
@@ -61,8 +59,8 @@ tokio-rustls = "0.26"
 petgraph = "0.6"
 
 # PQC signatures (NIST FIPS 204 / SLH-DSA)
-pqcrypto-sphincsplus = "0.8"
-pqcrypto-traits = "0.3"
+pqcrypto-sphincsplus = "0.7"
+pqcrypto-traits = "0.2"
 
 # CycloneDX CBOM
 cyclonedx-bom = "0.6"

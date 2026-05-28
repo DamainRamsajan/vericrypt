@@ -1,1 +1,0 @@
-impl Iterator<Item = Result<rustls_pemfile::Item, std::io::Error>> + '_

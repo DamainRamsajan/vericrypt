@@ -14,7 +14,7 @@ fn main() {
     }
 
     let report_path = PathBuf::from(&args[1]);
-    match vericrypt::report::verify_file(&report_path) {
+    match crate::report::verify_file(&report_path) {
         Ok(summary) => {
             println!("VERIFIED — {}", summary);
             process::exit(0);

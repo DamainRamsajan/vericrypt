@@ -117,3 +117,39 @@ pub struct PqcReport {
     pub tee_attestation: TeeStatus,
     pub signature: Option<SlhDsaSignature>,
 }
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ExposureResult {
+    pub total_hndl_exposure: f64,
+    pub per_asset_exposure: std::collections::HashMap<uuid::Uuid, f64>,
+    pub shapley_values: std::collections::HashMap<uuid::Uuid, f64>,
+    pub breakdown: ExposureBreakdown,
+    pub shapley_metadata: Option<ShapleyApproximationMetadata>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ExposureBreakdown {
+    pub temporal_hazard: f64,
+    pub crypto_vulnerability: f64,
+    pub operational_exposure: f64,
+    pub defense_attack_ratio: f64,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ShapleyApproximationMetadata {
+    pub samples: u64,
+    pub convergence_error: f64,
+    pub confidence_interval: f64,
+    pub converged: bool,
+    pub convergence_threshold: f64,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct MigrationPhase {
+    pub phase: u32,
+    pub asset_id: uuid::Uuid,
+    pub current_algorithm: String,
+    pub recommended_replacement: String,
+    pub regulatory_reference: String,
+    pub estimated_complexity: String,
+}
