@@ -15,6 +15,7 @@ name = "vericrypt-verify"
 path = "src/verify_main.rs"
 
 [dependencies]
+seedvm = { path = "../seedvm" }
 clap = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
@@ -34,7 +35,6 @@ petgraph = { workspace = true }
 walkdir = { workspace = true }
 csv = { workspace = true }
 ipnet = { workspace = true }
-which = { workspace = true }
 hostname = { workspace = true }
 dirs = { workspace = true }
 zstd = { workspace = true }
@@ -43,14 +43,12 @@ pqcrypto-traits = { workspace = true }
 cyclonedx-bom = { workspace = true }
 tempfile = { workspace = true }
 
-[target.'cfg(target_os = "linux")'.dependencies]
-tokio-rustls = { workspace = true }
-native-tls = { workspace = true }
-nix = { version = "0.29", features = ["ioctl"] }
-
 [dev-dependencies]
 criterion = { workspace = true }
 
 [[bench]]
 name = "scan_benchmarks"
 harness = false
+
+[build-dependencies]
+seedc = { path = "../seedc" }

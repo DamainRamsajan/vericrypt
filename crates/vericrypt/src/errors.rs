@@ -27,8 +27,8 @@ pub enum VeriCryptError {
     #[error("Unknown algorithm: {0}")]
     UnknownAlgorithm(String),
 
-    #[error("Lean 4 kernel unavailable: {0}")]
-    Lean4Unavailable(String),
+    #[error("ASL VM kernel unavailable: {0}")]
+    ASL VMUnavailable(String),
 
     #[error("Proof timeout: {0}")]
     ProofTimeout(String),

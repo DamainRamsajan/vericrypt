@@ -79,7 +79,7 @@ pub mod slh_dsa;
 use std::path::PathBuf;
 use crate::errors::VeriCryptError;
 use crate::types::{PqcReport, ComplianceTheorem, SlhDsaSignature};
-use crate::prioritize::MigrationPhase;
+use crate::types::MigrationPhase;
 use crate::license;
 
 /// Assemble and sign a .pqc compliance report.
@@ -371,7 +371,7 @@ use crate::errors::VeriCryptError;
 /// Per ADR-010: per-customer, independently rotatable, never embedded in binary.
 pub fn generate_signing_keypair() -> Result<(Vec<u8>, Vec<u8>), VeriCryptError> {
     let seed = uuid::Uuid::new_v4();
-    let private_key = blake3::hash(&seed.as_bytes()).as_bytes().to_vec();
+    let private_key = blake3::hash(seed.as_bytes()).as_bytes().to_vec();
     let public_key = blake3::hash(&private_key).as_bytes().to_vec();
 
     tracing::info!("Signing keypair generated");

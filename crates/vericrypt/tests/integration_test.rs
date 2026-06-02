@@ -15,6 +15,9 @@ fn test_full_pipeline() {
         cert_dir: Some(d.path().to_string_lossy().to_string()),
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
+        mode: vericrypt::cli::DeploymentMode::Shadow,
+        load_theorems: None,
+        publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();
     let o = d.path().join("o");
@@ -30,6 +33,9 @@ fn test_verify() {
         cert_dir: Some(d.path().to_string_lossy().to_string()),
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
+        mode: vericrypt::cli::DeploymentMode::Shadow,
+        load_theorems: None,
+        publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();
     let result = vericrypt::report::verify_file(&d.path().join("o").join("report.pqc")).unwrap();
@@ -44,6 +50,9 @@ fn test_csv() {
         cert_dir: Some(d.path().to_string_lossy().to_string()),
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
+        mode: vericrypt::cli::DeploymentMode::Shadow,
+        load_theorems: None,
+        publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();
 }

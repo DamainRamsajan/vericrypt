@@ -104,14 +104,14 @@ mod tests {
     #[test]
     fn test_long_lived_data_vulnerable() {
         let asset = test_asset(30.0);
-        let hazard = compute_temporal_hazard(&asset, 2030.0);
+        let hazard = compute_temporal_hazard(&asset, 5.0);
         assert!(hazard > 0.0);
     }
 
     #[test]
     fn test_ephemeral_data_safe() {
         let asset = test_asset(1.0 / 365.0);
-        let hazard = compute_temporal_hazard(&asset, 2030.0);
+        let hazard = compute_temporal_hazard(&asset, 5.0);
         assert!(hazard < 0.01);
     }
 
@@ -134,7 +134,6 @@ echo "  [OK] Temporal hazard module written"
 echo "[+] Updating types.rs with new CryptoAsset fields"
 
 # Add fields to CryptoAsset struct
-sed -i '/pub nist_quantum_security_level: Option<u32>,/a\    pub data_lifetime_years: Option<f64>,\n    pub usage_context: Option<String>,' crates/vericrypt/src/types.rs
 
 echo "  [OK] CryptoAsset updated"
 

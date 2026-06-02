@@ -1,11 +1,50 @@
+pub mod asl_runtime;
+
 use crate::errors::VeriCryptError;
 use crate::graph::CryptoGraph;
-use crate::types::{ComplianceTheorem, ProofStatus};
+use crate::types::ComplianceTheorem;
+use asl_runtime::AslRuntime;
 
-pub fn prove_compliance(_g: &CryptoGraph) -> Result<Vec<ComplianceTheorem>, VeriCryptError> {
-    Ok(vec![
-        ComplianceTheorem { theorem_id: uuid::Uuid::new_v4(), regulation_reference: "DORA Art. 12.3".into(), lean4_statement: "crypto_agility".into(), status: ProofStatus::Unverified, counterexample_asset_id: None, remediation_recommendation: Some("Migrate to NIST FIPS 204/205".into()) },
-        ComplianceTheorem { theorem_id: uuid::Uuid::new_v4(), regulation_reference: "SEC PQFIF".into(), lean4_statement: "inventory".into(), status: ProofStatus::Unverified, counterexample_asset_id: None, remediation_recommendation: Some("Complete inventory".into()) },
-        ComplianceTheorem { theorem_id: uuid::Uuid::new_v4(), regulation_reference: "NCSC Phase 1".into(), lean4_statement: "discovery".into(), status: ProofStatus::Unverified, counterexample_asset_id: None, remediation_recommendation: Some("Complete discovery".into()) },
-    ])
+/// Prove regulatory compliance using the ASL Virtual Machine.
+///
+/// Executes compiled regulatory bytecode against the cryptographic inventory.
+/// Produces verifiable execution evidence (schedule trace, ProofMeta).
+pub fn prove_compliance(graph: &CryptoGraph) -> Result<Vec<ComplianceTheorem>, VeriCryptError> {
+    let runtime = AslRuntime::new();
+
+    // Compute deterministic inventory hash for VM seed
+    let inventory_hash = compute_inventory_hash(graph);
+
+    let results = runtime.execute_all(&inventory_hash)?;
+
+    let theorems: Vec<ComplianceTheorem> = results
+        .into_iter()
+        .map(|(vm_state, mut theorem)| {
+            // Store VM state reference in theorem metadata
+            theorem.lean4_statement = format!(
+                "ASL VM: {} instructions, proof verified: {}",
+                vm_state.schedule_trace_len(),
+                vm_state.proof_verified()
+            );
+            theorem
+        })
+        .collect();
+
+    tracing::info!(
+        frameworks = runtime.available_frameworks().len(),
+        theorems = theorems.len(),
+        "ASL VM compliance verification complete"
+    );
+
+    Ok(theorems)
+}
+
+/// Compute a deterministic hash of the cryptographic inventory for VM seeding.
+fn compute_inventory_hash(graph: &CryptoGraph) -> Vec<u8> {
+    let mut hasher = blake3::Hasher::new();
+    for asset in graph.get_all_assets() {
+        hasher.update(asset.fingerprint.as_bytes());
+        hasher.update(asset.algorithm.name.as_bytes());
+    }
+    hasher.finalize().as_bytes().to_vec()
 }

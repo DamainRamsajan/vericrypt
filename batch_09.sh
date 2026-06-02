@@ -160,7 +160,7 @@ fn main() {
                     let output_path = out_dir.join(format!("{}.aslb", framework.to_lowercase()));
                     fs::write(&output_path, &bytecode)
                         .expect(&format!("Failed to write compiled axiom: {:?}", output_path));
-                    compiled_axioms.push((framework, output_path));
+                    compiled_axioms.push((framework.clone(), output_path));
                     println!("cargo:warning=Compiled {} axioms successfully", framework);
                 }
                 Err(e) => {

@@ -353,7 +353,7 @@ pub mod slh_dsa;
 use std::path::PathBuf;
 use crate::errors::VeriCryptError;
 use crate::types::{PqcReport, ComplianceTheorem, SlhDsaSignature, InventoryConfidence};
-use crate::prioritize::MigrationPhase;
+use crate::types::MigrationPhase;
 use crate::license;
 
 /// Assemble and sign a .pqc compliance report with full regulatory evidence.

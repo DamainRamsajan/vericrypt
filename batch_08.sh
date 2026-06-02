@@ -102,7 +102,7 @@ use traits::{SignatureProvider, SlhDsaProvider};
 /// Keys are per-customer, independently rotatable (ADR-010).
 pub fn generate_signing_keypair() -> Result<(Vec<u8>, Vec<u8>), VeriCryptError> {
     let seed = uuid::Uuid::new_v4();
-    let private_key = blake3::hash(&seed.as_bytes()).as_bytes().to_vec();
+    let private_key = blake3::hash(seed.as_bytes()).as_bytes().to_vec();
     let public_key = blake3::hash(&private_key).as_bytes().to_vec();
     tracing::info!("Signing keypair generated");
     Ok((private_key, public_key))
@@ -504,7 +504,7 @@ pub mod verichain;
 use std::path::PathBuf;
 use crate::errors::VeriCryptError;
 use crate::types::{PqcReport, ComplianceTheorem, SlhDsaSignature};
-use crate::prioritize::MigrationPhase;
+use crate::types::MigrationPhase;
 use crate::license;
 
 pub fn assemble_report(

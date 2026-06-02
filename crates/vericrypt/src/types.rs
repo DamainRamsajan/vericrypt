@@ -37,6 +37,8 @@ pub struct CryptoAsset {
     pub fingerprint: String,
     pub source_location: String,
     pub nist_quantum_security_level: Option<u32>,
+    pub data_lifetime_years: Option<f64>,
+    pub usage_context: Option<String>,
 }
 
 /// Dependency relationship between two cryptographic assets.
@@ -82,12 +84,12 @@ pub enum ProofStatus {
     Timeout,
 }
 
-/// A single compliance theorem with its Lean 4 kernel verdict.
+/// A single compliance theorem with its ASL VM kernel verdict.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ComplianceTheorem {
     pub theorem_id: Uuid,
     pub regulation_reference: String,
-    pub lean4_statement: String,
+    pub ASL VM_statement: String,
     pub status: ProofStatus,
     pub counterexample_asset_id: Option<Uuid>,
     pub remediation_recommendation: Option<String>,

@@ -919,7 +919,7 @@ cat > crates/vericrypt/src/report/mod.rs << 'EOF'
 use std::path::PathBuf;
 use crate::errors::VeriCryptError;
 use crate::types::{PqcReport, ComplianceTheorem, SlhDsaSignature};
-use crate::prioritize::MigrationPhase;
+use crate::types::MigrationPhase;
 use crate::license;
 
 pub fn assemble_report(dir: &str, cbom: String, thms: Vec<ComplianceTheorem>, rm: Vec<MigrationPhase>) -> Result<PqcReport, VeriCryptError> {

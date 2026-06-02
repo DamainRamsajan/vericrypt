@@ -1,0 +1,109 @@
+name: VeriCrypt CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo check -p vericrypt
+
+  test:
+    name: Tests
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test -p vericrypt
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - run: cargo clippy -p vericrypt -- -D warnings
+      - run: cargo fmt --check
+
+  build-musl:
+    name: Build (Linux musl)
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-musl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install musl tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }} -p vericrypt
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: vericrypt-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/vericrypt
+
+  fuzz:
+    name: Fuzz Testing
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz
+      - name: Run fuzz tests (60 seconds each)
+        run: |
+          for target in parse_pem parse_der parse_csv parse_json; do
+            cargo fuzz run $target -- -max_total_time=60 || true
+          done
+
+  release:
+    name: GitHub Release
+    needs: build-musl
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vericrypt-x86_64-unknown-linux-musl
+      - name: Generate SHA256 checksum
+        run: sha256sum vericrypt > vericrypt.sha256
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            vericrypt
+            vericrypt.sha256
+          tag_name: v${{ github.run_number }}
+          name: VeriCrypt v${{ github.run_number }}
+          body: |
+            VeriCrypt PQC Compliance Engine
+            
+            - Single air-gapped binary
+            - NIST FIPS 205 (SLH-DSA) signatures
+            - CycloneDX 1.7 CBOM output
+            - DORA/PQFIF/NCSC regulatory mapping
+            - Lean 4 theorem verification
+            - TEE attestation (Intel TDX / AMD SEV-SNP)

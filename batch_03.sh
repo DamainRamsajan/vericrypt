@@ -60,7 +60,7 @@ pub fn scan_network_range(cidr: &str) -> Result<Vec<CryptoAsset>, VeriCryptError
         network.hosts().take(1024).collect()
     };
 
-    for host in hosts {
+    for host in &hosts {
         let addr = format!("{}:443", host);
         match probe_tls_endpoint(&addr, timeout) {
             Ok(mut certs) => assets.append(&mut certs),
@@ -85,7 +85,7 @@ pub fn scan_network_range(cidr: &str) -> Result<Vec<CryptoAsset>, VeriCryptError
 
 fn probe_tls_endpoint(addr: &str, timeout: Duration) -> Result<Vec<CryptoAsset>, VeriCryptError> {
     let socket_addrs: Vec<std::net::SocketAddr> = addr
-        .to_socket_addrs()
+        .to_socket_addrs().map(|iter| iter.collect::<Vec<_>>())
         .map_err(|e| VeriCryptError::NetworkUnreachable(format!("DNS resolution failed for {}: {}", addr, e)))?;
 
     if socket_addrs.is_empty() {
