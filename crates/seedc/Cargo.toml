@@ -1,0 +1,15 @@
+[package]
+name = "seedc"
+version = "0.1.0"
+edition = "2021"
+description = "AGENT‑SEED v15.2 compiler frontend — lexer, parser, type checker, IR lowering"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+bincode = "1"
+crc32fast = "1"
+thiserror = { workspace = true }
+miette = { workspace = true }
+smallvec = { workspace = true }
+bitflags = { workspace = true }

@@ -1,5 +1,9 @@
 [workspace]
-members = ["crates/vericrypt"]
+members = [
+    "crates/seedc",
+    "crates/seedvm",
+    "crates/vericrypt",
+]
 resolver = "2"
 
 [workspace.package]
@@ -23,8 +27,9 @@ x509-parser = "0.17"
 rustls-pemfile = "2"
 der = "0.7"
 tokio = { version = "1", features = ["full"] }
+tokio-rustls = "0.26"
+native-tls = "0.2"
 petgraph = "0.6"
-ed25519-dalek = { version = "2", features = ["serde"] }
 walkdir = "2"
 csv = "1"
 ipnet = "2"
@@ -32,9 +37,16 @@ which = "7"
 hostname = "0.4"
 dirs = "6"
 zstd = "0.13"
-cyclonedx-bom = "0.6"
 pqcrypto-sphincsplus = "0.7"
 pqcrypto-traits = "0.2"
-tokio-rustls = "0.26"
-native-tls = "0.2"
+cyclonedx-bom = "0.6"
+clap = { version = "4", features = ["derive"] }
 tempfile = "3"
+criterion = { version = "0.5", features = ["html_reports"] }
+bitflags = "2"
+miette = "7"
+smallvec = "1"
+bincode = "1"
+im = "15"
+rand_pcg = "0.3"
+rustc-hash = "2"

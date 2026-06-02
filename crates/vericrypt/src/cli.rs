@@ -5,7 +5,7 @@ use crate::errors::VeriCryptError;
 #[derive(Parser)]
 #[command(name = "vericrypt")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
-#[command(about = "Scan cryptographic inventory and produce signed .pqc compliance reports", long_about = None)]
+#[command(about = "Scan cryptographic inventory and produce signed .pqc compliance reports")]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -19,8 +19,7 @@ pub enum Commands {
     Activate(ActivateArgs),
 }
 
-#[derive(clap::Args)]
-#[derive(Debug)]
+#[derive(Debug, clap::Args)]
 pub struct ScanArgs {
     /// Directory containing certificates to scan
     #[arg(long)]
@@ -44,19 +43,35 @@ pub struct ActivateArgs {
 
 pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
     tracing::info!(?args, "Starting scan");
-    // Pipeline: Ingest → Graph → Exposure → Compliance → Prioritize → CBOM → Report
+
     let assets = crate::ingest::discover_all(&args)?;
+    tracing::info!(count = assets.len(), "Ingestion complete");
+
     let graph = crate::graph::build_graph(assets)?;
+    tracing::info!(nodes = graph.node_count(), "Graph built");
+
     let exposure = crate::exposure::analyze(&graph)?;
+    tracing::info!(total = exposure.total_hndl_exposure, "Exposure analyzed");
+
     let theorems = crate::compliance::prove_compliance(&graph)?;
+    tracing::info!(count = theorems.len(), "Compliance checked");
+
     let roadmap = crate::prioritize::generate_roadmap(&exposure, &graph)?;
+    tracing::info!(phases = roadmap.len(), "Roadmap generated");
+
     let cbom = crate::cbom::generate_cbom(&graph)?;
-    let report = crate::report::assemble_report(&args.output, cbom, theorems, roadmap, exposure)?;
-    tracing::info!(
-        total_assets = report.total_assets,
-        violations = report.violations_found,
-        "Scan complete"
-    );
+    tracing::info!("CBOM generated");
+
+    let report = crate::report::assemble_report(&args.output, cbom, theorems, roadmap)?;
+    tracing::info!(id = %report.report_id, assets = report.total_assets, "Scan complete");
+
+    eprintln!();
+    eprintln!("=== VERICRYPT SCAN COMPLETE ===");
+    eprintln!("  Assets discovered: {}", report.total_assets);
+    eprintln!("  Quantum-vulnerable: {}", report.quantum_vulnerable_count);
+    eprintln!("  Compliance violations: {}", report.violations_found);
+    eprintln!("  Report: {}/report.pqc", args.output);
+
     Ok(())
 }
 
