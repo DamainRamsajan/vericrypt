@@ -30,6 +30,7 @@ tracing-subscriber = { workspace = true }
 rand = { workspace = true }
 x509-parser = { workspace = true }
 rustls-pemfile = { workspace = true }
+native-tls = { workspace = true }
 der = { workspace = true }
 petgraph = { workspace = true }
 walkdir = { workspace = true }

@@ -25,17 +25,17 @@ echo "[+] Adding ASL dependencies to Cargo.toml"
 
 CRATE_ROOT="crates/vericrypt"
 
-# Add seedvm as runtime dependency
+# Add seedvm as runtime dependency (use correct relative path inside workspace)
 if ! grep -q 'seedvm' "$CRATE_ROOT/Cargo.toml"; then
-    sed -i '/^\[dependencies\]/a seedvm = { path = "../../agentseed/seedvm" }' "$CRATE_ROOT/Cargo.toml"
+    sed -i '/^\[dependencies\]/a seedvm = { path = "../seedvm" }' "$CRATE_ROOT/Cargo.toml"
 fi
 
-# Add seedc as build dependency
+# Add seedc as build dependency (use correct relative path inside workspace)
 if ! grep -q 'seedc' "$CRATE_ROOT/Cargo.toml"; then
     cat >> "$CRATE_ROOT/Cargo.toml" << 'DEPS_EOF'
 
 [build-dependencies]
-seedc = { path = "../../agentseed/seedc" }
+seedc = { path = "../seedc" }
 DEPS_EOF
 fi
 
