@@ -29,7 +29,7 @@ pub fn write_violations(
     for theorem in violations {
         content.push_str(&format!(
             "VIOLATION: {}\n  Regulation: {}\n  Asset ID: {}\n  Remediation: {}\n\n",
-            theorem.lean4_statement,
+            theorem.asl_statement,
             theorem.regulation_reference,
             theorem.counterexample_asset_id
                 .map(|id| id.to_string())

@@ -11,10 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Run Master Build 9
-        run: bash batch_09.sh
-      - name: Run Master Build 10
-        run: bash batch_10.sh
+      - name: Type check
+        run: cargo check -p vericrypt
+      - name: Run tests
+        run: cargo test -p vericrypt
+      - name: Build release binary
+        run: cargo build --release -p vericrypt
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:

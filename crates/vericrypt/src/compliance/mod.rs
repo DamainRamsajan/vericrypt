@@ -21,7 +21,7 @@ pub fn prove_compliance(graph: &CryptoGraph) -> Result<Vec<ComplianceTheorem>, V
         .into_iter()
         .map(|(vm_state, mut theorem)| {
             // Store VM state reference in theorem metadata
-            theorem.lean4_statement = format!(
+            theorem.asl_statement = format!(
                 "ASL VM: {} instructions, proof verified: {}",
                 vm_state.schedule_trace_len(),
                 vm_state.proof_verified()

@@ -89,7 +89,7 @@ pub enum ProofStatus {
 pub struct ComplianceTheorem {
     pub theorem_id: Uuid,
     pub regulation_reference: String,
-    pub ASL VM_statement: String,
+    pub asl_statement: String,
     pub status: ProofStatus,
     pub counterexample_asset_id: Option<Uuid>,
     pub remediation_recommendation: Option<String>,
