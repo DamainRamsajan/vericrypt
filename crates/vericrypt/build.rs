@@ -27,7 +27,7 @@ fn main() {
     }
 
     embed_code.push_str("map");
-    embed_code.push_str("}");
+    embed_code.push('}');
 
     let embed_path = out_dir.join("embedded_axioms.rs");
     fs::write(&embed_path, embed_code.as_bytes()).unwrap_or_else(|e| {
