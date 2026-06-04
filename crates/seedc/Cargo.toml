@@ -13,3 +13,5 @@ thiserror = { workspace = true }
 miette = { workspace = true }
 smallvec = { workspace = true }
 bitflags = { workspace = true }
+[features]
+debug-dump = []
