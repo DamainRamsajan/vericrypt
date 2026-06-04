@@ -11,9 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      
-      - name: Cache Cargo dependencies
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry/index/
@@ -23,9 +21,12 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      
       - name: Run Master Build 9
-      - name: Build release binary
-      - name: Build release binary
         run: bash batch_09.sh
-      
+      - name: Build release binary
+        run: cargo build --release -p vericrypt
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: vericrypt-linux-x86_64
+          path: target/release/vericrypt
