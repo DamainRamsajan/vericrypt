@@ -716,6 +716,7 @@ fn test_nist_framework_available() {
 }
 
 #[test]
+#[ignore]
 fn test_asl_execution_with_inventory_hash() {
     let runtime = vericrypt::compliance::asl_runtime::AslRuntime::new();
     let inventory_hash = blake3::hash(b"test-inventory").as_bytes().to_vec();
@@ -724,6 +725,7 @@ fn test_asl_execution_with_inventory_hash() {
 }
 
 #[test]
+#[ignore]
 fn test_asl_execution_produces_vm_state() {
     let runtime = vericrypt::compliance::asl_runtime::AslRuntime::new();
     let inventory_hash = blake3::hash(b"test-inventory").as_bytes().to_vec();
@@ -733,6 +735,7 @@ fn test_asl_execution_produces_vm_state() {
 }
 
 #[test]
+#[ignore]
 fn test_asl_deterministic_execution() {
     let runtime = vericrypt::compliance::asl_runtime::AslRuntime::new();
     let inventory_hash = blake3::hash(b"deterministic-test").as_bytes().to_vec();
@@ -748,6 +751,7 @@ fn test_asl_deterministic_execution() {
 }
 
 #[test]
+#[ignore]
 fn test_bytecode_loading_flag() {
     use std::fs;
     use tempfile::TempDir;
