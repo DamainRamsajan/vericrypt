@@ -75,9 +75,7 @@ agent DORA_Compliance stratum: S1 {
     }
 }
 DORA
-fi
 
-if [ ! -f "$CRATE_ROOT/src/compliance/axioms/pqfif.asl" ]; then
 cat > "$CRATE_ROOT/src/compliance/axioms/pqfif.asl" << 'PQFIF'
 agent PQFIF_Compliance stratum: S1 {
     identity { name: "PQFIF_Compliance", version: "1.0.0" }
@@ -101,9 +99,7 @@ agent PQFIF_Compliance stratum: S1 {
     }
 }
 PQFIF
-fi
 
-if [ ! -f "$CRATE_ROOT/src/compliance/axioms/ncsc.asl" ]; then
 cat > "$CRATE_ROOT/src/compliance/axioms/ncsc.asl" << 'NCSC'
 agent NCSC_Compliance stratum: S1 {
     identity { name: "NCSC_Compliance", version: "1.0.0" }
@@ -129,9 +125,7 @@ agent NCSC_Compliance stratum: S1 {
     }
 }
 NCSC
-fi
 
-if [ ! -f "$CRATE_ROOT/src/compliance/axioms/nist.asl" ]; then
 cat > "$CRATE_ROOT/src/compliance/axioms/nist.asl" << 'NIST'
 agent NIST_Compliance stratum: S1 {
     identity { name: "NIST_Compliance", version: "1.0.0" }
@@ -154,7 +148,6 @@ agent NIST_Compliance stratum: S1 {
     }
 }
 NIST
-fi
 
 echo "  [OK] Axiom library created"
 
