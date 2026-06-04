@@ -27,5 +27,7 @@ jobs:
       - name: Run Master Build 9
       - name: Build release binary
         run: cargo build --release -p vericrypt
+      - name: Build release binary
+        run: cargo build --release -p vericrypt
         run: bash batch_09.sh
       
