@@ -4,7 +4,8 @@ use std::path::PathBuf;
 
 fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let axiom_dir = PathBuf::from("src/compliance/axioms_compiled");
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    let axiom_dir = manifest_dir.join("src/compliance/axioms_compiled");
 
     println!("cargo:rerun-if-changed=src/compliance/axioms_compiled/");
 
@@ -17,10 +18,10 @@ fn main() {
             let path = entry.path();
             if path.extension().is_some_and(|ext| ext == "aslb") {
                 let framework = path.file_stem().unwrap().to_string_lossy().to_uppercase();
-                let path_str = path.to_string_lossy().to_string();
+                let bytes = fs::read(&path).unwrap_or_default();
                 embed_code.push_str(&format!(
-                    "map.insert(\"{}\".to_string(), include_bytes!(\"{}\").to_vec());",
-                    framework, path_str
+                    "map.insert(\"{}\".to_string(), vec!{:?});",
+                    framework, bytes
                 ));
             }
         }

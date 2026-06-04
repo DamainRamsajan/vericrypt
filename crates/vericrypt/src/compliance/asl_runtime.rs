@@ -38,7 +38,7 @@ impl AslRuntime {
                 format!("ASL VM execution failed: {}", e)
             ))?;
 
-        let status = if vm_state.proof_verified() {
+        let status = if vm_state.exit_code == 0 {
             ProofStatus::Proved
         } else {
             ProofStatus::Counterexample
@@ -47,10 +47,11 @@ impl AslRuntime {
         let theorem = ComplianceTheorem {
             theorem_id: uuid::Uuid::new_v4(),
             regulation_reference: framework.to_string(),
-            asl_statement: format!("ASL VM execution: {} instructions traced", vm_state.schedule_trace_len()),
+            asl_statement: format!("ASL VM execution: {} steps, exit_code={}", 
+                vm_state.schedule_trace.len(), vm_state.exit_code),
             status,
             counterexample_asset_id: None,
-            remediation_recommendation: if !vm_state.proof_verified() {
+            remediation_recommendation: if vm_state.exit_code != 0 {
                 Some("Review ASL VM execution trace for failed constraints".into())
             } else {
                 None
@@ -77,7 +78,7 @@ impl AslRuntime {
     }
 
     pub fn has_framework(&self, framework: &str) -> bool {
-        self.bytecode.containsKey(framework)
+        self.bytecode.contains_key(framework)
     }
 
     pub fn available_frameworks(&self) -> Vec<&String> {

@@ -257,7 +257,7 @@ impl AslRuntime {
                 format!("ASL VM execution failed: {}", e)
             ))?;
 
-        let status = if vm_state.proof_verified() {
+        let status = if vm_state.(exit_code == 0) {
             ProofStatus::Proved
         } else {
             ProofStatus::Counterexample
@@ -266,10 +266,10 @@ impl AslRuntime {
         let theorem = ComplianceTheorem {
             theorem_id: uuid::Uuid::new_v4(),
             regulation_reference: framework.to_string(),
-            lean4_statement: format!("ASL VM execution: {} instructions traced", vm_state.schedule_trace_len()),
+            lean4_statement: format!("ASL VM execution: {} instructions traced", vm_state.schedule_trace.len()),
             status,
             counterexample_asset_id: None,
-            remediation_recommendation: if !vm_state.proof_verified() {
+            remediation_recommendation: if !vm_state.(exit_code == 0) {
                 Some("Review ASL VM execution trace for failed constraints".into())
             } else {
                 None
@@ -300,7 +300,7 @@ impl AslRuntime {
 
     /// Check if bytecode is available for a specific framework.
     pub fn has_framework(&self, framework: &str) -> bool {
-        self.bytecode.containsKey(framework)
+        self.bytecode.contains_key(framework)
     }
 
     /// List all available regulatory frameworks.
@@ -343,8 +343,8 @@ pub fn prove_compliance(graph: &CryptoGraph) -> Result<Vec<ComplianceTheorem>, V
             // Store VM state reference in theorem metadata
             theorem.lean4_statement = format!(
                 "ASL VM: {} instructions, proof verified: {}",
-                vm_state.schedule_trace_len(),
-                vm_state.proof_verified()
+                vm_state.schedule_trace.len(),
+                vm_state.(exit_code == 0)
             );
             theorem
         })
@@ -690,7 +690,7 @@ fn test_asl_execution_produces_vm_state() {
     let runtime = vericrypt::compliance::asl_runtime::AslRuntime::new();
     let inventory_hash = blake3::hash(b"test-inventory").as_bytes().to_vec();
     let (vm_state, theorem) = runtime.execute_framework("DORA", &inventory_hash).unwrap();
-    assert!(vm_state.schedule_trace_len() > 0, "Schedule trace should not be empty");
+    assert!(vm_state.schedule_trace.len() > 0, "Schedule trace should not be empty");
     assert!(theorem.lean4_statement.contains("ASL VM"), "Theorem should reference ASL VM");
 }
 
@@ -703,8 +703,8 @@ fn test_asl_deterministic_execution() {
     let (vm_state2, _) = runtime.execute_framework("DORA", &inventory_hash).unwrap();
 
     assert_eq!(
-        vm_state1.schedule_trace_len(),
-        vm_state2.schedule_trace_len(),
+        vm_state1.schedule_trace.len(),
+        vm_state2.schedule_trace.len(),
         "Same input should produce identical trace length"
     );
 }
