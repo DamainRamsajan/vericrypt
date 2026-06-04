@@ -15,7 +15,7 @@ fn test_compliance_confidence_computed() {
         vericrypt::types::ComplianceTheorem {
             theorem_id: uuid::Uuid::new_v4(),
             regulation_reference: "DORA Art. 12.3".into(),
-            lean4_statement: "test".into(),
+            asl_statement: "test".into(),
             status: vericrypt::types::ProofStatus::Proved,
             counterexample_asset_id: None,
             remediation_recommendation: None,
@@ -41,7 +41,7 @@ fn test_violations_written_when_counterexamples_exist() {
         vericrypt::types::ComplianceTheorem {
             theorem_id: uuid::Uuid::new_v4(),
             regulation_reference: "TEST".into(),
-            lean4_statement: "test".into(),
+            asl_statement: "test".into(),
             status: vericrypt::types::ProofStatus::Counterexample,
             counterexample_asset_id: Some(uuid::Uuid::new_v4()),
             remediation_recommendation: Some("Fix it".into()),
@@ -70,7 +70,7 @@ fn test_full_pipeline_with_hardening() {
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Shadow,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();

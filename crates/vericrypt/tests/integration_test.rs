@@ -16,7 +16,7 @@ fn test_full_pipeline() {
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Shadow,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();
@@ -34,7 +34,7 @@ fn test_verify() {
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Shadow,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();
@@ -51,7 +51,7 @@ fn test_csv() {
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Shadow,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();

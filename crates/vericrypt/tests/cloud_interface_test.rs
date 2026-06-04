@@ -10,7 +10,7 @@ fn test_theorem_pack_import() {
             {
                 "theorem_id": "00000000-0000-0000-0000-000000000001",
                 "regulation_reference": "TEST",
-                "lean4_statement": "test",
+                "asl_statement": "test",
                 "status": "Unverified",
                 "counterexample_asset_id": null,
                 "remediation_recommendation": "test remediation"
@@ -19,7 +19,7 @@ fn test_theorem_pack_import() {
     });
     let pack_path = d.path().join("theorems.pack");
     fs::write(&pack_path, serde_json::to_string_pretty(&pack).unwrap()).unwrap();
-    let theorems = vericrypt::theorem_import::import_theorem_pack(
+    let theorems = vericrypt::compliance::asl_runtime::AslRuntime::new().execute_framework("CUSTOM", blake3::hash(b"test").as_bytes()).map(|(_, t)| vec![t]).unwrap_or_default()(
         pack_path.to_str().unwrap()
     ).unwrap();
     assert_eq!(theorems.len(), 1);
@@ -85,7 +85,7 @@ fn test_deployment_mode_flags() {
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Shadow,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();
@@ -101,7 +101,7 @@ fn test_sth_export_flag() {
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Primary,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: true,
     };
     vericrypt::cli::run_scan(args).unwrap();

@@ -42,8 +42,8 @@ fn test_asl_execution_produces_vm_state() {
     let runtime = vericrypt::compliance::asl_runtime::AslRuntime::new();
     let inventory_hash = blake3::hash(b"test-inventory").as_bytes().to_vec();
     let (vm_state, theorem) = runtime.execute_framework("DORA", &inventory_hash).unwrap();
-    assert!(vm_state.schedule_trace_len() > 0, "Schedule trace should not be empty");
-    assert!(theorem.lean4_statement.contains("ASL VM"), "Theorem should reference ASL VM");
+    assert!(vm_state.schedule_trace.len() > 0, "Schedule trace should not be empty");
+    assert!(theorem.asl_statement.contains("ASL VM"), "Theorem should reference ASL VM");
 }
 
 #[test]
@@ -55,8 +55,8 @@ fn test_asl_deterministic_execution() {
     let (vm_state2, _) = runtime.execute_framework("DORA", &inventory_hash).unwrap();
 
     assert_eq!(
-        vm_state1.schedule_trace_len(),
-        vm_state2.schedule_trace_len(),
+        vm_state1.schedule_trace.len(),
+        vm_state2.schedule_trace.len(),
         "Same input should produce identical trace length"
     );
 }

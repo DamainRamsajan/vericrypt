@@ -29,7 +29,7 @@ fn test_report_unsigned_without_license() {
         network: None,
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Shadow,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: false,
     };
     vericrypt::cli::run_scan(args).unwrap();

@@ -15,7 +15,7 @@ fn test_network_scanner_with_invalid_cidr() {
         network: Some("invalid-cidr".to_string()),
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Shadow,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: false,
     };
     let result = vericrypt::cli::run_scan(args);
@@ -23,10 +23,9 @@ fn test_network_scanner_with_invalid_cidr() {
 }
 
 #[test]
-fn test_lean4_bridge_detection() {
-    let bridge = vericrypt::compliance::lean4_bridge::Lean4Bridge::new();
-    let available = bridge.is_available();
-    assert!(available || !available);
+fn test_asl_runtime_available_frameworks() {
+    let runtime = vericrypt::compliance::asl_runtime::AslRuntime::new();
+    assert!(runtime.has_framework("DORA") || runtime.has_framework("NIST") || runtime.has_framework("NCSC") || runtime.has_framework("PQFIF"));
 }
 
 #[test]
@@ -38,7 +37,7 @@ fn test_combined_file_and_network_scan() {
         network: Some("127.0.0.1/32".to_string()),
         output: d.path().join("o").to_string_lossy().to_string(),
         mode: vericrypt::cli::DeploymentMode::Shadow,
-        load_theorems: None,
+        load_bytecode: None,
         publish_sth: false,
     };
     let result = vericrypt::cli::run_scan(args);
