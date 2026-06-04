@@ -4,7 +4,11 @@ use crate::types::SlhDsaSignature;
 /// Abstract signature provider for crypto agility (ADR-014).
 pub trait SignatureProvider {
     fn sign(message: &[u8]) -> Result<SlhDsaSignature, VeriCryptError>;
-    fn verify(signature: &SlhDsaSignature, message: &[u8], public_key: &[u8]) -> Result<bool, VeriCryptError>;
+    fn verify(
+        signature: &SlhDsaSignature,
+        message: &[u8],
+        public_key: &[u8],
+    ) -> Result<bool, VeriCryptError>;
     fn algorithm_name() -> &'static str;
     fn nist_security_level() -> u32;
 }
@@ -13,7 +17,12 @@ pub trait SignatureProvider {
 pub trait MerkleProvider {
     fn compute_root(data: &[&[u8]]) -> Result<Vec<u8>, VeriCryptError>;
     fn generate_proof(data: &[&[u8]], index: usize) -> Result<Vec<u8>, VeriCryptError>;
-    fn verify_proof(root: &[u8], proof: &[u8], leaf: &[u8], index: usize) -> Result<bool, VeriCryptError>;
+    fn verify_proof(
+        root: &[u8],
+        proof: &[u8],
+        leaf: &[u8],
+        index: usize,
+    ) -> Result<bool, VeriCryptError>;
 }
 
 /// Abstract KEM provider for crypto agility (ADR-014).
@@ -35,7 +44,11 @@ impl SignatureProvider for SlhDsaProvider {
         })
     }
 
-    fn verify(signature: &SlhDsaSignature, message: &[u8], _public_key: &[u8]) -> Result<bool, VeriCryptError> {
+    fn verify(
+        signature: &SlhDsaSignature,
+        message: &[u8],
+        _public_key: &[u8],
+    ) -> Result<bool, VeriCryptError> {
         let computed = blake3::hash(message);
         if signature.signature_bytes.len() >= 32 {
             Ok(signature.signature_bytes[..32] == computed.as_bytes()[..32])
@@ -44,6 +57,10 @@ impl SignatureProvider for SlhDsaProvider {
         }
     }
 
-    fn algorithm_name() -> &'static str { "SLH-DSA-SHAKE-256s" }
-    fn nist_security_level() -> u32 { 5 }
+    fn algorithm_name() -> &'static str {
+        "SLH-DSA-SHAKE-256s"
+    }
+    fn nist_security_level() -> u32 {
+        5
+    }
 }

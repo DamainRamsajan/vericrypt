@@ -46,19 +46,24 @@ pub fn data_lifetime_from_context(usage_context: &str) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{CryptoAsset, AssetType, Algorithm};
+    use crate::types::{Algorithm, AssetType, CryptoAsset};
 
     fn test_asset(lifetime: f64) -> CryptoAsset {
         CryptoAsset {
             asset_id: uuid::Uuid::new_v4(),
             asset_type: AssetType::Certificate,
             algorithm: Algorithm {
-                name: "RSA".into(), family: "RSA".into(),
-                quantum_vulnerable: true, vulnerability_type: Some("Shor".into()),
-                nist_pqc_replacement: Some("ML-DSA-87".into()), shelf_life_years: Some(5),
+                name: "RSA".into(),
+                family: "RSA".into(),
+                quantum_vulnerable: true,
+                vulnerability_type: Some("Shor".into()),
+                nist_pqc_replacement: Some("ML-DSA-87".into()),
+                shelf_life_years: Some(5),
             },
-            key_size: Some(2048), expiry_date: None,
-            fingerprint: "test".into(), source_location: "test".into(),
+            key_size: Some(2048),
+            expiry_date: None,
+            fingerprint: "test".into(),
+            source_location: "test".into(),
             nist_quantum_security_level: Some(1),
             data_lifetime_years: Some(lifetime),
             usage_context: None,

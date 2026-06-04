@@ -2,7 +2,7 @@ pub mod temporal;
 
 use crate::errors::VeriCryptError;
 use crate::graph::CryptoGraph;
-use crate::types::{ExposureResult, ExposureBreakdown, ShapleyApproximationMetadata};
+use crate::types::{ExposureBreakdown, ExposureResult, ShapleyApproximationMetadata};
 use std::collections::HashMap;
 
 /// Analyze quantum exposure using the multiplicative HNDL model
@@ -11,15 +11,21 @@ pub fn analyze(g: &CryptoGraph) -> Result<ExposureResult, VeriCryptError> {
     let n = g.node_count();
     if n == 0 {
         return Ok(ExposureResult {
-            total_hndl_exposure: 0.0, per_asset_exposure: HashMap::new(),
+            total_hndl_exposure: 0.0,
+            per_asset_exposure: HashMap::new(),
             shapley_values: HashMap::new(),
             breakdown: ExposureBreakdown {
-                temporal_hazard: 0.0, crypto_vulnerability: 0.0,
-                operational_exposure: 0.0, defense_attack_ratio: 1.0,
+                temporal_hazard: 0.0,
+                crypto_vulnerability: 0.0,
+                operational_exposure: 0.0,
+                defense_attack_ratio: 1.0,
             },
             shapley_metadata: Some(ShapleyApproximationMetadata {
-                samples: 0, convergence_error: 0.0, confidence_interval: 0.0,
-                converged: true, convergence_threshold: 0.01,
+                samples: 0,
+                convergence_error: 0.0,
+                confidence_interval: 0.0,
+                converged: true,
+                convergence_threshold: 0.01,
             }),
         });
     }
@@ -54,8 +60,11 @@ pub fn analyze(g: &CryptoGraph) -> Result<ExposureResult, VeriCryptError> {
             defense_attack_ratio,
         },
         shapley_metadata: Some(ShapleyApproximationMetadata {
-            samples: 0, convergence_error: 0.0, confidence_interval: 0.0,
-            converged: true, convergence_threshold: 0.01,
+            samples: 0,
+            convergence_error: 0.0,
+            confidence_interval: 0.0,
+            converged: true,
+            convergence_threshold: 0.01,
         }),
     })
 }

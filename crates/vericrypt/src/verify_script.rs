@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use crate::errors::VeriCryptError;
+use std::path::PathBuf;
 
 /// Generate a self-contained verification script for regulators.
 ///
@@ -53,8 +53,7 @@ fi
         env!("CARGO_PKG_VERSION")
     );
 
-    std::fs::write(&script_path, script)
-        .map_err(|e| VeriCryptError::Io(e))?;
+    std::fs::write(&script_path, script).map_err(|e| VeriCryptError::Io(e))?;
 
     // Make the script executable on Unix
     #[cfg(unix)]
@@ -64,8 +63,7 @@ fi
             .map_err(|e| VeriCryptError::Io(e))?
             .permissions();
         perms.set_mode(0o755);
-        std::fs::set_permissions(&script_path, perms)
-            .map_err(|e| VeriCryptError::Io(e))?;
+        std::fs::set_permissions(&script_path, perms).map_err(|e| VeriCryptError::Io(e))?;
     }
 
     Ok(())

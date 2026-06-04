@@ -18,7 +18,9 @@ fn main() {
                 let framework = path.file_stem().unwrap().to_string_lossy().to_uppercase();
                 let source = fs::read_to_string(&path).unwrap_or_default();
                 embed_code.push_str(&format!(
-                    "map.insert(\"{}\".to_string(), vec!{:?});", framework, source.as_bytes()
+                    "map.insert(\"{}\".to_string(), vec!{:?});",
+                    framework,
+                    source.as_bytes()
                 ));
             }
         }

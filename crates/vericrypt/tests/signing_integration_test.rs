@@ -41,7 +41,12 @@ fn test_report_unsigned_without_license() {
 #[test]
 fn test_tee_detection_does_not_panic() {
     let tee_type = vericrypt::tee::detect_tee();
-    assert!(matches!(tee_type, vericrypt::tee::TeeType::IntelTdx | vericrypt::tee::TeeType::AmdSevSnp | vericrypt::tee::TeeType::None));
+    assert!(matches!(
+        tee_type,
+        vericrypt::tee::TeeType::IntelTdx
+            | vericrypt::tee::TeeType::AmdSevSnp
+            | vericrypt::tee::TeeType::None
+    ));
 }
 
 #[test]

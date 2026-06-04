@@ -1,23 +1,18 @@
-use crate::types::{EvidenceCustody, TeeStatus};
 use crate::errors::VeriCryptError;
+use crate::types::{EvidenceCustody, TeeStatus};
 
 /// Build a complete evidence chain of custody for a scan.
 ///
 /// Computes custody_root = BLAKE3(operator || binary_hash || merkle_root ||
 ///                                 timestamp || attestation_hash || environment)
 /// as specified in Addendum 3 §4.
-pub fn build_custody_chain(
-    merkle_root: &str,
-    tee_attestation: &TeeStatus,
-) -> EvidenceCustody {
+pub fn build_custody_chain(merkle_root: &str, tee_attestation: &TeeStatus) -> EvidenceCustody {
     let now = chrono::Utc::now();
     let binary_hash = env!("CARGO_PKG_VERSION").to_string();
     let operator = std::env::var("USER")
         .or_else(|_| std::env::var("USERNAME"))
         .ok();
-    let hostname = hostname::get()
-        .ok()
-        .and_then(|h| h.into_string().ok());
+    let hostname = hostname::get().ok().and_then(|h| h.into_string().ok());
     let attestation_hash = match tee_attestation {
         TeeStatus::Attested { measurement, .. } => measurement.clone(),
         TeeStatus::Unavailable { .. } => "none".to_string(),

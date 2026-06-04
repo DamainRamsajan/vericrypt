@@ -62,7 +62,9 @@ pub fn compile(source: &str) -> Result<Vec<u8>, CompileError> {
     // ── Temporary AST dump ──
     let dump = format!("{:#?}", &cst);
     #[cfg(feature = "debug-dump")]
-    { std::fs::write("ast_dump.txt", &dump).ok(); }
+    {
+        std::fs::write("ast_dump.txt", &dump).ok();
+    }
     // ── End dump ──
 
     let typed = sema::check(cst)?;

@@ -1,6 +1,6 @@
-use seedvm::{run_bytes, VMState};
 use crate::errors::VeriCryptError;
 use crate::types::{ComplianceTheorem, ProofStatus};
+use seedvm::{run_bytes, VMState};
 use std::collections::HashMap;
 
 mod embedded {
@@ -23,20 +23,18 @@ impl AslRuntime {
         framework: &str,
         inventory_hash: &[u8],
     ) -> Result<(VMState, ComplianceTheorem), VeriCryptError> {
-        let bytecode = self.bytecode.get(framework)
-            .ok_or_else(|| VeriCryptError::ParseError(
-                format!("No bytecode found for framework: {}", framework)
-            ))?;
+        let bytecode = self.bytecode.get(framework).ok_or_else(|| {
+            VeriCryptError::ParseError(format!("No bytecode found for framework: {}", framework))
+        })?;
 
         let seed = u64::from_le_bytes(
-            inventory_hash[..8].try_into()
-                .map_err(|_| VeriCryptError::ParseError("Invalid inventory hash length".into()))?
+            inventory_hash[..8]
+                .try_into()
+                .map_err(|_| VeriCryptError::ParseError("Invalid inventory hash length".into()))?,
         );
 
         let vm_state = run_bytes(bytecode, seed)
-            .map_err(|e| VeriCryptError::ParseError(
-                format!("ASL VM execution failed: {}", e)
-            ))?;
+            .map_err(|e| VeriCryptError::ParseError(format!("ASL VM execution failed: {}", e)))?;
 
         let status = if vm_state.exit_code == 0 {
             ProofStatus::Proved
@@ -47,8 +45,11 @@ impl AslRuntime {
         let theorem = ComplianceTheorem {
             theorem_id: uuid::Uuid::new_v4(),
             regulation_reference: framework.to_string(),
-            asl_statement: format!("ASL VM execution: {} steps, exit_code={}", 
-                vm_state.schedule_trace.len(), vm_state.exit_code),
+            asl_statement: format!(
+                "ASL VM execution: {} steps, exit_code={}",
+                vm_state.schedule_trace.len(),
+                vm_state.exit_code
+            ),
             status,
             counterexample_asset_id: None,
             remediation_recommendation: if vm_state.exit_code != 0 {

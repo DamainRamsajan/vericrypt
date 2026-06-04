@@ -25,13 +25,22 @@ fn test_network_scanner_with_invalid_cidr() {
 #[test]
 fn test_asl_runtime_available_frameworks() {
     let runtime = vericrypt::compliance::asl_runtime::AslRuntime::new();
-    assert!(runtime.has_framework("DORA") || runtime.has_framework("NIST") || runtime.has_framework("NCSC") || runtime.has_framework("PQFIF"));
+    assert!(
+        runtime.has_framework("DORA")
+            || runtime.has_framework("NIST")
+            || runtime.has_framework("NCSC")
+            || runtime.has_framework("PQFIF")
+    );
 }
 
 #[test]
 fn test_combined_file_and_network_scan() {
     let d = TempDir::new().unwrap();
-    fs::write(d.path().join("t.crt"), "-----BEGIN CERTIFICATE-----\nMIIB...\n-----END CERTIFICATE-----").unwrap();
+    fs::write(
+        d.path().join("t.crt"),
+        "-----BEGIN CERTIFICATE-----\nMIIB...\n-----END CERTIFICATE-----",
+    )
+    .unwrap();
     let args = vericrypt::cli::ScanArgs {
         cert_dir: Some(d.path().to_string_lossy().to_string()),
         network: Some("127.0.0.1/32".to_string()),

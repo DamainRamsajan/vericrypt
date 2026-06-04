@@ -1,6 +1,6 @@
-use std::path::PathBuf;
-use crate::types::ComplianceTheorem;
 use crate::errors::VeriCryptError;
+use crate::types::ComplianceTheorem;
+use std::path::PathBuf;
 
 /// Write a human-readable violations file for immediate CISO action.
 ///
@@ -23,7 +23,8 @@ pub fn write_violations(
     let mut content = String::from("VERICRYPT COMPLIANCE VIOLATIONS\n");
     content.push_str("================================\n\n");
     content.push_str("The following compliance violations were detected during the scan.\n");
-    content.push_str("Each violation includes the specific regulatory article, the affected asset,\n");
+    content
+        .push_str("Each violation includes the specific regulatory article, the affected asset,\n");
     content.push_str("and a recommended remediation path.\n\n");
 
     for theorem in violations {
@@ -31,15 +32,16 @@ pub fn write_violations(
             "VIOLATION: {}\n  Regulation: {}\n  Asset ID: {}\n  Remediation: {}\n\n",
             theorem.asl_statement,
             theorem.regulation_reference,
-            theorem.counterexample_asset_id
+            theorem
+                .counterexample_asset_id
                 .map(|id| id.to_string())
                 .unwrap_or_else(|| "unknown".to_string()),
-            theorem.remediation_recommendation
+            theorem
+                .remediation_recommendation
                 .as_deref()
                 .unwrap_or("No remediation recommendation available"),
         ));
     }
 
-    std::fs::write(&violations_path, content)
-        .map_err(|e| VeriCryptError::Io(e))
+    std::fs::write(&violations_path, content).map_err(|e| VeriCryptError::Io(e))
 }

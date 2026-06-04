@@ -20,6 +20,10 @@ pub fn sign_report(message: &[u8]) -> Result<SlhDsaSignature, VeriCryptError> {
 }
 
 /// Verify a signature using the SLH-DSA provider.
-pub fn verify_signature(sig: &SlhDsaSignature, msg: &[u8], pk: &[u8]) -> Result<bool, VeriCryptError> {
+pub fn verify_signature(
+    sig: &SlhDsaSignature,
+    msg: &[u8],
+    pk: &[u8],
+) -> Result<bool, VeriCryptError> {
     SlhDsaProvider::verify(sig, msg, pk)
 }

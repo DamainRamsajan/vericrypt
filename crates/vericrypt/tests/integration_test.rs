@@ -3,7 +3,14 @@ use tempfile::TempDir;
 
 fn make_cert(dir: &TempDir, name: &str) -> std::path::PathBuf {
     let p = dir.path().join(name);
-    fs::write(&p, &[0x30, 0x82, 0x01, 0x0A, 0x02, 0x01, 0x01, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00]).unwrap();
+    fs::write(
+        &p,
+        &[
+            0x30, 0x82, 0x01, 0x0A, 0x02, 0x01, 0x01, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48,
+            0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00,
+        ],
+    )
+    .unwrap();
     p
 }
 
@@ -45,7 +52,11 @@ fn test_verify() {
 #[test]
 fn test_csv() {
     let d = TempDir::new().unwrap();
-    fs::write(d.path().join("i.csv"), "h,p,c,alg,ks,exp,use\ns,443,x,RSA,2048,2027-12-31,w\n").unwrap();
+    fs::write(
+        d.path().join("i.csv"),
+        "h,p,c,alg,ks,exp,use\ns,443,x,RSA,2048,2027-12-31,w\n",
+    )
+    .unwrap();
     let args = vericrypt::cli::ScanArgs {
         cert_dir: Some(d.path().to_string_lossy().to_string()),
         network: None,

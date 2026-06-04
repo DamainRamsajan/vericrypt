@@ -1,11 +1,11 @@
 #![allow(warnings)]
 use clap::Parser;
-use vericrypt::cli::{Cli, Commands};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use vericrypt::cli::{Cli, Commands};
 
 fn main() -> Result<(), i32> {
-    let filter = EnvFilter::try_from_env("VERICRYPT_LOG_LEVEL")
-        .unwrap_or_else(|_| EnvFilter::new("info"));
+    let filter =
+        EnvFilter::try_from_env("VERICRYPT_LOG_LEVEL").unwrap_or_else(|_| EnvFilter::new("info"));
     tracing_subscriber::registry()
         .with(fmt::layer().json().with_writer(std::io::stderr))
         .with(filter)

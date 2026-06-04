@@ -1,11 +1,11 @@
 pub mod slh_dsa;
 pub mod verichain;
 
-use std::path::PathBuf;
 use crate::errors::VeriCryptError;
-use crate::types::{PqcReport, ComplianceTheorem, SlhDsaSignature};
-use crate::types::MigrationPhase;
 use crate::license;
+use crate::types::MigrationPhase;
+use crate::types::{ComplianceTheorem, PqcReport, SlhDsaSignature};
+use std::path::PathBuf;
 
 pub fn assemble_report(
     output_dir: &str,
@@ -22,9 +22,8 @@ pub fn assemble_report(
     let tee_attestation = crate::tee::collect_attestation();
     let custody = crate::evidence::build_custody_chain(&merkle_root, &tee_attestation);
 
-    let inventory = crate::confidence::compute_inventory_confidence(
-        roadmap.len() as u64, 0, &[], 0,
-    );
+    let inventory =
+        crate::confidence::compute_inventory_confidence(roadmap.len() as u64, 0, &[], 0);
     let compliance_conf = crate::confidence::compute_compliance_confidence(&theorems, &inventory);
 
     let violations_found = theorems
@@ -107,6 +106,7 @@ pub fn verify_file(path: &PathBuf) -> Result<String, VeriCryptError> {
     Ok(format!(
         "VERIFIED — scan at {}, {} assets, {} violations",
         report.scan_timestamp.format("%Y-%m-%dT%H:%M:%SZ"),
-        report.total_assets, report.violations_found,
+        report.total_assets,
+        report.violations_found,
     ))
 }

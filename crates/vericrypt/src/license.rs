@@ -22,7 +22,9 @@ pub fn activate(token: &str) -> Result<(), VeriCryptError> {
     // Full PASETO verification is implemented in Batch 5.
 
     tracing::info!("License activated");
-    unsafe { LICENSE_ACTIVE = true; }
+    unsafe {
+        LICENSE_ACTIVE = true;
+    }
     Ok(())
 }
 

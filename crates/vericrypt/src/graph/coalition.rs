@@ -31,13 +31,14 @@ pub fn group_into_coalitions(
 
     for (source_id, target_id, dep_type) in edges {
         let coalition = coalition_for_dependency(dep_type);
-        coalitions.entry(coalition).or_default().extend([*source_id, *target_id]);
+        coalitions
+            .entry(coalition)
+            .or_default()
+            .extend([*source_id, *target_id]);
     }
 
-    let connected: std::collections::HashSet<Uuid> = edges
-        .iter()
-        .flat_map(|(s, t, _)| [*s, *t])
-        .collect();
+    let connected: std::collections::HashSet<Uuid> =
+        edges.iter().flat_map(|(s, t, _)| [*s, *t]).collect();
 
     let isolated: Vec<Uuid> = assets
         .iter()
@@ -58,11 +59,29 @@ mod tests {
 
     #[test]
     fn test_coalition_assignment() {
-        assert_eq!(coalition_for_dependency(&DependencyType::Trusts), CoalitionType::TrustChain);
-        assert_eq!(coalition_for_dependency(&DependencyType::Signs), CoalitionType::TrustChain);
-        assert_eq!(coalition_for_dependency(&DependencyType::Encrypts), CoalitionType::Encryption);
-        assert_eq!(coalition_for_dependency(&DependencyType::Uses), CoalitionType::Encryption);
-        assert_eq!(coalition_for_dependency(&DependencyType::Configures), CoalitionType::Configuration);
-        assert_eq!(coalition_for_dependency(&DependencyType::Contains), CoalitionType::Container);
+        assert_eq!(
+            coalition_for_dependency(&DependencyType::Trusts),
+            CoalitionType::TrustChain
+        );
+        assert_eq!(
+            coalition_for_dependency(&DependencyType::Signs),
+            CoalitionType::TrustChain
+        );
+        assert_eq!(
+            coalition_for_dependency(&DependencyType::Encrypts),
+            CoalitionType::Encryption
+        );
+        assert_eq!(
+            coalition_for_dependency(&DependencyType::Uses),
+            CoalitionType::Encryption
+        );
+        assert_eq!(
+            coalition_for_dependency(&DependencyType::Configures),
+            CoalitionType::Configuration
+        );
+        assert_eq!(
+            coalition_for_dependency(&DependencyType::Contains),
+            CoalitionType::Container
+        );
     }
 }

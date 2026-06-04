@@ -1,4 +1,4 @@
-use crate::types::{ComplianceConfidence, ComplianceTheorem, ProofStatus, InventoryConfidence};
+use crate::types::{ComplianceConfidence, ComplianceTheorem, InventoryConfidence, ProofStatus};
 
 /// Compute compliance confidence as specified in Addendum 3 §3.
 ///

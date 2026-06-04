@@ -27,9 +27,8 @@ fn test_sth_consistency_verification() {
     let root2 = b"root-hash-number-two-32-bytes-".to_vec();
     let sth1 = vericrypt::report::verichain::SignedTreeHead::new(root1.clone(), 0);
     let sth2 = vericrypt::report::verichain::SignedTreeHead::new(root2.clone(), 1);
-    let valid = vericrypt::report::verichain::SignedTreeHead::verify_consistency(
-        &sth1, &sth2, &[],
-    ).unwrap();
+    let valid = vericrypt::report::verichain::SignedTreeHead::verify_consistency(&sth1, &sth2, &[])
+        .unwrap();
     assert!(valid);
 }
 
@@ -39,9 +38,9 @@ fn test_sth_non_equivocation_detection() {
     let root_b = b"root-hash-bbbb-32-bytes-xxxxxx".to_vec();
     let sth_a = vericrypt::report::verichain::SignedTreeHead::new(root_a, 5);
     let sth_b = vericrypt::report::verichain::SignedTreeHead::new(root_b, 5);
-    let result = vericrypt::report::verichain::SignedTreeHead::verify_non_equivocation(
-        &sth_a, &sth_b,
-    ).unwrap();
+    let result =
+        vericrypt::report::verichain::SignedTreeHead::verify_non_equivocation(&sth_a, &sth_b)
+            .unwrap();
     assert!(!result);
 }
 
@@ -79,7 +78,14 @@ fn test_deployment_mode_flags() {
 fn test_sth_export_flag() {
     let d = TempDir::new().unwrap();
     let cert_path = d.path().join("t.der");
-    fs::write(&cert_path, &[0x30, 0x82, 0x01, 0x0A, 0x02, 0x01, 0x01, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00]).unwrap();
+    fs::write(
+        &cert_path,
+        &[
+            0x30, 0x82, 0x01, 0x0A, 0x02, 0x01, 0x01, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48,
+            0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00,
+        ],
+    )
+    .unwrap();
     let args = vericrypt::cli::ScanArgs {
         cert_dir: Some(d.path().to_string_lossy().to_string()),
         network: None,

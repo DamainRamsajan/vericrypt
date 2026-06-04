@@ -23,7 +23,13 @@ impl SignedTreeHead {
         message.extend_from_slice(timestamp.to_rfc3339().as_bytes());
         let signature = blake3::hash(&message).as_bytes().to_vec();
 
-        SignedTreeHead { tree_size, root_hash, timestamp, signature, sequence_number }
+        SignedTreeHead {
+            tree_size,
+            root_hash,
+            timestamp,
+            signature,
+            sequence_number,
+        }
     }
 
     /// Verify a consistency proof between two STHs.
@@ -33,11 +39,15 @@ impl SignedTreeHead {
         new_sth: &SignedTreeHead,
         _proof: &[Vec<u8>],
     ) -> Result<bool, VeriCryptError> {
-        if old_sth.tree_size > new_sth.tree_size { return Ok(false); }
+        if old_sth.tree_size > new_sth.tree_size {
+            return Ok(false);
+        }
         if old_sth.tree_size == new_sth.tree_size {
             return Ok(old_sth.root_hash == new_sth.root_hash);
         }
-        if old_sth.tree_size == 0 { return Ok(true); }
+        if old_sth.tree_size == 0 {
+            return Ok(true);
+        }
         Ok(true)
     }
 
@@ -61,6 +71,7 @@ impl SignedTreeHead {
             "timestamp": self.timestamp.to_rfc3339(),
             "signature": hex::encode(&self.signature),
             "sequence_number": self.sequence_number,
-        }).to_string()
+        })
+        .to_string()
     }
 }

@@ -1,7 +1,7 @@
-use clap::{Parser, Subcommand, ValueEnum};
-use crate::errors::VeriCryptError;
-use crate::types::{StageTiming, InventoryConfidence, ComplianceConfidence};
 use crate::confidence;
+use crate::errors::VeriCryptError;
+use crate::types::{ComplianceConfidence, InventoryConfidence, StageTiming};
+use clap::{Parser, Subcommand, ValueEnum};
 
 /// VeriCrypt — Post-Quantum Cryptographic Compliance Engine
 #[derive(Parser)]
@@ -86,9 +86,7 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
         item_count: assets.len() as u64,
     });
 
-    let inventory = confidence::compute_inventory_confidence(
-        assets.len() as u64, 0, &[], 0,
-    );
+    let inventory = confidence::compute_inventory_confidence(assets.len() as u64, 0, &[], 0);
 
     // Stage 2: Knowledge graph
     let t1 = std::time::Instant::now();
@@ -113,8 +111,7 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
     // Stage 4: ASL VM compliance verification
     let t3 = std::time::Instant::now();
     let theorems = if let Some(bytecode_path) = &args.load_bytecode {
-        let bytecode = std::fs::read(bytecode_path)
-            .map_err(|e| VeriCryptError::Io(e))?;
+        let bytecode = std::fs::read(bytecode_path).map_err(|e| VeriCryptError::Io(e))?;
         let runtime = crate::compliance::asl_runtime::AslRuntime::new();
         let framework = "CUSTOM";
         let (_, theorem) = runtime.execute_framework(framework, &bytecode)?;
@@ -168,8 +165,7 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
             1,
         );
         let sth_path = std::path::Path::new(&args.output).join("sth.json");
-        std::fs::write(&sth_path, sth.export_for_anchoring())
-            .map_err(|e| VeriCryptError::Io(e))?;
+        std::fs::write(&sth_path, sth.export_for_anchoring()).map_err(|e| VeriCryptError::Io(e))?;
         tracing::info!("STH exported for VeriChain anchoring");
     }
 
@@ -179,13 +175,15 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
     eprintln!("  Assets discovered: {}", report.total_assets);
     eprintln!("  Quantum-vulnerable: {}", report.quantum_vulnerable_count);
     eprintln!("  Compliance violations: {}", report.violations_found);
-    eprintln!("  Compliance confidence: {:.2} (proof={:.2} × inventory={:.2} × axiom={:.2})",
+    eprintln!(
+        "  Compliance confidence: {:.2} (proof={:.2} × inventory={:.2} × axiom={:.2})",
         compliance_conf.composite_confidence,
         compliance_conf.proof_confidence,
         compliance_conf.inventory_confidence,
         compliance_conf.regulatory_axiom_confidence,
     );
-    eprintln!("  Inventory confidence: {:?} ({:.0}%)",
+    eprintln!(
+        "  Inventory confidence: {:?} ({:.0}%)",
         inventory.confidence_level,
         inventory.visibility_score * 100.0,
     );
