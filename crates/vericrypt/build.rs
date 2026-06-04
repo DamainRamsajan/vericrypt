@@ -4,9 +4,15 @@ use std::path::PathBuf;
 
 fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    let axiom_dir = manifest_dir.join("src/compliance/axioms");
-
+    let embed_path = out_dir.join("embedded_axioms.rs");
+    
+    // Only regenerate if the embedded file doesn't exist
+    if embed_path.exists() {
+        println!("cargo:warning=Axioms already compiled, skipping");
+        return;
+    }
+    
+    let axiom_dir = PathBuf::from("src/compliance/axioms");
     println!("cargo:rerun-if-changed=src/compliance/axioms/");
 
     let mut embed_code = String::from("use std::collections::HashMap;");
@@ -19,21 +25,17 @@ fn main() {
             if path.extension().is_some_and(|ext| ext == "asl") {
                 let framework = path.file_stem().unwrap().to_string_lossy().to_uppercase();
                 let source = fs::read_to_string(&path).unwrap_or_else(|e| {
-                    panic!("Failed to read axiom file {:?}: {}", path, e);
+                    panic!("Failed to read axiom {:?}: {}", path, e);
                 });
-
                 println!("cargo:warning=Compiling {} axioms...", framework);
                 match seedc::compile(&source) {
                     Ok(bytecode) => {
                         embed_code.push_str(&format!(
-                            "map.insert(\"{}\".to_string(), vec!{:?});",
-                            framework, bytecode
+                            "map.insert(\"{}\".to_string(), vec!{:?});", framework, bytecode
                         ));
                         println!("cargo:warning=Compiled {} ({} bytes)", framework, bytecode.len());
                     }
-                    Err(e) => {
-                        panic!("Failed to compile {} axioms: {:?}", framework, e);
-                    }
+                    Err(e) => panic!("Failed to compile {}: {:?}", framework, e),
                 }
             }
         }
@@ -41,8 +43,6 @@ fn main() {
 
     embed_code.push_str("map");
     embed_code.push('}');
-
-    let embed_path = out_dir.join("embedded_axioms.rs");
     fs::write(&embed_path, embed_code.as_bytes()).unwrap_or_else(|e| {
         panic!("Failed to write embedded axioms: {}", e);
     });
