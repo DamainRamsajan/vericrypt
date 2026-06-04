@@ -27,10 +27,3 @@ jobs:
       - name: Run Master Build 9
         run: bash batch_09.sh
       
-      - name: Run Master Build 10
-      
-      - name: Upload binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: vericrypt-linux-x86_64
-          path: target/release/vericrypt
