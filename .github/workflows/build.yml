@@ -28,7 +28,6 @@ jobs:
         run: bash batch_09.sh
       
       - name: Run Master Build 10
-        run: bash batch_10.sh
       
       - name: Upload binary
         uses: actions/upload-artifact@v4

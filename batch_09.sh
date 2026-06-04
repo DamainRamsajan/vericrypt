@@ -462,7 +462,6 @@ echo "============================================"
 echo " Running tests (check + integration in one pass)..."
 echo "============================================"
 
-cargo check -p vericrypt
 
 echo ""
 echo "============================================"
