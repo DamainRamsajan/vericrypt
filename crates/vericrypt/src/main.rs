@@ -1,3 +1,4 @@
+#![allow(warnings)]
 use clap::Parser;
 use vericrypt::cli::{Cli, Commands};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
