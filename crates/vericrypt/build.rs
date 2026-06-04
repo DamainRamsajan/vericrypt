@@ -4,14 +4,6 @@ use std::path::PathBuf;
 
 fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let embed_path = out_dir.join("embedded_axioms.rs");
-    
-    // Only regenerate if the embedded file doesn't exist
-    if embed_path.exists() {
-        println!("cargo:warning=Axioms already compiled, skipping");
-        return;
-    }
-    
     let axiom_dir = PathBuf::from("src/compliance/axioms");
     println!("cargo:rerun-if-changed=src/compliance/axioms/");
 
@@ -24,26 +16,16 @@ fn main() {
             let path = entry.path();
             if path.extension().is_some_and(|ext| ext == "asl") {
                 let framework = path.file_stem().unwrap().to_string_lossy().to_uppercase();
-                let source = fs::read_to_string(&path).unwrap_or_else(|e| {
-                    panic!("Failed to read axiom {:?}: {}", path, e);
-                });
-                println!("cargo:warning=Compiling {} axioms...", framework);
-                match seedc::compile(&source) {
-                    Ok(bytecode) => {
-                        embed_code.push_str(&format!(
-                            "map.insert(\"{}\".to_string(), vec!{:?});", framework, bytecode
-                        ));
-                        println!("cargo:warning=Compiled {} ({} bytes)", framework, bytecode.len());
-                    }
-                    Err(e) => panic!("Failed to compile {}: {:?}", framework, e),
-                }
+                let source = fs::read_to_string(&path).unwrap_or_default();
+                embed_code.push_str(&format!(
+                    "map.insert(\"{}\".to_string(), vec!{:?});", framework, source.as_bytes()
+                ));
             }
         }
     }
 
     embed_code.push_str("map");
     embed_code.push('}');
-    fs::write(&embed_path, embed_code.as_bytes()).unwrap_or_else(|e| {
-        panic!("Failed to write embedded axioms: {}", e);
-    });
+    let embed_path = out_dir.join("embedded_axioms.rs");
+    fs::write(&embed_path, embed_code.as_bytes()).unwrap();
 }
