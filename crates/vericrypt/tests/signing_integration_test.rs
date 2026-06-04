@@ -48,8 +48,8 @@ fn test_tee_detection_does_not_panic() {
 fn test_tee_attestation_collection() {
     let status = vericrypt::tee::collect_attestation();
     match status {
-        vericrypt::types::TeeStatus::Attested { .. } => {},
-        vericrypt::types::TeeStatus::Unavailable { .. } => {},
+        vericrypt::types::TeeStatus::Attested { .. } => {}
+        vericrypt::types::TeeStatus::Unavailable { .. } => {}
     }
 }
 
