@@ -49,7 +49,7 @@ echo "[+] Creating ASL regulatory axiom library"
 
 mkdir -p "$CRATE_ROOT/src/compliance/axioms"
 
-if [ ! -f "$CRATE_ROOT/src/compliance/axioms/dora.asl" ]; then
+
 cat > "$CRATE_ROOT/src/compliance/axioms/dora.asl" << 'DORA'
 agent DORA_Compliance stratum: S1 {
     identity { name: "DORA_Compliance", version: "1.0.0" }
