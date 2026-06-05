@@ -131,28 +131,6 @@ impl Lowerer {
                 func.push_instr(blk, Instr::new(Opcode::Const, Some(dest), vec![Operand::String(0)]));
                 Operand::Var(dest)
             },
-                if matches!(
-                    ident.name.as_str(),
-                    "route" | "select" | "task" | "think" | "cap"
-                        | "fast" | "shallow" | "medium" | "deep" | "exhaustive"
-                        | "proof" | "nanozk" | "zkagent" | "jolt_atlas" | "hmac"
-                        | "deterministic" | "tee"
-                        | "model" | "prompt" | "schema" | "budget" | "speculate" | "timeout"
-                        | "S0" | "S1" | "S2" | "S3"
-                ) {
-                    let func = self.func();
-                    let dest = func.new_var();
-                    func.push_instr(blk, Instr::new(Opcode::Const, Some(dest), vec![Operand::String(0)]));
-                    Operand::Var(dest)
-                } else {
-                    let func = self.func();
-                    let dest = func.new_var();
-                    func.push_instr(blk, Instr::new(Opcode::Const, Some(dest), vec![Operand::String(0)]));
-                    Operand::Var(dest)
-                }
-            },
-
-            // ── Binary / Unary ──
             ExprKind::Binary(op, lhs, rhs) => {
                 let l = self.lower_expr(lhs, blk);
                 let r = self.lower_expr(rhs, blk);
