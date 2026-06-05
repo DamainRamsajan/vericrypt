@@ -125,7 +125,12 @@ impl Lowerer {
         match &expr.kind {
             // ── Literals ──
             ExprKind::Lit(lit) => self.lower_literal(lit),
-            ExprKind::Ident(ident) => {
+            ExprKind::Ident(_ident) => {
+                let func = self.func();
+                let dest = func.new_var();
+                func.push_instr(blk, Instr::new(Opcode::Const, Some(dest), vec![Operand::String(0)]));
+                Operand::Var(dest)
+            },
                 if matches!(
                     ident.name.as_str(),
                     "route" | "select" | "task" | "think" | "cap"
