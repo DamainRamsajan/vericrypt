@@ -1,29 +1,47 @@
 name: VeriCrypt Build
-
+ 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches: ["main", "dev", "feature/**"]
+  pull_request:
+    branches: ["main"]
+ 
+env:
+  CARGO_TERM_COLOR: always
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
+    name: Build and test
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: actions/cache@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
-      - name: Run Master Build 9
-        run: bash batch_09.sh
-      - name: Build and test
-        run: cargo test --release -p vericrypt
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Build release
+        run: cargo build --release --workspace
+
+      - name: Run tests
+        run: cargo test --workspace
+
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
