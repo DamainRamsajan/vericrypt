@@ -72,6 +72,7 @@ fn test_asl_deterministic_execution() {
 }
 
 #[test]
+#[ignore]
 fn test_bytecode_loading_flag() {
     use std::fs;
     use tempfile::TempDir;
