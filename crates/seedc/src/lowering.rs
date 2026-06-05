@@ -125,7 +125,7 @@ impl Lowerer {
         match &expr.kind {
             // ── Literals ──
             ExprKind::Lit(lit) => self.lower_literal(lit),
-            ExprKind::Ident(_) => Operand::Var(0),
+            ExprKind::Ident(ident) => self.lower_ident(ident, blk),
 
             // ── Binary / Unary ──
             ExprKind::Binary(op, lhs, rhs) => {
