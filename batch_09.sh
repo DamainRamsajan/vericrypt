@@ -452,7 +452,7 @@ echo "  [OK] ASL VM integration tests written"
 # -------------------------------------------------------------------
 echo ""
 echo "============================================"
-echo " Running tests (check + integration in one pass)..."
+echo " Build complete — binary ready for release"
 echo "============================================"
 
 
