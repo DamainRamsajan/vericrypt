@@ -32,7 +32,7 @@ jobs:
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
-          key: ${{ runner.os }}-cargo-registry-v3-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-registry-v3-${{ hashFiles('**/Cargo.lock', '**/axioms/*') }}
           restore-keys: |
             ${{ runner.os }}-cargo-registry-v3-
 
