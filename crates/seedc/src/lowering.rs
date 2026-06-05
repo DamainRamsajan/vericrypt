@@ -125,7 +125,27 @@ impl Lowerer {
         match &expr.kind {
             // ── Literals ──
             ExprKind::Lit(lit) => self.lower_literal(lit),
-            ExprKind::Ident(ident) => self.lower_ident(ident, blk),
+            ExprKind::Ident(ident) => {
+                if matches!(
+                    ident.name.as_str(),
+                    "route" | "select" | "task" | "think" | "cap"
+                        | "fast" | "shallow" | "medium" | "deep" | "exhaustive"
+                        | "proof" | "nanozk" | "zkagent" | "jolt_atlas" | "hmac"
+                        | "deterministic" | "tee"
+                        | "model" | "prompt" | "schema" | "budget" | "speculate" | "timeout"
+                        | "S0" | "S1" | "S2" | "S3"
+                ) {
+                    let func = self.func();
+                    let dest = func.new_var();
+                    func.push_instr(blk, Instr::new(Opcode::Const, Some(dest), vec![Operand::String(0)]));
+                    Operand::Var(dest)
+                } else {
+                    let func = self.func();
+                    let dest = func.new_var();
+                    func.push_instr(blk, Instr::new(Opcode::Const, Some(dest), vec![Operand::String(0)]));
+                    Operand::Var(dest)
+                }
+            },
 
             // ── Binary / Unary ──
             ExprKind::Binary(op, lhs, rhs) => {
