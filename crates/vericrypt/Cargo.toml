@@ -53,3 +53,6 @@ criterion = { workspace = true }
 name = "scan_benchmarks"
 harness = false
 
+
+[build-dependencies]
+seedc = { path = "../seedc" }
