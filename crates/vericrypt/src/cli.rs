@@ -140,7 +140,6 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
     } else {
         crate::compliance::prove_compliance(&graph)?
     };
-    };
     stage_timings.push(StageTiming {
         stage_name: "asl_compliance".into(),
         elapsed_ms: t3.elapsed().as_millis() as u64,
