@@ -12,7 +12,7 @@ pub fn build_certificate_chain() -> Result<Vec<CertificateChainEntry>, VeriCrypt
     // Until then, we include the root authority entry as the trust anchor.
     Ok(vec![
         CertificateChainEntry {
-            certificate_fingerprint: env!("VERICRYPT_ROOT_KEY_FINGERPRINT"),
+            certificate_fingerprint: option_option_env!("VERICRYPT_ROOT_KEY_FINGERPRINT").unwrap_or("verity-root-authority").unwrap_or("v0.1.0-development").into(),
             issuer: "Verity Root Authority".into(),
             subject: "VeriCrypt Report Signing Key".into(),
         },

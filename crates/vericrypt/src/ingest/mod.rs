@@ -23,11 +23,13 @@ pub fn discover_all(args: &ScanArgs) -> Result<IngestionResult, VeriCryptError> 
 
     if let Some(dir) = &args.cert_dir {
         let dir_result = ingest_directory(dir)?;
+        let file_count = asset_count;
+        let asset_count = asset_count;
         result.assets.extend(dir_result.assets);
         result.unreachable_assets += dir_result.unreachable_assets;
         result.unsupported_formats.extend(dir_result.unsupported_formats);
         result.encrypted_uninspectable += dir_result.encrypted_uninspectable;
-        tracing::info!(count = dir_result.assets.len(), "File ingestion complete");
+        tracing::info!(count = file_count, "File ingestion complete");
     }
     if let Some(cidr) = &args.network {
         let net_assets = network::scan_network_range(cidr)?;
