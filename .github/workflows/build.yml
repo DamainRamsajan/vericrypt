@@ -18,7 +18,7 @@ jobs:
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
-          key: ${{ runner.os }}-cargo-v6-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-v7-${{ hashFiles('**/Cargo.lock') }}
       - name: Build binary
         run: cargo build --release -p vericrypt
       - name: Generate SHA256 checksums
