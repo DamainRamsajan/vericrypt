@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VeriCrypt — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #08090b; --vault: #0d0f12; --plate: #111318; --border: #1e2128;
+      --border-hi: #2e3240; --wine: #722f37; --wine-bright: #8b3a44; --wine-dim: #4a1e24;
+      --wine-glow: rgba(114,47,55,0.12); --platinum: #e8e4da; --silver: #8a8680;
+      --smoke: #4a4845; --text-primary: #e8e4da; --text-secondary: #8a8680;
+      --text-dim: #4a4845; --green: #3a8; --red: #c44;
+      --mono: 'JetBrains Mono', monospace; --serif: 'Cormorant Garamond', Georgia, serif;
+      --cond: 'Barlow Condensed', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--black); color: var(--text-primary); font-family: var(--mono); min-height: 100vh; overflow-x: hidden; cursor: crosshair; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 999; opacity: 0.6; }
+    body::after { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px); pointer-events: none; z-index: 998; }
+    .content-wrapper { padding: 100px 3rem 6rem; max-width: 720px; margin: 0 auto; }
+    .section-label { font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--wine-dim); margin-bottom: 0.5rem; text-align: center; }
+    .section-heading { font-family: var(--serif); font-size: 2.4rem; font-weight: 300; letter-spacing: 0.05em; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.1; text-align: center; }
+    .section-heading em { color: var(--wine); font-style: italic; }
+    .body-text { font-size: 0.62rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 2rem; text-align: center; }
+    .auth-card { background: var(--vault); border: 1px solid var(--border); padding: 3rem 2rem; max-width: 480px; margin: 0 auto; text-align: left; }
+    .auth-card h2 { font-family: var(--cond); font-size: 1rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-primary); margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; }
+    .form-group input, .form-group select { width: 100%; padding: 0.8rem 1rem; background: var(--plate); border: 1px solid var(--border-hi); color: var(--text-primary); font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--wine); box-shadow: 0 0 0 1px var(--wine-glow); }
+    .form-group input::placeholder { color: var(--text-dim); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; padding: 0.9rem 2rem; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; text-decoration: none; transition: all 0.2s ease; cursor: pointer; border: none; width: 100%; }
+    .btn-primary { background: transparent; color: var(--wine-bright); border: 1px solid var(--wine); position: relative; overflow: hidden; }
+    .btn-primary::before { content: ''; position: absolute; inset: 0; background: var(--wine); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; z-index: -1; }
+    .btn-primary:hover { color: var(--platinum); }
+    .btn-primary:hover::before { transform: scaleX(1); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .message { padding: 0.8rem 1rem; margin-bottom: 1.5rem; font-size: 0.55rem; letter-spacing: 0.1em; border: 1px solid; display: none; }
+    .message.error { display: block; color: var(--red); border-color: var(--red); background: rgba(204,68,68,0.08); }
+    .message.success { display: block; color: var(--green); border-color: var(--green); background: rgba(51,170,136,0.08); }
+    .result-card { background: var(--vault); border: 1px solid var(--wine-dim); padding: 2rem; margin-top: 2rem; display: none; }
+    .result-card h3 { font-family: var(--cond); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-primary); margin-bottom: 1rem; }
+    .result-field { margin-bottom: 1rem; }
+    .result-field label { display: block; font-size: 0.45rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.3rem; }
+    .result-field .value { font-family: var(--mono); font-size: 0.55rem; color: var(--text-primary); background: var(--plate); padding: 0.6rem; border: 1px solid var(--border); word-break: break-all; line-height: 1.6; }
+    .result-field .value.token { color: var(--wine-bright); font-size: 0.5rem; }
+    .copy-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.15em; text-transform: uppercase; background: var(--plate); border: 1px solid var(--border-hi); color: var(--text-dim); cursor: pointer; transition: all 0.2s; margin-top: 0.4rem; }
+    .copy-btn:hover { border-color: var(--wine-dim); color: var(--wine-bright); }
+    footer { padding: 2rem 3rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; text-align: center; }
+    .footer-text { font-size: 0.48rem; letter-spacing: 0.15em; color: var(--text-dim); font-family: var(--mono); }
+    @media (max-width: 600px) { .content-wrapper { padding: 60px 1.5rem 4rem; } .section-heading { font-size: 1.8rem; } }
+  </style>
+</head>
+<body>
+  <div class="content-wrapper">
+    <div class="section-label">VeriCrypt Administration</div>
+    <h1 class="section-heading">Generate <em>Licence</em></h1>
+    <p class="body-text">Create PASETO v4 licence tokens for customers.</p>
+
+    <div class="auth-card">
+      <h2>◇ New Licence</h2>
+      <div id="generate-message" class="message"></div>
+      <div class="form-group"><label for="customer-email">Customer Email</label><input type="email" id="customer-email" placeholder="ciso@bank.com" /></div>
+      <div class="form-group"><label for="customer-org">Organization</label><input type="text" id="customer-org" placeholder="Bank Name" /></div>
+      <div class="form-group"><label for="customer-name">Contact Name (Optional)</label><input type="text" id="customer-name" placeholder="Jane Smith" /></div>
+      <div class="form-group"><label for="customer-country">Country</label><input type="text" id="customer-country" placeholder="Germany" /></div>
+      <div class="form-group"><label for="license-tier">Tier</label><select id="license-tier"><option value="A">Tier A — Proof of Value (€125K)</option><option value="B" selected>Tier B — Mid-Market Annual (€425K)</option><option value="C">Tier C — Large Institution Annual (€950K)</option><option value="D">Tier D — Enterprise / G-SIB</option></select></div>
+      <div class="form-group"><label for="validity-days">Validity (Days)</label><input type="number" id="validity-days" value="365" min="30" max="1095" step="30" /></div>
+      <button id="generate-btn" class="btn btn-primary" onclick="generateLicense()"><span>✦</span> Generate Licence Token</button>
+    </div>
+
+    <div id="result-card" class="result-card">
+      <h3>✓ Licence Generated</h3>
+      <div class="result-field"><label>PASETO v4 Token</label><div class="value token" id="result-token"></div><button class="copy-btn" onclick="copyToken()">📋 Copy Token</button></div>
+      <div class="result-field"><label>Customer</label><div class="value" id="result-customer"></div></div>
+      <div class="result-field"><label>Organization</label><div class="value" id="result-org"></div></div>
+      <div class="result-field"><label>Tier</label><div class="value" id="result-tier"></div></div>
+      <div class="result-field"><label>Expires</label><div class="value" id="result-expiry"></div></div>
+      <button class="btn btn-primary" style="margin-top:1rem;" onclick="resetForm()"><span>◇</span> Generate Another</button>
+    </div>
+  </div>
+  <footer><div class="footer-text">VeriCrypt Admin</div></footer>
+
+  <script>
+    const FUNCTION_URL = 'https://umcjybsayugpcxbqhhmr.supabase.co/functions/v1/generate-license';
+    const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtY2p5YnNheXVncGN4YnFoaG1yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDc2Mjg1NywiZXhwIjoyMDk2MzM4ODU3fQ.A0goqfsl4424iwdfp2cSXbKuOaEnwwRdam0heKoM7Mg';
+
+    function setMessage(el, type, text) { el.className = 'message ' + type; el.textContent = text; }
+    function clearMessage(el) { el.className = 'message'; el.style.display = 'none'; }
+
+    async function generateLicense() {
+      const email = document.getElementById('customer-email').value.trim();
+      const org = document.getElementById('customer-org').value.trim();
+      const name = document.getElementById('customer-name').value.trim();
+      const country = document.getElementById('customer-country').value.trim();
+      const tier = document.getElementById('license-tier').value;
+      const validityDays = parseInt(document.getElementById('validity-days').value) || 365;
+      const btn = document.getElementById('generate-btn');
+      const msg = document.getElementById('generate-message');
+
+      if (!email || !org) { setMessage(msg, 'error', 'Email and organization are required.'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>⟳</span> Generating...';
+      clearMessage(msg);
+
+      try {
+        const res = await fetch(FUNCTION_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_ROLE_KEY}` },
+          body: JSON.stringify({ email, organization: org, contact_name: name || null, country: country || null, tier, validity_days: validityDays }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setMessage(msg, 'error', data.error || 'Failed to generate licence.'); btn.disabled = false; btn.innerHTML = '<span>✦</span> Generate Licence Token'; return; }
+
+        document.getElementById('result-card').style.display = 'block';
+        document.getElementById('result-token').textContent = data.license_key;
+        document.getElementById('result-customer').textContent = email + (name ? ` (${name})` : '');
+        document.getElementById('result-org').textContent = org;
+        document.getElementById('result-tier').textContent = data.tier;
+        document.getElementById('result-expiry').textContent = data.expires_at;
+        document.querySelector('.auth-card').style.display = 'none';
+        btn.disabled = false;
+        btn.innerHTML = '<span>✦</span> Generate Licence Token';
+      } catch (err) {
+        setMessage(msg, 'error', 'Network error — please try again.');
+        btn.disabled = false;
+        btn.innerHTML = '<span>✦</span> Generate Licence Token';
+      }
+    }
+
+    function copyToken() {
+      navigator.clipboard.writeText(document.getElementById('result-token').textContent).then(() => {
+        const btn = event.target; btn.textContent = '✓ Copied'; setTimeout(() => { btn.textContent = '📋 Copy Token'; }, 2000);
+      });
+    }
+
+    function resetForm() {
+      document.getElementById('result-card').style.display = 'none';
+      document.querySelector('.auth-card').style.display = 'block';
+      clearMessage(document.getElementById('generate-message'));
+    }
+  </script>
+</body>
+</html>
