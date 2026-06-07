@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VeriCrypt — Implementation Manual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:       #08090b;
+      --vault:       #0d0f12;
+      --plate:       #111318;
+      --border:      #1e2128;
+      --border-hi:   #2e3240;
+      --wine:        #722f37;
+      --wine-bright: #8b3a44;
+      --wine-dim:    #4a1e24;
+      --wine-glow:   rgba(114,47,55,0.12);
+      --platinum:    #e8e4da;
+      --silver:      #8a8680;
+      --smoke:       #4a4845;
+      --text-primary: #e8e4da;
+      --text-secondary: #8a8680;
+      --text-dim:    #4a4845;
+      --green:       #3a8;
+      --amber:       #d4853a;
+      --mono: 'JetBrains Mono', monospace;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --cond: 'Barlow Condensed', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: 0.6;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+      pointer-events: none; z-index: 998;
+    }
+
+    .status-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 36px;
+      background: rgba(8,9,11,0.92); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .status-left { display: flex; align-items: center; gap: 1.5rem; }
+    .status-indicator {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim);
+    }
+    .status-indicator .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #722f37; box-shadow: 0 0 6px #722f37;
+      animation: pulse-wine 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-wine { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .status-right { font-size: 0.58rem; letter-spacing: 0.12em; color: var(--text-dim); }
+    .status-divider { width: 1px; height: 14px; background: var(--border); }
+
+    nav {
+      position: fixed; top: 36px; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 3rem; height: 64px;
+      background: rgba(8,9,11,0.88); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+    .nav-logo { display: flex; flex-direction: column; gap: 1px; text-decoration: none; }
+    .nav-logo-mark {
+      font-family: var(--serif); font-size: 1.3rem; font-weight: 300;
+      letter-spacing: 0.25em; color: var(--text-primary); line-height: 1;
+    }
+    .nav-logo-mark:hover { opacity: 0.8; }
+    .nav-logo-mark span { color: var(--wine); }
+    .nav-logo-sub {
+      font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--text-dim); font-family: var(--mono);
+    }
+    .nav-links { display: flex; align-items: center; list-style: none; }
+    .nav-links a {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0 1.2rem; height: 64px;
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-secondary); text-decoration: none;
+      border-left: 1px solid var(--border);
+      transition: color 0.2s, background 0.2s;
+      font-family: var(--mono); position: relative;
+    }
+    .nav-links a:last-child { border-right: 1px solid var(--border); }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 1px; background: var(--wine);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.25s ease;
+    }
+    .nav-links a:hover { color: var(--wine-bright); background: var(--wine-glow); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active { color: var(--wine-bright); background: var(--wine-glow); cursor: default; pointer-events: none; }
+    .nav-links a.active::after { transform: scaleX(1); }
+
+    .content-wrapper { padding: 140px 3rem 6rem; max-width: 860px; margin: 0 auto; }
+    .section-label { font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--wine-dim); margin-bottom: 0.5rem; }
+    .section-heading { font-family: var(--serif); font-size: 2.4rem; font-weight: 300; letter-spacing: 0.05em; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.1; }
+    .section-heading em { color: var(--wine); font-style: italic; }
+    .body-text { font-size: 0.62rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+    h2 {
+      font-family: var(--cond); font-size: 1rem; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--text-primary); margin: 3rem 0 1rem;
+      padding-top: 1.5rem; border-top: 1px solid var(--border);
+    }
+    h3 {
+      font-family: var(--cond); font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--wine-bright); margin: 2rem 0 0.8rem;
+    }
+
+    p { font-size: 0.58rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 1rem; }
+    ul, ol { margin-left: 1.5rem; margin-bottom: 1.5rem; line-height: 1.7; font-size: 0.58rem; color: var(--text-secondary); }
+    li { margin-bottom: 0.4rem; }
+
+    code {
+      background: var(--plate); padding: 0.15em 0.4em;
+      font-size: 0.56rem; color: var(--wine-bright);
+      border: 1px solid var(--border-hi); font-family: var(--mono);
+      white-space: nowrap;
+    }
+    pre {
+      background: var(--vault); border: 1px solid var(--border-hi);
+      padding: 1.2rem 1.5rem; margin: 1rem 0 1.5rem;
+      overflow-x: auto; font-size: 0.52rem; line-height: 1.8;
+      color: var(--text-primary);
+    }
+    pre code {
+      background: transparent; border: none; padding: 0;
+      font-size: inherit; color: inherit; white-space: pre;
+    }
+
+    .note {
+      background: var(--vault); border-left: 2px solid var(--wine);
+      padding: 1rem 1.5rem; margin: 1.5rem 0;
+      font-size: 0.55rem; line-height: 1.7; color: var(--text-dim);
+    }
+    .note strong { color: var(--wine-bright); }
+
+    .warning {
+      background: var(--vault); border-left: 2px solid var(--amber);
+      padding: 1rem 1.5rem; margin: 1.5rem 0;
+      font-size: 0.55rem; line-height: 1.7; color: var(--text-dim);
+    }
+    .warning strong { color: var(--amber); }
+
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.55rem;
+      margin: 1rem 0 2rem; border: 1px solid var(--border);
+    }
+    th {
+      text-align: left; padding: 0.5rem 0.8rem;
+      font-size: 0.45rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--wine-dim); border-bottom: 1px solid var(--border);
+      background: var(--vault);
+    }
+    td {
+      padding: 0.5rem 0.8rem; color: var(--text-secondary);
+      border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    .divider { display: flex; align-items: center; gap: 1.5rem; margin: 3rem 0; }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-label { font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.8rem 1.8rem; font-family: var(--mono);
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      text-decoration: none; transition: all 0.2s ease;
+      cursor: pointer; border: 1px solid var(--wine);
+      background: transparent; color: var(--wine-bright);
+    }
+    .btn:hover { color: var(--platinum); background: var(--wine); }
+
+    footer { padding: 2rem 3rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .footer-left { display: flex; flex-direction: column; gap: 0.3rem; }
+    .footer-brand { font-family: var(--serif); font-size: 0.9rem; font-weight: 300; letter-spacing: 0.2em; color: var(--text-secondary); }
+    .footer-brand span { color: var(--wine); }
+    .footer-tagline { font-size: 0.48rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+    .footer-right { font-size: 0.5rem; letter-spacing: 0.15em; color: var(--text-dim); text-align: right; line-height: 1.8; }
+
+    @media (max-width: 900px) {
+      nav { padding: 0 1.5rem; }
+      .content-wrapper { padding: 140px 1.5rem 4rem; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-right { text-align: center; }
+      .nav-links a { padding: 0 0.8rem; font-size: 0.5rem; }
+    }
+    @media (max-width: 600px) {
+      .status-bar { display: none; } nav { top: 0; }
+      .content-wrapper { padding-top: 100px; }
+      .nav-links { flex-wrap: wrap; }
+      .nav-links a { height: 40px; font-size: 0.45rem; padding: 0 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="status-indicator"><span class="dot"></span><span>Documentation v1.0</span></div>
+      <div class="status-divider"></div>
+      <div class="status-indicator"><span>Air-Gapped · Single Binary · Zero Dependencies</span></div>
+    </div>
+    <div class="status-right">ARC42 v1.0 · DORA Art. 5–14 · NIST FIPS 203/204/205</div>
+  </div>
+
+  <nav>
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-mark">VERICRYPT<span>.</span></div>
+      <div class="nav-logo-sub">Post-Quantum Compliance Engine</div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../download.html">Download</a></li>
+      <li><a href="../partners.html">Partners</a></li>
+      <li><a href="user.html">User Manual</a></li>
+      <li><a href="implementation.html" class="active">Implementation Manual</a></li>
+    </ul>
+  </nav>
+
+  <div class="content-wrapper">
+
+    <div class="section-label">Deployment Guide</div>
+    <h1 class="section-heading">Implementation <em>Manual</em></h1>
+    <p class="body-text">
+      VeriCrypt is a single, statically-linked binary with zero runtime dependencies. Deployment requires no package manager, no database, no cloud connectivity, and no network egress during scan operations. This guide covers every step from download to regulator-ready .pqc report.
+    </p>
+
+    <!-- ============ 1. SYSTEM REQUIREMENTS ============ -->
+    <h2>1. System Requirements</h2>
+
+    <h3>Production Scan Host</h3>
+    <ul>
+      <li>Linux kernel 5.15+ (x86_64 or ARM64)</li>
+      <li>8+ cores, 32 GB RAM, 512 GB SSD</li>
+      <li>Intel TDX or AMD SEV-SNP enabled (optional, for TEE attestation)</li>
+      <li>Root access (required only for TEE device file access: <code>/dev/tdx_guest</code> or <code>/dev/sev-guest</code>)</li>
+      <li>No network egress required during scan — air-gapped by design</li>
+    </ul>
+
+    <h3>Evaluation / Pilot Host</h3>
+    <ul>
+      <li>Linux kernel 5.15+ (x86_64)</li>
+      <li>4 cores, 16 GB RAM, 100 GB free disk</li>
+      <li>TEE optional — runs in simulation mode without hardware attestation</li>
+    </ul>
+
+    <div class="note">
+      <strong>Air-gap requirement:</strong> The scan host must have read access to certificate stores and internal network endpoints for TLS probing. It must <strong>not</strong> have internet access during scan operations. VeriCrypt never initiates outbound connections except for explicitly configured internal network scanning of target endpoints.
+    </div>
+
+    <!-- ============ 2. DOWNLOAD & VERIFY ============ -->
+    <h2>2. Binary Download &amp; Verification</h2>
+
+    <p>On an internet-connected machine, visit the <a href="../download.html" style="color:var(--wine-bright);">Download Portal</a> and enter your licence key. Select your platform and binary:</p>
+
+    <table>
+      <thead>
+        <tr><th>Binary</th><th>Purpose</th><th>Platforms</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color:var(--text-primary);"><code>vericrypt</code></td><td>Compliance scanner — ingests certificates, executes pipeline, produces .pqc report</td><td>linux-x86_64, linux-arm64</td></tr>
+        <tr><td style="color:var(--text-primary);"><code>vericrypt-verify</code></td><td>Offline verifier — independently validates .pqc reports (freely distributable to regulators)</td><td>linux-x86_64, linux-arm64</td></tr>
+      </tbody>
+    </table>
+
+    <p>Verify integrity before use:</p>
+    <pre><code>sha256sum vericrypt
+sha256sum vericrypt-verify
+# Compare against the published checksums on the download page
+
+file vericrypt
+# Expected: ELF 64-bit LSB executable, x86-64, statically linked, stripped
+# Verify: no dynamic dependencies
+ldd vericrypt
+# Expected: not a dynamic executable</code></pre>
+
+    <!-- ============ 3. TRANSFER TO AIR-GAPPED HOST ============ -->
+    <h2>3. Transfer to Air-Gapped Host</h2>
+
+    <p>Transfer both binaries to the scan host via approved media:</p>
+    <ul>
+      <li>USB drive (mounted read-only after transfer)</li>
+      <li>Internal file share (temporary, disconnected before scan)</li>
+      <li>SFTP to staging host (then disconnected before scan)</li>
+    </ul>
+
+    <pre><code># On the air-gapped scan host
+chmod +x vericrypt vericrypt-verify
+./vericrypt --version
+# Expected: vericrypt 0.1.0</code></pre>
+
+    <div class="warning">
+      <strong>Critical:</strong> Never transfer the binary over an internet-connected network to the scan host. The air-gap must be maintained. The binary's integrity depends on the chain of custody from download to execution.
+    </div>
+
+    <!-- ============ 4. LICENCE ACTIVATION ============ -->
+    <h2>4. Licence Activation</h2>
+
+    <p>Activate your licence key on the air-gapped host. The binary validates the PASETO v4 token offline using its embedded public key — no network call is made.</p>
+
+    <pre><code>./vericrypt activate --key $LICENSE_KEY</code></pre>
+
+    <p>The activation process verifies:</p>
+    <ul>
+      <li>PASETO v4.public Ed25519 signature against embedded public key</li>
+      <li>Token expiry date</li>
+      <li>Binary hash scope — the licence is bound to the specific binary version</li>
+      <li>Capability claims: tier, max_assets, features</li>
+    </ul>
+
+    <p>Alternatively, set the licence key as an environment variable:</p>
+    <pre><code>export VERICRYPT_LICENSE_KEY="v4.public.eyJ..."</code></pre>
+
+    <div class="note">
+      <strong>First scan is free:</strong> Without a licence key, VeriCrypt runs the full pipeline and produces an unsigned .pqc report. This is suitable for evaluation and pipeline validation. A licence is required for SLH-DSA signed reports — the artefact regulators accept.
+    </div>
+
+    <!-- ============ 5. CERTIFICATE INVENTORY PREPARATION ============ -->
+    <h2>5. Certificate Inventory Preparation</h2>
+
+    <p>Gather all cryptographic assets into a directory tree accessible from the scan host. VeriCrypt performs recursive directory traversal — nested subdirectories are processed automatically.</p>
+
+    <h3>Supported File Formats</h3>
+    <table>
+      <thead>
+        <tr><th>Format</th><th>Extension</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color:var(--text-primary);">PEM Certificate</td><td><code>.pem</code>, <code>.crt</code>, <code>.cer</code></td><td>PEM-encoded X.509 certificates</td></tr>
+        <tr><td style="color:var(--text-primary);">PEM Private Key</td><td><code>.key</code></td><td>PKCS#1, PKCS#8, SEC1 private keys</td></tr>
+        <tr><td style="color:var(--text-primary);">DER Certificate</td><td><code>.der</code></td><td>DER-encoded X.509 certificates</td></tr>
+        <tr><td style="color:var(--text-primary);">PKCS#12 Keystore</td><td><code>.p12</code>, <code>.pfx</code></td><td>Password-protected keystores</td></tr>
+        <tr><td style="color:var(--text-primary);">CSV Inventory</td><td><code>.csv</code></td><td>CMDB exports with columns: host, port, cert_path, algorithm, key_size, expiry, usage_context</td></tr>
+        <tr><td style="color:var(--text-primary);">JSON Inventory</td><td><code>.json</code></td><td>CMDB JSON export with <code>"certificates"</code> array containing algorithm, key_size, expiry, fingerprint</td></tr>
+      </tbody>
+    </table>
+
+    <h3>CSV Format Specification</h3>
+    <pre><code>host,port,cert_path,algorithm,key_size,expiry,usage_context
+lb.example.com,443,/etc/ssl/certs/lb.pem,RSA-2048,2048,2027-03-15,external_tls
+internal.db.example.com,5432,/etc/ssl/certs/db.pem,ECDSA-P256,256,2026-11-01,database_tls</code></pre>
+
+    <h3>JSON Format Specification</h3>
+    <pre><code>{
+  "certificates": [
+    {
+      "host": "lb.example.com",
+      "port": 443,
+      "algorithm": "RSA-2048",
+      "key_size": 2048,
+      "expiry": "2027-03-15T00:00:00Z",
+      "fingerprint": "a1b2c3...",
+      "usage_context": "external_tls"
+    }
+  ]
+}</code></pre>
+
+    <!-- ============ 6. RUNNING SCANS ============ -->
+    <h2>6. Running Scans</h2>
+
+    <h3>6.1 First Scan — Unsigned (Evaluation)</h3>
+    <pre><code>./vericrypt scan \
+  --cert-dir /data/certificates/ \
+  --output ./vericrypt-report/</code></pre>
+
+    <p>This executes the full 7-stage pipeline and produces an unsigned report. Use this to validate the pipeline, verify certificate parsing, and confirm inventory completeness before purchasing a licence.</p>
+
+    <h3>6.2 Licensed Scan — Signed Report</h3>
+    <pre><code>./vericrypt scan \
+  --cert-dir /data/certificates/ \
+  --network 10.0.0.0/8 \
+  --mode primary \
+  --output ./report/</code></pre>
+
+    <p>With an active licence, the .pqc report is signed with SLH-DSA (NIST FIPS 205). The signature binds the Merkle root of all findings, the scan timestamp, and the TEE attestation quote (if available).</p>
+
+    <h3>6.3 Network Scanning</h3>
+    <pre><code>./vericrypt scan \
+  --cert-dir /data/certificates/ \
+  --network 10.0.0.0/8 \
+  --output ./report/</code></pre>
+
+    <p>Probes all hosts in the specified CIDR range for TLS endpoints. Each endpoint's certificate is parsed, fingerprinted, and added to the cryptographic asset inventory. Works with internal RFC 1918 addresses.</p>
+
+    <h3>6.4 Deployment Modes</h3>
+    <pre><code>--mode shadow     # Phase 1: Reports generated but not submitted to regulators
+--mode parallel   # Phase 2: Reports submitted alongside traditional documentation
+--mode primary    # Phase 3: .pqc files are the primary compliance evidence</code></pre>
+
+    <h3>6.5 Custom Regulatory Axioms (Mode 2)</h3>
+    <pre><code>./vericrypt scan \
+  --cert-dir /data/certificates/ \
+  --load-bytecode /opt/vericrypt/custom-framework.aslb \
+  --output ./report/</code></pre>
+
+    <p>The <code>--load-bytecode</code> flag loads a custom-compiled ASL bytecode file. Use this when the bank's legal counsel or compliance team has edited the axiom source files to reflect jurisdiction-specific requirements. The resulting .pqc report is proved against the custom rules, with a full verifiable execution trace.</p>
+
+    <h3>6.6 VeriChain Signed Tree Head Export</h3>
+    <pre><code>./vericrypt scan \
+  --cert-dir /data/certificates/ \
+  --publish-sth \
+  --output ./report/</code></pre>
+
+    <p>Exports an RFC 6962-compatible Signed Tree Head to <code>sth.json</code> for optional VeriChain anchoring. Provides cross-institutional consistency proofs and non-equivocation guarantees.</p>
+
+    <h3>6.7 Full Command Reference</h3>
+    <table>
+      <thead>
+        <tr><th>Flag</th><th>Argument</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>--cert-dir</code></td><td>path</td><td>Directory containing certificates to scan (recursive)</td></tr>
+        <tr><td><code>--network</code></td><td>CIDR</td><td>Network range to probe for TLS endpoints</td></tr>
+        <tr><td><code>--output</code></td><td>path</td><td>Output directory for .pqc report and CBOM (default: ./report/)</td></tr>
+        <tr><td><code>--mode</code></td><td>shadow|parallel|primary</td><td>Deployment phase (default: shadow)</td></tr>
+        <tr><td><code>--load-bytecode</code></td><td>path</td><td>Custom ASL bytecode file for Mode 2/3 axioms</td></tr>
+        <tr><td><code>--publish-sth</code></td><td>—</td><td>Export Signed Tree Head for VeriChain anchoring</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ============ 7. OUTPUT FILES ============ -->
+    <h2>7. Output Files</h2>
+
+    <table>
+      <thead>
+        <tr><th>File</th><th>Format</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);"><code>report.pqc</code></td>
+          <td>JSON</td>
+          <td>Signed compliance artifact — Merkle-proofed, SLH-DSA signed. Contains: report metadata, CBOM Merkle root, compliance theorems with ASL VM execution trace, TEE attestation quote, PKI certificate chain, SLH-DSA signature. This is the primary regulatory submission artefact.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>cbom.json</code></td>
+          <td>JSON</td>
+          <td>CycloneDX 1.7 Cryptographic Bill of Materials (ECMA-424). Every asset as a component with cryptoProperties: algorithm, keySize, mode, padding, curve, quantumSecurityLevel. PQC algorithm naming per CycloneDX Cryptography Registry.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>roadmap.md</code></td>
+          <td>Markdown</td>
+          <td>Prioritized PQC migration roadmap — Phase 1 (0–12 months), Phase 2 (12–24 months), Phase 3 (24–36 months). Shapley-ranked by exposure contribution. EU 2026/2030/2035 milestone alignment.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>violations.txt</code></td>
+          <td>Text</td>
+          <td>Specific compliance violations with asset IDs, regulatory references, and remediation recommendations. Only generated if ASL VM produces counterexamples.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>verify.sh</code></td>
+          <td>Shell Script</td>
+          <td>Self-contained verification script for regulators. Bundles the verification procedure into a single executable script.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>sth.json</code></td>
+          <td>JSON</td>
+          <td>RFC 6962 Signed Tree Head for VeriChain anchoring. Only generated when <code>--publish-sth</code> flag is used.</td>
+        </tr>
+      </tbody>
+    </table>
+
+      <!-- ============ BATCH 2 BEGINS — Append inside content-wrapper before closing </div> ============ -->
+
+    <!-- ============ 8. SCAN OUTPUT INTERPRETATION ============ -->
+    <h2>8. Scan Output Interpretation</h2>
+
+    <p>During execution, VeriCrypt writes structured JSON logs to stderr. A summary is printed upon completion:</p>
+
+    <pre><code>=== VERICRYPT SCAN COMPLETE ===
+  Mode: PRIMARY (Phase 3)
+  Assets discovered: 2,437
+  Quantum-vulnerable: 1,182
+  Compliance violations: 12
+  Compliance confidence: 0.87 (proof=1.00 × inventory=0.87 × axiom=1.00)
+  Inventory confidence: High (87%)
+  Report: ./report/report.pqc</code></pre>
+
+    <h3>Understanding Compliance Confidence</h3>
+    <p>The compliance confidence score is a multiplicative composite of three independent factors:</p>
+
+    <table>
+      <thead>
+        <tr><th>Factor</th><th>Range</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);">Proof Confidence (P)</td>
+          <td>0.0–1.0</td>
+          <td>1.0 = ASL VM execution successful, all frameworks proved. 0.7 = Some theorems unverified. 0.3 = Degraded mode.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Inventory Confidence (I)</td>
+          <td>0.0–1.0</td>
+          <td>Derived from visibility score: endpoint coverage, subnet coverage, cert transparency correlation, AD/LDAP reconciliation, HSM reconciliation, duplicate chain analysis, expected-vs-observed entropy, network topology consistency.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Regulatory Axiom Confidence (R)</td>
+          <td>0.0–1.0</td>
+          <td>1.0 = Axioms reviewed and signed by qualified regulatory expert. 0.8 = Reviewed by internal compliance team. 0.5 = Auto-generated without human review.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>The composite score is <code>compliance_confidence = P × I × R</code>. Thresholds for deployment modes:</p>
+    <ul>
+      <li><strong>Phase 3 (Primary):</strong> ≥ 0.90</li>
+      <li><strong>Phase 2 (Parallel):</strong> ≥ 0.70</li>
+      <li><strong>Phase 1 (Shadow):</strong> ≥ 0.50</li>
+    </ul>
+
+    <h3>Stage Timing Output</h3>
+    <p>In verbose mode (<code>VERICRYPT_LOG_LEVEL=DEBUG</code>), per-stage timing is reported:</p>
+
+    <table>
+      <thead>
+        <tr><th>Stage</th><th>Complexity</th><th>Typical (10K certs)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Ingestion</td><td>O(n)</td><td>~30 seconds</td></tr>
+        <tr><td>Knowledge Graph Building</td><td>O(n log n)</td><td>~10 seconds</td></tr>
+        <tr><td>HNDL Exposure Analysis</td><td>O(n²) exact / O(n) Monte Carlo</td><td>~15 seconds</td></tr>
+        <tr><td>ASL VM Compliance Verification</td><td>VM execution</td><td>~3 seconds</td></tr>
+        <tr><td>Prioritization &amp; Roadmap</td><td>O(n log n)</td><td>~2 seconds</td></tr>
+        <tr><td>CBOM Generation</td><td>O(n)</td><td>~2 seconds</td></tr>
+        <tr><td>Report Assembly &amp; Signing</td><td>O(n) + O(1) signing</td><td>~3 seconds</td></tr>
+        <tr><td style="color:var(--wine-bright);"><strong>Total</strong></td><td></td><td style="color:var(--wine-bright);"><strong>~60 seconds</strong></td></tr>
+      </tbody>
+    </table>
+
+    <!-- ============ 9. ENVIRONMENT VARIABLES ============ -->
+    <h2>9. Environment Variables</h2>
+
+    <table>
+      <thead>
+        <tr><th>Variable</th><th>Values</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);"><code>VERICRYPT_LICENSE_KEY</code></td>
+          <td>PASETO v4 token</td>
+          <td>Licence key for signed report generation. Alternative to <code>--key</code> flag on activate command.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>VERICRYPT_DATA_DIR</code></td>
+          <td>path</td>
+          <td>Directory for algorithm database and cached certificates. Default: <code>~/.vericrypt/</code></td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>VERICRYPT_LOG_LEVEL</code></td>
+          <td>ERROR, WARN, INFO, DEBUG, TRACE</td>
+          <td>Log verbosity. Default: INFO. DEBUG shows per-asset details. TRACE shows full parse output.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>VERICRYPT_SCAN_TIMEOUT</code></td>
+          <td>seconds</td>
+          <td>Maximum duration per scan target. Prevents hung scans on unresponsive endpoints.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>VERICRYPT_PROOF_TIMEOUT</code></td>
+          <td>seconds</td>
+          <td>Maximum duration per ASL VM framework execution. Prevents hung compliance verification.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>VERICRYPT_TEE_ATTESTATION</code></td>
+          <td>1, 0, auto</td>
+          <td>Enable/disable TEE attestation. Default: auto-detect. Set to 0 to skip even if TEE is available.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============ 10. TEE ATTESTATION ============ -->
+    <h2>10. TEE Attestation</h2>
+
+    <p>VeriCrypt auto-detects Intel TDX or AMD SEV-SNP at scan time. When available, a hardware-signed attestation quote is collected and embedded in the .pqc report header. The quote binds the binary's measurement to the report, cryptographically proving the scan ran untampered.</p>
+
+    <h3>Requirements</h3>
+    <ul>
+      <li>Intel TDX: <code>/dev/tdx_guest</code> device file accessible</li>
+      <li>AMD SEV-SNP: <code>/dev/sev-guest</code> device file accessible</li>
+      <li>Root access (required only for TEE device file access)</li>
+      <li>CPU vendor root of trust certificates embedded in vericrypt-verify</li>
+    </ul>
+
+    <h3>Attestation Quote Contents</h3>
+    <ul>
+      <li><strong>TDX:</strong> MRTD (measurement of the Trust Domain), RTMRs (runtime measurements)</li>
+      <li><strong>SNP:</strong> Launch measurement, guest policy</li>
+      <li>Certificate chain back to CPU vendor root of trust (Intel PCS or AMD KDS)</li>
+    </ul>
+
+    <p>When TEE is unavailable, the .pqc report is generated without hardware trust anchor and marked accordingly. The core cryptographic proof (Merkle root + SLH-DSA signature) remains valid without TEE.</p>
+
+    <pre><code># Check TEE status
+./vericrypt scan --cert-dir /data/certs/ 2>&1 | grep -i tee
+# Expected: TEE Attestation: Active (Intel TDX) or TEE Attestation: Unavailable (no TEE hardware)</code></pre>
+
+    <!-- ============ 11. REGULATOR VERIFICATION ============ -->
+    <h2>11. Regulator Verification Procedure</h2>
+
+    <p>The <code>vericrypt-verify</code> binary is freely distributable. Regulators use it to independently verify .pqc reports without access to the bank's systems, without trust in Verity, and without network connectivity.</p>
+
+    <h3>Verification Steps</h3>
+    <ol>
+      <li>Bank submits <code>report.pqc</code> to regulator via email or portal</li>
+      <li>Regulator runs the offline verifier:</li>
+    </ol>
+
+    <pre><code>./vericrypt-verify ./report.pqc</code></pre>
+
+    <h3>What the Verifier Checks</h3>
+    <ol>
+      <li><strong>SLH-DSA signature validity</strong> — verifies the signature over (Merkle root + metadata) using embedded Verity public key</li>
+      <li><strong>Merkle root consistency</strong> — recomputes Merkle root from CBOM contents and compares against signed root</li>
+      <li><strong>ASL VM execution trace</strong> — supports <code>--replay</code> flag for bit-identical re-execution of compliance bytecode against the inventory hash</li>
+      <li><strong>TEE attestation quote</strong> (if present) — verifies attestation signature against Intel/AMD root certificates</li>
+      <li><strong>Certificate chain</strong> — verifies PKI chain from signing key to Root Verity Authority Key</li>
+      <li><strong>Revocation check</strong> — verifies signing certificate against offline revocation bundle</li>
+    </ol>
+
+    <h3>Verification Output</h3>
+    <pre><code># Success:
+VERIFIED — scan at 2026-06-05T14:30:00Z, 2,437 assets, 12 violations
+
+# Failure modes:
+VERIFICATION FAILED — signature does not verify. Report tampered.
+VERIFICATION FAILED — CBOM contents do not match signed root.
+VERIFICATION FAILED — TEE attestation quote invalid.</code></pre>
+
+    <div class="note">
+      <strong>Verification is O(1):</strong> Regardless of whether the scan covered 10 or 10 million certificates, the verifier checks only the Merkle root and signature — constant time, under 1 second. The .pqc file is a constant-size evidence structure as formalized by Kao (February 2026).
+    </div>
+
+    <!-- ============ 12. TROUBLESHOOTING ============ -->
+    <h2>12. Troubleshooting</h2>
+
+    <h3>Common Issues</h3>
+
+    <table>
+      <thead>
+        <tr><th>Symptom</th><th>Likely Cause</th><th>Resolution</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);">"Licence validation failed"</td>
+          <td>Expired or invalid PASETO token</td>
+          <td>Verify token expiry date. Contact channel sales for renewal. Check binary hash matches licence scope.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">"Permission denied" on cert files</td>
+          <td>Insufficient read permissions</td>
+          <td>Ensure scan user has read access to certificate directory tree. Use <code>chmod -R +r</code> if needed.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">"Not a directory" error</td>
+          <td>--cert-dir path does not exist</td>
+          <td>Verify the path is correct and accessible. Use absolute paths.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">"Network unreachable" on TLS probe</td>
+          <td>Target endpoint down or firewalled</td>
+          <td>Recorded as "unreachable" in inventory. Scan continues. Verify network connectivity from scan host.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">"TLS handshake timeout"</td>
+          <td>Endpoint not responding to TLS</td>
+          <td>Recorded with timeout metadata. Adjust <code>VERICRYPT_SCAN_TIMEOUT</code> if needed.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">"ASL VM execution failed"</td>
+          <td>Corrupt or invalid bytecode file</td>
+          <td>Recompile axiom source through seedc. Verify bytecode file integrity.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">"Signing key unavailable"</td>
+          <td>Licence not activated or expired</td>
+          <td>Run <code>./vericrypt activate --key $LICENSE_KEY</code>. Verify licence state with <code>--version</code>.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">No TEE attestation in report</td>
+          <td>TEE hardware not available or not configured</td>
+          <td>Verify <code>/dev/tdx_guest</code> or <code>/dev/sev-guest</code> exists. Check root access. TEE is optional — report is valid without it.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Debug Mode</h3>
+    <pre><code># Enable verbose logging for troubleshooting
+export VERICRYPT_LOG_LEVEL=DEBUG
+./vericrypt scan --cert-dir /data/certificates/ --output ./report/ 2> debug.log
+
+# Trace mode shows full parse output (large files)
+export VERICRYPT_LOG_LEVEL=TRACE
+./vericrypt scan --cert-dir /data/certificates/ --output ./report/ 2> trace.log</code></pre>
+
+    <h3>Verifying Installation Integrity</h3>
+    <pre><code># Confirm static linking
+file vericrypt
+# Expected: statically linked
+
+ldd vericrypt
+# Expected: not a dynamic executable
+
+# Verify binary hash matches licence scope
+sha256sum vericrypt
+# Compare against the binary_hash claim in your PASETO token</code></pre>
+
+    <!-- ============ 13. SUPPORT ============ -->
+    <h2>13. Support</h2>
+
+    <p>For deployment assistance, licence issues, or technical questions:</p>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 2rem;">
+      <a href="mailto:peterdramsajan@gmail.com?subject=VeriCrypt%20Support%20—%20[Issue]" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; background: var(--plate); border: 1px solid var(--border-hi); padding: 0.8rem 1.2rem; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--wine-dim)'" onmouseout="this.style.borderColor='var(--border-hi)'">
+        <span style="font-size:1.2rem;">✉</span> peterdramsajan@gmail.com
+      </a>
+      <a href="https://wa.me/18687195236" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; background: var(--plate); border: 1px solid var(--border-hi); padding: 0.8rem 1.2rem; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--wine-dim)'" onmouseout="this.style.borderColor='var(--border-hi)'">
+        <span style="font-size:1.2rem;">📱</span> +1 (868) 719-5236
+      </a>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-label">Related Documentation</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+      <a href="user.html" class="btn">
+        <span>◈</span> User Manual
+      </a>
+      <a href="../download.html" class="btn">
+        <span>↓</span> Download Portal
+      </a>
+      <a href="../partners.html" class="btn">
+        <span>◆</span> Partners
+      </a>
+    </div>
+
+  </div> <!-- /content-wrapper -->
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-left">
+      <div class="footer-brand">VERICRYPT<span>.</span></div>
+      <div class="footer-tagline">Machine-Verified · Air-Gapped · Post-Quantum · Regulator-Ready</div>
+    </div>
+    <div class="footer-right">
+      DORA Art. 5–14 · SEC PQFIF · UK NCSC Phase 1–3<br />
+      NIST FIPS 203/204/205 · ECMA-424 · RFC 6962
+    </div>
+  </footer>
+
+</body>
+</html>
+
+  </div> <!-- /content-wrapper -->
+
+</body>
+</html>

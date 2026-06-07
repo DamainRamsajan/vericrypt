@@ -5,31 +5,50 @@ use crate::errors::VeriCryptError;
 use crate::types::{Algorithm, AssetType, CryptoAsset};
 use std::path::Path;
 
-pub fn discover_all(args: &ScanArgs) -> Result<Vec<CryptoAsset>, VeriCryptError> {
-    let mut assets = Vec::new();
+/// Result of asset discovery with confidence metrics.
+pub struct IngestionResult {
+    pub assets: Vec<CryptoAsset>,
+    pub unreachable_assets: u64,
+    pub unsupported_formats: Vec<String>,
+    pub encrypted_uninspectable: u64,
+}
+
+pub fn discover_all(args: &ScanArgs) -> Result<IngestionResult, VeriCryptError> {
+    let mut result = IngestionResult {
+        assets: Vec::new(),
+        unreachable_assets: 0,
+        unsupported_formats: Vec::new(),
+        encrypted_uninspectable: 0,
+    };
+
     if let Some(dir) = &args.cert_dir {
-        let file_assets = ingest_directory(dir)?;
-        tracing::info!(count = file_assets.len(), "File ingestion complete");
-        assets.extend(file_assets);
+        let dir_result = ingest_directory(dir)?;
+        result.assets.extend(dir_result.assets);
+        result.unreachable_assets += dir_result.unreachable_assets;
+        result.unsupported_formats.extend(dir_result.unsupported_formats);
+        result.encrypted_uninspectable += dir_result.encrypted_uninspectable;
+        tracing::info!(count = dir_result.assets.len(), "File ingestion complete");
     }
     if let Some(cidr) = &args.network {
         let net_assets = network::scan_network_range(cidr)?;
         tracing::info!(count = net_assets.len(), "Network ingestion complete");
-        assets.extend(net_assets);
+        result.assets.extend(net_assets);
     }
-    tracing::info!(total = assets.len(), "Discovery complete");
-    Ok(assets)
+    tracing::info!(total = result.assets.len(), "Discovery complete");
+    Ok(result)
 }
 
-fn ingest_directory(dir: &str) -> Result<Vec<CryptoAsset>, VeriCryptError> {
+fn ingest_directory(dir: &str) -> Result<IngestionResult, VeriCryptError> {
     let path = Path::new(dir);
     if !path.is_dir() {
-        return Err(VeriCryptError::ParseError(format!(
-            "Not a directory: {}",
-            dir
-        )));
+        return Err(VeriCryptError::ParseError(format!("Not a directory: {}", dir)));
     }
-    let mut assets = Vec::new();
+    let mut result = IngestionResult {
+        assets: Vec::new(),
+        unreachable_assets: 0,
+        unsupported_formats: Vec::new(),
+        encrypted_uninspectable: 0,
+    };
     for entry in walkdir::WalkDir::new(dir)
         .follow_links(false)
         .into_iter()
@@ -39,32 +58,41 @@ fn ingest_directory(dir: &str) -> Result<Vec<CryptoAsset>, VeriCryptError> {
             continue;
         }
         match parse_file(entry.path()) {
-            Ok(mut a) => assets.append(&mut a),
-            Err(e) => tracing::warn!(file = %entry.path().display(), error = %e, "Skip"),
+            Ok(mut file_result) => {
+                result.assets.append(&mut file_result.assets);
+                result.encrypted_uninspectable += file_result.encrypted_uninspectable;
+            }
+            Err(e) => {
+                tracing::warn!(file = %entry.path().display(), error = %e, "Skipping unsupported file");
+                result.unsupported_formats.push(entry.path().extension()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("unknown")
+                    .to_string());
+            }
         }
     }
-    Ok(assets)
+    Ok(result)
 }
 
-fn parse_file(path: &Path) -> Result<Vec<CryptoAsset>, VeriCryptError> {
-    let ext = path
-        .extension()
-        .and_then(|s| s.to_str())
-        .unwrap_or("")
-        .to_lowercase();
+struct FileResult {
+    assets: Vec<CryptoAsset>,
+    encrypted_uninspectable: u64,
+}
+
+fn parse_file(path: &Path) -> Result<FileResult, VeriCryptError> {
+    let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("").to_lowercase();
     match ext.as_str() {
         "pem" | "crt" | "cer" | "key" => parse_pem(path),
-        "der" => parse_der(path),
-        "p12" | "pfx" => parse_p12(path),
-        "csv" => parse_csv(path),
-        "json" => parse_json(path),
+        "der" => parse_der(path).map(|a| FileResult { assets: a, encrypted_uninspectable: 0 }),
+        "p12" | "pfx" => parse_p12(path).map(|a| FileResult { assets: a, encrypted_uninspectable: 1 }),
+        "csv" => parse_csv(path).map(|a| FileResult { assets: a, encrypted_uninspectable: 0 }),
+        "json" => parse_json(path).map(|a| FileResult { assets: a, encrypted_uninspectable: 0 }),
         _ => parse_pem(path),
     }
 }
 
-fn parse_pem(path: &Path) -> Result<Vec<CryptoAsset>, VeriCryptError> {
-    let data =
-        std::fs::read(path).map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
+fn parse_pem(path: &Path) -> Result<FileResult, VeriCryptError> {
+    let data = std::fs::read(path).map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
     let mut assets = Vec::new();
     for item in rustls_pemfile::read_all(&mut data.as_slice()) {
         match item {
@@ -85,128 +113,69 @@ fn parse_pem(path: &Path) -> Result<Vec<CryptoAsset>, VeriCryptError> {
             _ => {}
         }
     }
-    Ok(assets)
+    Ok(FileResult { assets, encrypted_uninspectable: 0 })
 }
 
 fn parse_der(path: &Path) -> Result<Vec<CryptoAsset>, VeriCryptError> {
-    let data =
-        std::fs::read(path).map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
+    let data = std::fs::read(path).map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
     Ok(vec![classify_x509(&data, path)?])
 }
 
 fn parse_p12(path: &Path) -> Result<Vec<CryptoAsset>, VeriCryptError> {
-    let data =
-        std::fs::read(path).map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
+    let data = std::fs::read(path).map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
     Ok(vec![CryptoAsset {
         asset_id: uuid::Uuid::new_v4(),
         asset_type: AssetType::Key,
         algorithm: Algorithm {
-            name: "PKCS12".into(),
-            family: "PKCS12".into(),
-            quantum_vulnerable: false,
-            vulnerability_type: None,
-            nist_pqc_replacement: None,
-            shelf_life_years: None,
+            name: "PKCS12".into(), family: "PKCS12".into(),
+            quantum_vulnerable: false, vulnerability_type: None,
+            nist_pqc_replacement: None, shelf_life_years: None,
         },
-        key_size: None,
-        expiry_date: None,
+        key_size: None, expiry_date: None,
         fingerprint: hex::encode(blake3::hash(&data).as_bytes()),
         source_location: path.display().to_string(),
         nist_quantum_security_level: None,
-        data_lifetime_years: None,
-        usage_context: None,
+        data_lifetime_years: None, usage_context: None,
     }])
 }
 
 fn parse_csv(path: &Path) -> Result<Vec<CryptoAsset>, VeriCryptError> {
-    let c = std::fs::read_to_string(path)
-        .map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
+    let c = std::fs::read_to_string(path).map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
     let mut a = Vec::new();
     for r in csv::Reader::from_reader(c.as_bytes()).records() {
         let r = r.map_err(|e| VeriCryptError::ParseError(format!("CSV: {}", e)))?;
-        if r.len() < 6 {
-            continue;
-        }
-        let alg = r.get(3).unwrap_or("unknown");
-        let qv = is_qv(alg);
+        if r.len() < 6 { continue; }
+        let alg = r.get(3).unwrap_or("unknown"); let qv = is_qv(alg);
         a.push(CryptoAsset {
-            asset_id: uuid::Uuid::new_v4(),
-            asset_type: AssetType::Certificate,
-            algorithm: Algorithm {
-                name: alg.into(),
-                family: fam(alg),
-                quantum_vulnerable: qv,
-                vulnerability_type: if qv { Some("Shor".into()) } else { None },
-                nist_pqc_replacement: if qv { Some("ML-DSA".into()) } else { None },
-                shelf_life_years: if qv { Some(5) } else { Some(20) },
-            },
+            asset_id: uuid::Uuid::new_v4(), asset_type: AssetType::Certificate,
+            algorithm: Algorithm { name: alg.into(), family: fam(alg), quantum_vulnerable: qv, vulnerability_type: if qv { Some("Shor".into()) } else { None }, nist_pqc_replacement: if qv { Some("ML-DSA".into()) } else { None }, shelf_life_years: if qv { Some(5) } else { Some(20) } },
             key_size: r.get(4).and_then(|s| s.parse().ok()),
-            expiry_date: r.get(5).and_then(|s| {
-                chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d")
-                    .ok()
-                    .map(|d| {
-                        chrono::DateTime::from_naive_utc_and_offset(
-                            d.and_hms_opt(0, 0, 0).unwrap(),
-                            chrono::Utc,
-                        )
-                    })
-            }),
+            expiry_date: r.get(5).and_then(|s| chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d").ok().map(|d| chrono::DateTime::from_naive_utc_and_offset(d.and_hms_opt(0,0,0).unwrap(), chrono::Utc))),
             fingerprint: r.get(0).unwrap_or("unknown").into(),
-            source_location: format!(
-                "{}:{}",
-                path.display(),
-                r.position().map(|p| p.line()).unwrap_or(0)
-            ),
+            source_location: format!("{}:{}", path.display(), r.position().map(|p| p.line()).unwrap_or(0)),
             nist_quantum_security_level: if qv { Some(1) } else { Some(5) },
-            data_lifetime_years: None,
-            usage_context: None,
+            data_lifetime_years: None, usage_context: None,
         });
     }
     Ok(a)
 }
 
 fn parse_json(path: &Path) -> Result<Vec<CryptoAsset>, VeriCryptError> {
-    let c = std::fs::read_to_string(path)
-        .map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
-    let v: serde_json::Value =
-        serde_json::from_str(&c).map_err(|e| VeriCryptError::ParseError(format!("JSON: {}", e)))?;
+    let c = std::fs::read_to_string(path).map_err(|e| VeriCryptError::PermissionError(format!("{}", e)))?;
+    let v: serde_json::Value = serde_json::from_str(&c).map_err(|e| VeriCryptError::ParseError(format!("JSON: {}", e)))?;
     let mut a = Vec::new();
     if let Some(arr) = v.get("certificates").and_then(|x| x.as_array()) {
         for item in arr {
-            let alg = item
-                .get("algorithm")
-                .and_then(|x| x.as_str())
-                .unwrap_or("unknown");
-            let qv = is_qv(alg);
+            let alg = item.get("algorithm").and_then(|x| x.as_str()).unwrap_or("unknown"); let qv = is_qv(alg);
             a.push(CryptoAsset {
-                asset_id: uuid::Uuid::new_v4(),
-                asset_type: AssetType::Certificate,
-                algorithm: Algorithm {
-                    name: alg.into(),
-                    family: fam(alg),
-                    quantum_vulnerable: qv,
-                    vulnerability_type: if qv { Some("Shor".into()) } else { None },
-                    nist_pqc_replacement: if qv { Some("ML-DSA".into()) } else { None },
-                    shelf_life_years: if qv { Some(5) } else { Some(20) },
-                },
-                key_size: item
-                    .get("key_size")
-                    .and_then(|x| x.as_u64())
-                    .map(|x| x as u32),
-                expiry_date: item.get("expiry").and_then(|x| x.as_str()).and_then(|s| {
-                    chrono::DateTime::parse_from_rfc3339(s)
-                        .ok()
-                        .map(|d| d.with_timezone(&chrono::Utc))
-                }),
-                fingerprint: item
-                    .get("fingerprint")
-                    .and_then(|x| x.as_str())
-                    .unwrap_or("unknown")
-                    .into(),
+                asset_id: uuid::Uuid::new_v4(), asset_type: AssetType::Certificate,
+                algorithm: Algorithm { name: alg.into(), family: fam(alg), quantum_vulnerable: qv, vulnerability_type: if qv { Some("Shor".into()) } else { None }, nist_pqc_replacement: if qv { Some("ML-DSA".into()) } else { None }, shelf_life_years: if qv { Some(5) } else { Some(20) } },
+                key_size: item.get("key_size").and_then(|x| x.as_u64()).map(|x| x as u32),
+                expiry_date: item.get("expiry").and_then(|x| x.as_str()).and_then(|s| chrono::DateTime::parse_from_rfc3339(s).ok().map(|d| d.with_timezone(&chrono::Utc))),
+                fingerprint: item.get("fingerprint").and_then(|x| x.as_str()).unwrap_or("unknown").into(),
                 source_location: path.display().to_string(),
                 nist_quantum_security_level: if qv { Some(1) } else { Some(5) },
-                data_lifetime_years: None,
-                usage_context: None,
+                data_lifetime_years: None, usage_context: None,
             });
         }
     }
@@ -214,83 +183,38 @@ fn parse_json(path: &Path) -> Result<Vec<CryptoAsset>, VeriCryptError> {
 }
 
 fn classify_x509(der: &[u8], src: &Path) -> Result<CryptoAsset, VeriCryptError> {
-    let (_, cert) = x509_parser::parse_x509_certificate(der)
-        .map_err(|e| VeriCryptError::ParseError(format!("X509: {}", e)))?;
-    let oid = cert
-        .tbs_certificate
-        .subject_pki
-        .algorithm
-        .algorithm
-        .to_id_string();
-    let qv = is_qv(&oid);
+    let (_, cert) = x509_parser::parse_x509_certificate(der).map_err(|e| VeriCryptError::ParseError(format!("X509: {}", e)))?;
+    let oid = cert.tbs_certificate.subject_pki.algorithm.algorithm.to_id_string(); let qv = is_qv(&oid);
     Ok(CryptoAsset {
-        asset_id: uuid::Uuid::new_v4(),
-        asset_type: AssetType::Certificate,
-        algorithm: Algorithm {
-            name: oid.clone(),
-            family: fam(&oid),
-            quantum_vulnerable: qv,
-            vulnerability_type: if qv { Some("Shor".into()) } else { None },
-            nist_pqc_replacement: if qv { Some("ML-DSA".into()) } else { None },
-            shelf_life_years: if qv { Some(5) } else { Some(20) },
-        },
-        key_size: Some(
-            cert.tbs_certificate
-                .subject_pki
-                .subject_public_key
-                .data
-                .len() as u32
-                * 8,
-        ),
-        expiry_date: Some(
-            chrono::DateTime::from_timestamp(
-                cert.tbs_certificate.validity.not_after.timestamp(),
-                0,
-            )
-            .unwrap_or_default(),
-        ),
+        asset_id: uuid::Uuid::new_v4(), asset_type: AssetType::Certificate,
+        algorithm: Algorithm { name: oid.clone(), family: fam(&oid), quantum_vulnerable: qv, vulnerability_type: if qv { Some("Shor".into()) } else { None }, nist_pqc_replacement: if qv { Some("ML-DSA".into()) } else { None }, shelf_life_years: if qv { Some(5) } else { Some(20) } },
+        key_size: Some(cert.tbs_certificate.subject_pki.subject_public_key.data.len() as u32 * 8),
+        expiry_date: Some(chrono::DateTime::from_timestamp(cert.tbs_certificate.validity.not_after.timestamp(), 0).unwrap_or_default()),
         fingerprint: hex::encode(blake3::hash(der).as_bytes()),
         source_location: src.display().to_string(),
         nist_quantum_security_level: if qv { Some(1) } else { Some(5) },
-        data_lifetime_years: None,
-        usage_context: None,
+        data_lifetime_years: None, usage_context: None,
     })
 }
 
 fn key_asset(name: &str, qv: bool, k: &[u8], src: &Path) -> CryptoAsset {
     CryptoAsset {
-        asset_id: uuid::Uuid::new_v4(),
-        asset_type: AssetType::Key,
-        algorithm: Algorithm {
-            name: name.into(),
-            family: if qv { name.into() } else { "Generic".into() },
-            quantum_vulnerable: qv,
-            vulnerability_type: if qv { Some("Shor".into()) } else { None },
-            nist_pqc_replacement: if qv { Some("ML-DSA".into()) } else { None },
-            shelf_life_years: if qv { Some(5) } else { Some(20) },
-        },
-        key_size: Some(k.len() as u32 * 8),
-        expiry_date: None,
+        asset_id: uuid::Uuid::new_v4(), asset_type: AssetType::Key,
+        algorithm: Algorithm { name: name.into(), family: if qv { name.into() } else { "Generic".into() }, quantum_vulnerable: qv, vulnerability_type: if qv { Some("Shor".into()) } else { None }, nist_pqc_replacement: if qv { Some("ML-DSA".into()) } else { None }, shelf_life_years: if qv { Some(5) } else { Some(20) } },
+        key_size: Some(k.len() as u32 * 8), expiry_date: None,
         fingerprint: hex::encode(blake3::hash(k).as_bytes()),
         source_location: src.display().to_string(),
         nist_quantum_security_level: if qv { Some(1) } else { Some(5) },
-        data_lifetime_years: None,
-        usage_context: None,
+        data_lifetime_years: None, usage_context: None,
     }
 }
 
 fn fam(oid: &str) -> String {
-    if oid.contains("RSA") || oid.contains("1.2.840.113549") {
-        "RSA".into()
-    } else if oid.contains("EC") || oid.contains("1.2.840.10045") {
-        "ECC".into()
-    } else {
-        "Unknown".into()
-    }
+    if oid.contains("RSA") || oid.contains("1.2.840.113549") { "RSA".into() }
+    else if oid.contains("EC") || oid.contains("1.2.840.10045") { "ECC".into() }
+    else { "Unknown".into() }
 }
+
 fn is_qv(oid: &str) -> bool {
-    oid.contains("RSA")
-        || oid.contains("EC")
-        || oid.contains("1.2.840.113549")
-        || oid.contains("1.2.840.10045")
+    oid.contains("RSA") || oid.contains("EC") || oid.contains("1.2.840.113549") || oid.contains("1.2.840.10045")
 }

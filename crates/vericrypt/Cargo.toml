@@ -15,6 +15,7 @@ name = "vericrypt-verify"
 path = "src/verify_main.rs"
 
 [dependencies]
+seedc = { path = "../seedc" }
 seedvm = { path = "../seedvm" }
 clap = { workspace = true }
 tokio = { workspace = true }
@@ -43,6 +44,7 @@ pqcrypto-sphincsplus = { workspace = true }
 pqcrypto-traits = { workspace = true }
 cyclonedx-bom = { workspace = true }
 tempfile = { workspace = true }
+pasetors = "0.7.8"
 
 [dev-dependencies]
 criterion = { workspace = true }
@@ -51,5 +53,3 @@ criterion = { workspace = true }
 name = "scan_benchmarks"
 harness = false
 
-[build-dependencies]
-seedc = { path = "../seedc" }

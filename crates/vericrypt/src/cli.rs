@@ -39,13 +39,16 @@ pub struct ScanArgs {
     #[arg(long, default_value = "shadow")]
     pub mode: DeploymentMode,
 
-    /// Path to compiled ASL bytecode file for custom regulatory frameworks
+    /// Path to signed theorem pack for custom regulatory axioms (ADR-017)
     #[arg(long)]
-    pub load_bytecode: Option<String>,
+    pub load_theorems: Option<String>,
 
     /// Export Signed Tree Head for VeriChain anchoring
     #[arg(long)]
     pub publish_sth: bool,
+    /// Path to custom ASL axiom source files for Mode 2/3 compliance (EAC FR-001)
+    #[arg(long)]
+    pub axiom_source: Option<String>,
 }
 
 #[derive(clap::Args)]
@@ -78,7 +81,8 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
 
     // Stage 1: Ingestion
     let t0 = std::time::Instant::now();
-    let assets = crate::ingest::discover_all(&args)?;
+    let ingestion = crate::ingest::discover_all(&args)?;
+    let assets = ingestion.assets;
     stage_timings.push(StageTiming {
         stage_name: "ingestion".into(),
         elapsed_ms: t0.elapsed().as_millis() as u64,
@@ -86,7 +90,7 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
         item_count: assets.len() as u64,
     });
 
-    let inventory = confidence::compute_inventory_confidence(assets.len() as u64, 0, &[], 0);
+    let inventory = confidence::compute_inventory_confidence(assets.len() as u64, ingestion.unreachable_assets, &ingestion.unsupported_formats, ingestion.encrypted_uninspectable);
 
     // Stage 2: Knowledge graph
     let t1 = std::time::Instant::now();
@@ -110,7 +114,24 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
 
     // Stage 4: ASL VM compliance verification
     let t3 = std::time::Instant::now();
-    let theorems = if let Some(bytecode_path) = &args.load_bytecode {
+    let theorems = if let Some(source_dir) = &args.axiom_source {
+        // Mode 2/3: Compile custom axioms at scan time (EAC FR-001, FR-002)
+        let mut custom_theorems = Vec::new();
+        let runtime = crate::compliance::asl_runtime::AslRuntime::new();
+        for entry in std::fs::read_dir(source_dir).map_err(|e| VeriCryptError::Io(e))? {
+            let entry = entry.map_err(|e| VeriCryptError::Io(e))?;
+            let path = entry.path();
+            if path.extension().is_some_and(|ext| ext == "asl") {
+                let source = std::fs::read_to_string(&path).map_err(|e| VeriCryptError::Io(e))?;
+                let bytecode = seedc::compile(&source).map_err(|e| VeriCryptError::ParseError(format!("Axiom compilation failed: {:?}", e)))?;
+                let framework = path.file_stem().unwrap().to_string_lossy().to_uppercase();
+                let inventory_hash = blake3::hash(b"custom-inventory").as_bytes().to_vec();
+                let (_, theorem) = runtime.execute_framework(&framework, &bytecode)?;
+                custom_theorems.push(theorem);
+            }
+        }
+        custom_theorems
+    } else if let Some(bytecode_path) = &args.load_theorems {
         let bytecode = std::fs::read(bytecode_path).map_err(|e| VeriCryptError::Io(e))?;
         let runtime = crate::compliance::asl_runtime::AslRuntime::new();
         let framework = "CUSTOM";
@@ -118,6 +139,7 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
         vec![theorem]
     } else {
         crate::compliance::prove_compliance(&graph)?
+    };
     };
     stage_timings.push(StageTiming {
         stage_name: "asl_compliance".into(),
@@ -169,9 +191,20 @@ pub fn run_scan(args: ScanArgs) -> Result<(), VeriCryptError> {
         tracing::info!("STH exported for VeriChain anchoring");
     }
 
+    eprintln!("  Stage timings:");
+    for t in &stage_timings {
+        eprintln!("    {} ({}, {} items): {}ms", t.stage_name, t.complexity, t.item_count, t.elapsed_ms);
+    }
     eprintln!();
     eprintln!("=== VERICRYPT SCAN COMPLETE ===");
     eprintln!("  Mode: {}", mode_label);
+    if args.axiom_source.is_some() {
+        eprintln!("  Axiom mode: BANK_CUSTOM (Mode 2)");
+    } else if args.load_theorems.is_some() {
+        eprintln!("  Axiom mode: THIRD_PARTY (Mode 3)");
+    } else {
+        eprintln!("  Axiom mode: STANDARD (Mode 1)");
+    }
     eprintln!("  Assets discovered: {}", report.total_assets);
     eprintln!("  Quantum-vulnerable: {}", report.quantum_vulnerable_count);
     eprintln!("  Compliance violations: {}", report.violations_found);

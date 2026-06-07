@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VeriCrypt — Implementation Partners</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:       #08090b;
+      --vault:       #0d0f12;
+      --plate:       #111318;
+      --border:      #1e2128;
+      --border-hi:   #2e3240;
+      --wine:        #722f37;
+      --wine-bright: #8b3a44;
+      --wine-dim:    #4a1e24;
+      --wine-glow:   rgba(114,47,55,0.12);
+      --platinum:    #e8e4da;
+      --silver:      #8a8680;
+      --smoke:       #4a4845;
+      --text-primary: #e8e4da;
+      --text-secondary: #8a8680;
+      --text-dim:    #4a4845;
+      --green:       #3a8;
+      --amber:       #d4853a;
+      --mono: 'JetBrains Mono', monospace;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --cond: 'Barlow Condensed', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: 0.6;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+      pointer-events: none; z-index: 998;
+    }
+
+    .status-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 36px;
+      background: rgba(8,9,11,0.92); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .status-left { display: flex; align-items: center; gap: 1.5rem; }
+    .status-indicator {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim);
+    }
+    .status-indicator .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #722f37; box-shadow: 0 0 6px #722f37;
+      animation: pulse-wine 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-wine { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .status-right { font-size: 0.58rem; letter-spacing: 0.12em; color: var(--text-dim); }
+    .status-divider { width: 1px; height: 14px; background: var(--border); }
+
+    nav {
+      position: fixed; top: 36px; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 3rem; height: 64px;
+      background: rgba(8,9,11,0.88); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+    .nav-logo { display: flex; flex-direction: column; gap: 1px; text-decoration: none; }
+    .nav-logo-mark {
+      font-family: var(--serif); font-size: 1.3rem; font-weight: 300;
+      letter-spacing: 0.25em; color: var(--text-primary); line-height: 1;
+    }
+    .nav-logo-mark:hover { opacity: 0.8; }
+    .nav-logo-mark span { color: var(--wine); }
+    .nav-logo-sub {
+      font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--text-dim); font-family: var(--mono);
+    }
+    .nav-links { display: flex; align-items: center; list-style: none; }
+    .nav-links a {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0 1.2rem; height: 64px;
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-secondary); text-decoration: none;
+      border-left: 1px solid var(--border);
+      transition: color 0.2s, background 0.2s;
+      font-family: var(--mono); position: relative;
+    }
+    .nav-links a:last-child { border-right: 1px solid var(--border); }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 1px; background: var(--wine);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.25s ease;
+    }
+    .nav-links a:hover { color: var(--wine-bright); background: var(--wine-glow); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.primary-link { color: var(--wine-bright); border-color: var(--wine-dim); background: rgba(114,47,55,0.06); }
+    .nav-links a.active { color: var(--wine-bright); background: var(--wine-glow); cursor: default; pointer-events: none; }
+    .nav-links a.active::after { transform: scaleX(1); }
+
+    .content-wrapper { padding: 140px 3rem 6rem; max-width: 960px; margin: 0 auto; }
+    .section-label { font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--wine-dim); margin-bottom: 0.5rem; }
+    .section-heading { font-family: var(--serif); font-size: 2.2rem; font-weight: 300; letter-spacing: 0.05em; color: var(--text-primary); margin-bottom: 1.5rem; }
+    .section-heading em { color: var(--wine); font-style: italic; }
+    .sub-heading {
+      font-family: var(--cond); font-size: 1.1rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-primary);
+      margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .body-text { font-size: 0.62rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.5rem; }
+    code {
+      background: var(--plate); padding: 0.2em 0.4em; font-size: 0.58rem;
+      color: var(--wine-bright); border: 1px solid var(--border-hi); font-family: var(--mono);
+    }
+    pre {
+      background: var(--vault); border: 1px solid var(--border);
+      padding: 1rem; margin: 1rem 0; overflow-x: auto;
+      font-family: var(--mono); font-size: 0.52rem; line-height: 1.8;
+      color: var(--text-primary); white-space: pre-wrap; word-break: break-word;
+    }
+
+    .divider { display: flex; align-items: center; gap: 1.5rem; margin: 3rem 0; }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-label { font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.8rem 1.8rem; font-family: var(--mono);
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      text-decoration: none; position: relative; transition: all 0.2s ease;
+      cursor: pointer; border: 1px solid var(--wine);
+      background: transparent; color: var(--wine-bright);
+    }
+    .btn:hover { color: var(--platinum); background: var(--wine); }
+    .btn-secondary { border-color: var(--border-hi); color: var(--text-secondary); }
+    .btn-secondary:hover { border-color: var(--text-secondary); color: var(--text-primary); background: rgba(255,255,255,0.03); }
+    .btn-small { padding: 0.4rem 1rem; font-size: 0.5rem; letter-spacing: 0.15em; }
+
+    /* Pipeline */
+    .pipeline-overview {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px;
+      background: var(--border); border: 1px solid var(--border); margin: 2rem 0;
+    }
+    .pipeline-step {
+      background: var(--vault); padding: 1.5rem 1rem; text-align: center;
+      transition: background 0.25s; position: relative;
+    }
+    .pipeline-step:hover { background: var(--plate); }
+    .pipeline-step::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 1px; background: var(--wine);
+      transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease;
+    }
+    .pipeline-step:hover::after { transform: scaleX(1); }
+    .pipeline-step-num {
+      font-family: var(--serif); font-size: 1.5rem; font-weight: 300;
+      color: var(--wine); opacity: 0.3; line-height: 1; margin-bottom: 0.5rem;
+    }
+    .pipeline-step-icon { font-size: 1.2rem; margin-bottom: 0.5rem; display: block; }
+    .pipeline-step-title {
+      font-family: var(--cond); font-size: 0.55rem; font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-primary); margin-bottom: 0.3rem;
+    }
+    .pipeline-step-desc { font-size: 0.45rem; color: var(--text-dim); line-height: 1.5; }
+
+    /* Progress Tracker */
+    .progress-tracker {
+      display: flex; align-items: center; justify-content: center; gap: 0;
+      margin: 2rem 0 3rem; position: relative;
+    }
+    .progress-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--border-hi); transition: background 0.3s, box-shadow 0.3s;
+      cursor: pointer; position: relative; z-index: 2;
+    }
+    .progress-dot.completed { background: var(--wine); box-shadow: 0 0 8px var(--wine-glow); }
+    .progress-dot.active { background: var(--wine-bright); box-shadow: 0 0 12px var(--wine-glow); animation: pulse-wine 2s ease-in-out infinite; }
+    .progress-line { width: 55px; height: 1px; background: var(--border-hi); z-index: 1; transition: background 0.3s; }
+    .progress-line.completed { background: var(--wine-dim); }
+    .progress-labels { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin-top: 0.8rem; text-align: center; }
+    .progress-label { width: 67px; font-size: 0.4rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); transition: color 0.3s; line-height: 1.4; }
+    .progress-label.completed, .progress-label.active { color: var(--wine-dim); }
+
+    /* Stage Cards */
+    .stage-card {
+      background: var(--vault); border: 1px solid var(--border);
+      padding: 2rem; margin-bottom: 2rem; position: relative; transition: border-color 0.3s;
+    }
+    .stage-card:hover { border-color: var(--border-hi); }
+    .stage-number {
+      font-family: var(--serif); font-size: 3rem; font-weight: 300;
+      color: var(--wine); opacity: 0.2; line-height: 1; margin-bottom: 0.5rem;
+    }
+    .stage-title {
+      font-family: var(--cond); font-size: 1rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-primary); margin-bottom: 1rem;
+    }
+
+    /* Contact Cards */
+    .contact-card {
+      background: var(--plate); border: 1px solid var(--border-hi);
+      padding: 1.2rem 1.5rem; display: inline-flex; align-items: center;
+      gap: 1rem; margin: 0.5rem 0.5rem 0.5rem 0; transition: border-color 0.2s; text-decoration: none;
+    }
+    .contact-card:hover { border-color: var(--wine-dim); }
+    .contact-icon { font-size: 1.4rem; line-height: 1; }
+    .contact-label { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-primary); }
+    .contact-sublabel { font-size: 0.45rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.15rem; }
+
+    /* Calculator */
+    .calculator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+    .calc-input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .calc-input-group label { font-size: 0.48rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
+    .calc-input-group input, .calc-input-group select {
+      background: var(--plate); border: 1px solid var(--border-hi);
+      padding: 0.6rem; color: var(--text-primary); font-family: var(--mono); font-size: 0.6rem;
+    }
+    .calc-input-group input:focus, .calc-input-group select:focus { outline: none; border-color: var(--wine-dim); }
+    .calc-result { background: var(--plate); border: 1px solid var(--wine-dim); padding: 1.5rem; margin-top: 1rem; }
+    .calc-result-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.6rem; padding: 0.4rem 0; color: var(--text-secondary); }
+    .calc-result-row.total { border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 0.8rem; font-size: 0.7rem; }
+    .calc-section-label { font-size: 0.45rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--wine-dim); margin: 1.2rem 0 0.8rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+
+    /* Highlight box */
+    .highlight-box {
+      background: var(--plate); border: 1px solid var(--wine-dim);
+      padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .highlight-box h4 {
+      font-family: var(--cond); font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--wine-bright); margin-bottom: 0.8rem;
+    }
+    .highlight-box p { font-size: 0.55rem; line-height: 1.7; color: var(--text-dim); margin-bottom: 0.5rem; }
+
+    /* Restriction box */
+    .restriction-box {
+      background: var(--vault); border: 1px solid #5c1a1a;
+      padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .restriction-box h4 {
+      font-family: var(--cond); font-size: 0.7rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: #a44; margin-bottom: 0.8rem;
+    }
+    .restriction-box ul { margin-left: 1.5rem; font-size: 0.52rem; color: var(--text-dim); line-height: 1.8; }
+
+    /* Final CTA */
+    .final-cta { padding: 6rem 3rem 8rem; text-align: center; position: relative; overflow: hidden; margin-top: 2rem; }
+    .final-cta-glow {
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse at 50% 100%, rgba(114,47,55,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .final-pre { font-size: 0.55rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--wine-dim); margin-bottom: 1.5rem; }
+    .final-title { font-family: var(--serif); font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 300; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.1; }
+    .final-sub { font-family: var(--serif); font-style: italic; font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 3rem; }
+    .final-buttons { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+    /* Tables */
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.58rem;
+    }
+    th {
+      text-align: left; padding: 0.6rem 0.8rem;
+      font-size: 0.45rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--wine-dim); border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 0.6rem 0.8rem; color: var(--text-secondary);
+      border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    footer { padding: 2rem 3rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .footer-left { display: flex; flex-direction: column; gap: 0.3rem; }
+    .footer-brand { font-family: var(--serif); font-size: 0.9rem; font-weight: 300; letter-spacing: 0.2em; color: var(--text-secondary); }
+    .footer-brand span { color: var(--wine); }
+    .footer-tagline { font-size: 0.48rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+    .footer-right { font-size: 0.5rem; letter-spacing: 0.15em; color: var(--text-dim); text-align: right; line-height: 1.8; }
+
+    @media (max-width: 900px) {
+      nav { padding: 0 1.5rem; }
+      .content-wrapper { padding: 140px 1.5rem 4rem; }
+      .calculator-grid { grid-template-columns: 1fr; }
+      .pipeline-overview { grid-template-columns: repeat(3, 1fr); }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-right { text-align: center; }
+      .nav-links a { padding: 0 0.8rem; font-size: 0.5rem; }
+    }
+    @media (max-width: 600px) {
+      .status-bar { display: none; } nav { top: 0; }
+      .content-wrapper { padding-top: 100px; }
+      .pipeline-overview { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { flex-wrap: wrap; }
+      .nav-links a { height: 40px; font-size: 0.45rem; padding: 0 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="status-indicator"><span class="dot"></span><span>ASL VM Runtime Active</span></div>
+      <div class="status-divider"></div>
+      <div class="status-indicator"><span>TEE Attestation Ready</span></div>
+      <div class="status-divider"></div>
+      <div class="status-indicator"><span>FIPS 205 · SLH-DSA</span></div>
+    </div>
+    <div class="status-right">ARC42 v1.0 · DORA Art. 5–14 · ECMA-424 · RFC 6962</div>
+  </div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">VERICRYPT<span>.</span></div>
+      <div class="nav-logo-sub">Post-Quantum Compliance Engine</div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="download.html">Download</a></li>
+      <li><a href="partners.html" class="active">Partners</a></li>
+      <li><a href="docs/user.html">User Manual</a></li>
+      <li><a href="docs/implementation.html">Implementation Manual</a></li>
+    </ul>
+  </nav>
+
+  <div class="content-wrapper">
+
+    <!-- Hero -->
+    <div style="margin-bottom: 3rem; text-align: center;">
+      <div class="section-label">IMPLEMENTATION PARTNER PROGRAM</div>
+      <h1 class="section-heading" style="font-size: 2.8rem;">VeriCrypt <em>Partners</em></h1>
+      <p class="body-text" style="max-width: 700px; margin: 0 auto 1.5rem; font-size: 0.68rem;">
+        Deploy the only compliance engine where the rules are <em>open, auditable, and provable</em>. Help banks eliminate DORA enforcement exposure — fines of up to 2% of annual turnover or €10M per violation — with a single cryptographically signed .pqc artefact that any regulator can independently verify offline.
+      </p>
+
+      <!-- Editable Axiom Differentiator -->
+      <div class="highlight-box" style="text-align: left; max-width: 780px; margin: 2rem auto;">
+        <h4>◈ The Only Compliance Tool Where the Rules Are Open, Auditable, and Provable</h4>
+        <p>
+          Every other PQC tool on the market is a black box. The compliance rules are hidden in proprietary code. Banks, regulators, and legal counsel cannot audit how regulations are encoded, cannot verify correctness, and cannot customise the rules to their jurisdiction.
+        </p>
+        <p>
+          <strong>VeriCrypt is different.</strong> The regulatory axiom library is open ASL source code — compiled by seedc, executed deterministically by seedvm, producing a verifiable schedule trace. Banks can use the standard axioms encoding DORA, NIST FIPS 203/204/205, NCSC, and PQFIF requirements. Or they can edit the axioms to reflect their jurisdiction, internal policy, or supervisory expectations — recompile, re-run, and produce a signed .pqc report proved against the exact rules they chose. Regulators can publish their own axiom packs for all banks in their jurisdiction to use.
+        </p>
+        <p style="color: var(--wine-bright);">
+          <strong>Mode 1:</strong> Standard axiom library · <strong>Mode 2:</strong> Bank-customised axioms · <strong>Mode 3:</strong> Regulator-specified axioms. No competitor can offer Mode 2 or Mode 3. This is a genuine and durable competitive moat.
+        </p>
+      </div>
+
+      <a href="#pipeline-overview" class="btn">
+        <span>↓</span> See the Partner Process
+      </a>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-label">01 — Commercial Structure</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- Pricing Table -->
+    <h2 class="sub-heading">Direct Pricing Schedule</h2>
+    <p class="body-text">
+      VeriCrypt is priced on value-based methodology. The reference point is not what comparable software costs — it is what the regulatory exposure being eliminated costs the bank. DORA fines reach €100M+ for mid-size institutions, €400M+ for G-SIBs.
+    </p>
+
+    <div style="overflow-x: auto; border: 1px solid var(--border); background: var(--vault); margin-top: 2rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Target</th>
+            <th>Scope</th>
+            <th>Year 1 Total</th>
+            <th>Renewal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--text-primary);">A — Proof of Value</td>
+            <td>Any DORA-in-scope bank</td>
+            <td>Single signed .pqc report. Full 7-stage pipeline. CycloneDX 1.7 CBOM. Phase 1/2/3 roadmap. 90-day licence window.</td>
+            <td style="color:var(--wine-bright);">€125,000</td>
+            <td style="color:var(--text-dim);">—</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-primary);">B — Mid-Market Annual</td>
+            <td>€1B–€50B AUM</td>
+            <td>Unlimited scans. All frameworks. Quarterly axiom updates. Full editable axiom capability. Priority support.</td>
+            <td style="color:var(--wine-bright);">€425,000</td>
+            <td style="color:var(--text-dim);">€350,000</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-primary);">C — Large Institution Annual</td>
+            <td>€50B–€500B AUM</td>
+            <td>All Tier B + Dedicated axiom customisation. HSM-mode signing. Technical account manager. Quarterly executive briefing.</td>
+            <td style="color:var(--wine-bright);">€950,000</td>
+            <td style="color:var(--text-dim);">€750,000</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-primary);">D — Enterprise / G-SIB</td>
+            <td>Systemically important</td>
+            <td>All Tier C + Multi-entity. White-label verifier. VeriChain STH. GRC integration. Regulator axiom publishing programme.</td>
+            <td style="color:var(--wine-bright);">€1.9M–€3.8M</td>
+            <td style="color:var(--text-dim);">Negotiated</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body-text" style="margin-top: 0.8rem; font-size: 0.5rem; color: var(--text-dim);">
+      <strong>Every invoice carries two undeletable line items:</strong> Licence fee (annual right to deploy, generate signed .pqc reports) + Professional services fee (deployment, configuration, axiom review, results interpretation). Training materials licence (€8,500 one-time) and training consulting (€12K–€28K per session) are additive.
+    </p>
+
+    <!-- Partner Types -->
+    <h2 class="sub-heading">Three Partner Types</h2>
+    <div style="overflow-x: auto; border: 1px solid var(--border); background: var(--vault);">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Who</th>
+            <th>Revenue</th>
+            <th>Requirements</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--text-primary);">1 — Certified Delivery Partner</td>
+            <td>PQC consultancies, cybersecurity firms, crypto advisory practices</td>
+            <td>100% of PS fee + 100% of training consulting. Licence fee passed through at list price.</td>
+            <td>Min. 1 certified engineer. Signed partner agreement. 2 deployments/year.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-primary);">2 — Strategic Referral Partner</td>
+            <td>Big 4 cyber practices, Tier 1 consultancies with DORA mandates</td>
+            <td>15% referral fee on first-year licence value. Full advisory mandate retained.</td>
+            <td>Signed referral agreement. Named account registration. No competing scan tool in same engagement.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-primary);">3 — Technology Integration Partner</td>
+            <td>GRC/RegTech platforms (ServiceNow, OneTrust, Archer, etc.)</td>
+            <td>10% referral fee on year-one licence. Co-marketing as verified cryptographic proof layer.</td>
+            <td>Build .pqc integration. API documentation provided at no charge.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Support Levels -->
+    <div class="highlight-box" style="margin-top: 2rem;">
+      <h4>Technical Support — Three Levels</h4>
+      <p><strong>Level 1 — Partner responsibility:</strong> Basic operations, scan configuration, results interpretation, training delivery, report navigation. Resolvable with documentation and partner certification.</p>
+      <p><strong>Level 2 — Verity responsibility:</strong> Licence activation issues, binary deployment problems, OS-level compatibility, configuration beyond standard parameters. Escalated via named Verity technical contact.</p>
+      <p><strong>Level 3 — Verity responsibility only:</strong> Binary patch or signed update distribution, axiom library updates, signing chain issues. Partners never patch or modify the binary. SLA: 4 business hours critical, 2 business days non-critical.</p>
+    </div>
+
+    <!-- ============ 6-COLUMN PIPELINE ============ -->
+    <div class="divider" style="margin-top: 3rem;">
+      <div class="divider-line"></div>
+      <div class="divider-label">02 — Process Overview</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <h2 class="sub-heading">The Partner Pipeline</h2>
+    <p class="body-text" style="margin-bottom: 1.5rem;">
+      Six stages. One session. Go from receiving your partner key to invoicing your first bank.
+    </p>
+
+    <div class="pipeline-overview" id="pipeline-overview">
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">01</div>
+        <div class="pipeline-step-icon">🔑</div>
+        <div class="pipeline-step-title">Get Licence</div>
+        <div class="pipeline-step-desc">Contact channel sales for your partner key</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">02</div>
+        <div class="pipeline-step-icon">↓</div>
+        <div class="pipeline-step-title">Download</div>
+        <div class="pipeline-step-desc">VeriCrypt + vericrypt-verify binaries</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">03</div>
+        <div class="pipeline-step-icon">⊞</div>
+        <div class="pipeline-step-title">Implement</div>
+        <div class="pipeline-step-desc">Deploy air-gapped, run first scan</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">04</div>
+        <div class="pipeline-step-icon">◇</div>
+        <div class="pipeline-step-title">Quote</div>
+        <div class="pipeline-step-desc">Generate PQC compliance proposal</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">05</div>
+        <div class="pipeline-step-icon">◈</div>
+        <div class="pipeline-step-title">Train</div>
+        <div class="pipeline-step-desc">Deliver compliance training with certification</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">06</div>
+        <div class="pipeline-step-icon">✓</div>
+        <div class="pipeline-step-title">Invoice</div>
+        <div class="pipeline-step-desc">Bill customer & move to production</div>
+      </div>
+    </div>
+
+    <!-- Progress Tracker -->
+    <div class="progress-tracker">
+      <div class="progress-dot active" id="dot-1" onclick="scrollToStage(1)" title="Get Licence Key"></div>
+      <div class="progress-line" id="line-1"></div>
+      <div class="progress-dot" id="dot-2" onclick="scrollToStage(2)" title="Download Binaries"></div>
+      <div class="progress-line" id="line-2"></div>
+      <div class="progress-dot" id="dot-3" onclick="scrollToStage(3)" title="Implement & Test"></div>
+      <div class="progress-line" id="line-3"></div>
+      <div class="progress-dot" id="dot-4" onclick="scrollToStage(4)" title="Send Quote"></div>
+      <div class="progress-line" id="line-4"></div>
+      <div class="progress-dot" id="dot-5" onclick="scrollToStage(5)" title="Train Customer Team"></div>
+      <div class="progress-line" id="line-5"></div>
+      <div class="progress-dot" id="dot-6" onclick="scrollToStage(6)" title="Invoice & Production"></div>
+    </div>
+    <div class="progress-labels">
+      <div class="progress-label active" id="label-1">1. Licence Key</div>
+      <div class="progress-label" id="label-2">2. Download</div>
+      <div class="progress-label" id="label-3">3. Implement</div>
+      <div class="progress-label" id="label-4">4. Quote</div>
+      <div class="progress-label" id="label-5">5. Train</div>
+      <div class="progress-label" id="label-6">6. Invoice</div>
+    </div>
+
+    <!-- ============ STAGE 1: GET LICENCE KEY ============ -->
+    <div class="stage-card" id="stage-1">
+      <div class="stage-number">01</div>
+      <div class="stage-title">Get Your Partner Licence Key</div>
+      <p class="body-text">
+        Contact VeriCrypt Channel Sales to receive your partner licence key — a PASETO v4 token scoped to your organisation. You'll also receive access to the secure download portal, implementation manual, training materials, and quote/invoice templates.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0;">
+        <a href="mailto:peterdramsajan@gmail.com?subject=Partner%20Licence%20Request%20—%20[Your%20Company%20Name]" class="contact-card" style="text-decoration:none;">
+          <div class="contact-icon">✉</div>
+          <div>
+            <div class="contact-label">Channel Sales — Email</div>
+            <div class="contact-sublabel">peterdramsajan@gmail.com</div>
+          </div>
+        </a>
+        <a href="https://wa.me/18687195236?text=Partner%20Licence%20Request%20—%20[Your%20Company%20Name]" target="_blank" class="contact-card" style="text-decoration:none;">
+          <div class="contact-icon">📱</div>
+          <div>
+            <div class="contact-label">Channel Sales — WhatsApp</div>
+            <div class="contact-sublabel">+1 (868) 719-5236</div>
+          </div>
+        </a>
+        <a href="tel:+18687195236" class="contact-card" style="text-decoration:none;">
+          <div class="contact-icon">📞</div>
+          <div>
+            <div class="contact-label">Channel Sales — Phone</div>
+            <div class="contact-sublabel">+1 (868) 719-5236</div>
+          </div>
+        </a>
+      </div>
+      <p class="body-text" style="font-size:0.55rem; color:var(--text-dim);">
+        Use subject line: <code>Partner Licence Request — [Your Company Name]</code>. Certification programme included. Partner training materials licence at reduced rate €4,500.
+      </p>
+    </div>
+
+    <!-- ============ STAGE 2: DOWNLOAD BINARIES ============ -->
+    <div class="stage-card" id="stage-2">
+      <div class="stage-number">02</div>
+      <div class="stage-title">Download Your Binaries</div>
+      <p class="body-text">
+        Use your partner licence key on the secure download portal to get both statically-linked musl binaries. Each download is SLH-DSA signed and SHA-256 checksummed.
+      </p>
+      <ol style="margin-left:1.5rem; margin-bottom:1.5rem; line-height:1.7; font-size:0.62rem; color:var(--text-secondary);">
+        <li>Navigate to the <a href="download.html" style="color:var(--wine-bright);">VeriCrypt Download Portal ↗</a>.</li>
+        <li>Enter your PASETO v4 partner licence key.</li>
+        <li>Select and download <code>vericrypt</code> (Compliance Scanner) for linux-x86_64 or linux-arm64.</li>
+        <li>Select and download <code>vericrypt-verify</code> (Offline Verifier) — freely distributable to regulators.</li>
+        <li>Verify SHA-256 checksums against the published values on the download page.</li>
+      </ol>
+      <a href="download.html" class="btn" style="margin-top:1rem;">
+        <span>↓</span> Go to Download Portal
+      </a>
+      <p class="body-text" style="font-size:0.5rem; color:var(--text-dim); margin-top:1rem;">
+        Need deployment specs? See the <a href="docs/implementation.html" style="color:var(--wine-dim);">Implementation Manual ↗</a> for air-gapped host requirements and transfer procedures.
+      </p>
+    </div>
+
+    <!-- ============ STAGE 3: IMPLEMENT & RUN FIRST SCAN ============ -->
+    <div class="stage-card" id="stage-3">
+      <div class="stage-number">03</div>
+      <div class="stage-title">Implement &amp; Run First Scan</div>
+      <p class="body-text">
+        Deploy VeriCrypt on the bank's air-gapped scan host. Prepare the certificate inventory and execute the full 7-stage pipeline: Ingestion → Knowledge Graph → HNDL Exposure → ASL VM Compliance → Prioritization → CBOM → Signed .pqc Report.
+      </p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+        <div style="background: var(--plate); border: 1px solid var(--border); padding: 1rem;">
+          <div style="font-size: 0.48rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--wine-dim); margin-bottom: 0.5rem;">Production Scan Host</div>
+          <div style="font-size: 0.55rem; color: var(--text-secondary); line-height: 1.6;">
+            Linux 5.15+ · 8 Cores · 32GB RAM<br>
+            512GB SSD · Intel TDX or AMD SEV-SNP optional
+          </div>
+        </div>
+        <div style="background: var(--plate); border: 1px solid var(--border); padding: 1rem;">
+          <div style="font-size: 0.48rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--wine-dim); margin-bottom: 0.5rem;">Evaluation / Pilot</div>
+          <div style="font-size: 0.55rem; color: var(--text-secondary); line-height: 1.6;">
+            Linux 5.15+ · 4 Cores · 16GB RAM<br>
+            100GB SSD · TEE optional (simulation mode)
+          </div>
+        </div>
+      </div>
+
+      <p class="body-text" style="font-size:0.55rem; color:var(--text-dim); margin-bottom:0.5rem;">
+        <strong>First scan validates the complete pipeline:</strong>
+      </p>
+      <ul style="margin-left:1.5rem; margin-bottom:1rem; font-size:0.55rem; color:var(--text-dim); line-height:1.8;">
+        <li>Certificate ingestion: PEM, DER, PKCS#12, CSV, JSON, TLS endpoint probing</li>
+        <li>Knowledge graph construction with typed dependency edges</li>
+        <li>Multiplicative HNDL exposure scoring (Rufino et al., 2026)</li>
+        <li>ASL VM deterministic compliance execution with schedule trace</li>
+        <li>Shapley value risk attribution and Phase 1/2/3 migration roadmap</li>
+        <li>CycloneDX 1.7 CBOM with NIST quantum security levels</li>
+        <li>SLH-DSA (FIPS 205) signed .pqc report — Merkle-proofed, regulator-replayable</li>
+      </ul>
+
+      <pre>./vericrypt scan \
+  --cert-dir /data/certificates/ \
+  --network 10.0.0.0/8 \
+  --mode parallel \
+  --output ./pilot-report/</pre>
+
+      <a href="docs/implementation.html" class="btn">
+        <span>⊞</span> Read the Implementation Manual
+      </a>
+    </div>
+
+      <!-- ============ STAGE 4: SEND QUOTE ============ -->
+    <div class="stage-card" id="stage-4">
+      <div class="stage-number">04</div>
+      <div class="stage-title">Send a Compliance Quote to Your Customer</div>
+      <p class="body-text">
+        Use the calculator below to generate a professional PQC compliance proposal. The VeriCrypt licence fee and professional services fee are <strong>mandatory, undeletable line items</strong> on every quote and invoice. Partner services revenue is <strong>100% yours</strong>. Licence fees pass through at list price — partners never discount them.
+      </p>
+
+      <div class="calculator-grid">
+        <div class="calc-input-group">
+          <label for="tier-select">Licence Tier</label>
+          <select id="tier-select" onchange="updateCalculator()">
+            <option value="A">Tier A — Proof of Value (€125K)</option>
+            <option value="B" selected>Tier B — Mid-Market Annual (€425K)</option>
+            <option value="C">Tier C — Large Institution Annual (€950K)</option>
+            <option value="D">Tier D — Enterprise / G-SIB (€1.9M–€3.8M)</option>
+          </select>
+        </div>
+        <div class="calc-input-group">
+          <label for="entity-count">Entity Count (Tier D only)</label>
+          <input type="number" id="entity-count" value="1" min="1" max="20" step="1" onchange="updateCalculator()" disabled />
+        </div>
+        <div class="calc-input-group">
+          <label for="partner-rate">Partner Hourly Rate (€)</label>
+          <input type="number" id="partner-rate" value="250" min="100" max="750" step="25" onchange="updateCalculator()" />
+        </div>
+        <div class="calc-input-group">
+          <label for="cert-count">Certificate Inventory Size</label>
+          <input type="number" id="cert-count" value="5000" min="100" max="500000" step="500" onchange="updateCalculator()" />
+        </div>
+        <div class="calc-input-group">
+          <label for="impl-weeks">Implementation Weeks</label>
+          <input type="number" id="impl-weeks" value="4" min="1" max="16" step="1" onchange="updateCalculator()" />
+        </div>
+        <div class="calc-input-group">
+          <label for="training-days">Training Days</label>
+          <input type="number" id="training-days" value="3" min="1" max="10" step="1" onchange="updateCalculator()" />
+        </div>
+        <div class="calc-input-group">
+          <label for="training-rate">Training Daily Rate (€)</label>
+          <input type="number" id="training-rate" value="2500" min="1000" max="5000" step="250" onchange="updateCalculator()" />
+        </div>
+        <div class="calc-input-group">
+          <label for="training-sessions">Training Consulting Sessions</label>
+          <select id="training-sessions" onchange="updateCalculator()">
+            <option value="0">None</option>
+            <option value="1" selected>1 Full-Day Remote (€20,000)</option>
+            <option value="2">1 Half-Day + 1 Full-Day Remote (€32,000)</option>
+            <option value="3">2 Full-Day Remote (€40,000)</option>
+            <option value="4">1 Full-Day On-Site (€28,000)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="calc-result" id="calc-result">
+        <div class="calc-section-label">Partner Revenue — 100% Yours</div>
+        <div class="calc-result-row"><span>Certificate Inventory Preparation &amp; Validation</span><span id="result-inventory">€10,000</span></div>
+        <div class="calc-result-row"><span>Air-Gapped Deployment &amp; Binary Installation</span><span id="result-impl">€40,000</span></div>
+        <div class="calc-result-row"><span>Scan Configuration &amp; Pipeline Execution</span><span id="result-config">€15,000</span></div>
+        <div class="calc-result-row"><span>Results Interpretation &amp; Compliance Analysis</span><span id="result-analysis">€12,500</span></div>
+        <div class="calc-result-row"><span>PQC Migration Roadmap Generation (Phase 1/2/3)</span><span id="result-roadmap">€15,000</span></div>
+        <div class="calc-result-row"><span>Regulatory Submission Support &amp; Liaison Package</span><span id="result-liaison">€10,000</span></div>
+        <div class="calc-result-row"><span>Instructor-Led Training Delivery</span><span id="result-training-delivery">€7,500</span></div>
+        <div class="calc-result-row total" style="color:var(--green);"><span>Total Partner Revenue</span><span id="result-partner">€110,000</span></div>
+
+        <div class="calc-section-label">VeriCrypt Revenue — Mandatory, Non-Negotiable</div>
+        <div class="calc-result-row"><span>VeriCrypt Platform Licence (Annual)</span><span id="result-licence">€350,000</span></div>
+        <div class="calc-result-row"><span>Professional Services — Deployment Assurance &amp; Axiom Review</span><span id="result-ps-deploy">€75,000</span></div>
+        <div class="calc-result-row"><span>Training Materials Licence — PDFs, Slide Decks, Workbooks</span><span id="result-training-materials">€8,500</span></div>
+        <div class="calc-result-row"><span>Training Consulting — Certification &amp; Regulatory Evidence Package</span><span id="result-training-consulting">€20,000</span></div>
+        <div class="calc-result-row total" style="color:var(--wine-bright);"><span>Total VeriCrypt Revenue</span><span id="result-vericrypt">€453,500</span></div>
+
+        <div class="calc-result-row total" style="font-size:0.75rem; padding-top:1rem; margin-top:0.5rem;"><span>Engagement Grand Total</span><span id="result-total" style="color:var(--wine-bright);">€563,500</span></div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.5rem;">
+        <button class="btn" onclick="downloadQuote()">
+          <span>↓</span> Download Quote Template (.md)
+        </button>
+        <button class="btn btn-secondary" onclick="copyQuoteToClipboard()">
+          <span>📋</span> Copy Quote to Clipboard
+        </button>
+      </div>
+      <p class="body-text" style="font-size:0.45rem; color:var(--text-dim); margin-top:0.8rem;">
+        <strong>Undeletable line items:</strong> Licence fee + Professional services fee appear on every invoice without exception. Partners may set and keep 100% of their PS fee and training consulting fee. Licence fee is passed through at list price — never bundled, absorbed, or discounted. Training materials licence is Verity intellectual property, billed per deployment.
+      </p>
+    </div>
+
+    <!-- ============ STAGE 5: TRAIN CUSTOMER TEAM ============ -->
+    <div class="stage-card" id="stage-5">
+      <div class="stage-number">05</div>
+      <div class="stage-title">Train Your Customer's Team</div>
+      <p class="body-text">
+        Deliver VeriCrypt compliance training using Verity-provided materials. Training delivery is a billable partner service. Verity charges separately for the training materials licence (IP) and training consulting (certification session). Recommended sessions are tailored to each audience.
+      </p>
+
+      <div style="overflow-x: auto; border: 1px solid var(--border); background: var(--vault); margin: 1rem 0;">
+        <table>
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Audience</th>
+              <th>Duration</th>
+              <th>Content</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--text-primary);">CISO Executive Briefing</td>
+              <td>CISO, CTO, Board Risk Committee</td>
+              <td>Half-Day</td>
+              <td>Regulatory timeline, .pqc report interpretation, HNDL exposure overview, axiom architecture, regulator submission process, DORA Article mapping</td>
+            </tr>
+            <tr>
+              <td style="color:var(--text-primary);">Security Team Technical Workshop</td>
+              <td>Security Engineers, PKI Team</td>
+              <td>Full-Day</td>
+              <td>Scan operation and CLI usage, certificate inventory preparation, CBOM review and interpretation, migration roadmap execution, axiom editing and recompilation (Mode 2), TEE attestation configuration</td>
+            </tr>
+            <tr>
+              <td style="color:var(--text-primary);">Compliance Team Regulatory Mapping</td>
+              <td>Compliance Officers, Legal Counsel</td>
+              <td>Half-Day</td>
+              <td>DORA/PQFIF/NCSC article mapping, compliance confidence scoring (P × I × R), evidence chain of custody, Mode 2 axiom customisation workflow, regulator verification replay procedure</td>
+            </tr>
+            <tr>
+              <td style="color:var(--text-primary);">Continuous Monitoring Setup</td>
+              <td>Security Operations, GRC Team</td>
+              <td>Half-Day</td>
+              <td>Scheduled scan configuration, VeriChain STH anchoring, TEE attestation verification, CI/CD integration for quarterly axiom updates, alerting and reporting</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="body-text" style="font-size:0.55rem; color:var(--text-dim);">
+        <strong>Training materials provided by Verity (included in €8,500 materials licence):</strong>
+        <code>VeriCrypt_Regulatory_Mapping_Reference.pdf</code> ·
+        <code>VeriCrypt_Report_Interpretation_Workbook.pdf</code> ·
+        <code>VeriCrypt_CISO_Executive_Briefing_Deck.pdf</code> ·
+        <code>VeriCrypt_Security_Team_Operations_Guide.pdf</code> ·
+        <code>VeriCrypt_Axiom_Editing_Guide.pdf</code>
+      </p>
+
+      <div class="highlight-box">
+        <h4>Training Consulting Fees (Verity — per session)</h4>
+        <table>
+          <thead>
+            <tr><th>Format</th><th>Duration</th><th>Participants</th><th>Fee</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Remote</td><td>Half-Day</td><td>Up to 12</td><td style="color:var(--wine-bright);">€12,000</td></tr>
+            <tr><td>Remote</td><td>Full-Day</td><td>Up to 12</td><td style="color:var(--wine-bright);">€20,000</td></tr>
+            <tr><td>On-Site</td><td>Full-Day</td><td>Up to 12</td><td style="color:var(--wine-bright);">€28,000</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:0.8rem; font-size:0.5rem; color:var(--text-dim);">
+          Training consulting fee includes Verity engineer-led session, competency verification, co-signed training completion certificates, and regulatory evidence package for DORA Art. 25 and SWIFT CSCF v2026 §4.2.
+        </p>
+      </div>
+
+      <a href="docs/user.html" class="btn">
+        <span>◈</span> VeriCrypt User Manual
+      </a>
+    </div>
+
+    <!-- ============ STAGE 6: INVOICE & MOVE TO PRODUCTION ============ -->
+    <div class="stage-card" id="stage-6">
+      <div class="stage-number">06</div>
+      <div class="stage-title">Invoice Your Customer &amp; Move to Production</div>
+      <p class="body-text">
+        Once the pilot scan is complete and the team is trained, use the invoice template below to bill your client. Move them to production with signed .pqc reports, continuous compliance monitoring, and VeriChain STH anchoring for cross-institutional verification.
+      </p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; margin: 1rem 0;">
+        <button class="btn" onclick="downloadInvoice()">
+          <span>↓</span> Download Invoice Template (.md)
+        </button>
+        <button class="btn btn-secondary" onclick="copyInvoiceToClipboard()">
+          <span>📋</span> Copy Invoice to Clipboard
+        </button>
+      </div>
+
+      <div class="divider" style="margin: 2rem 0 1.5rem;">
+        <div class="divider-line"></div>
+        <div class="divider-label">Production Migration</div>
+        <div class="divider-line"></div>
+      </div>
+
+      <p class="body-text">
+        After a successful pilot, repeat stages 1–6 with a production licence. The process is identical — the only differences are the licence tier, TEE attestation enablement, VeriChain STH anchoring, and the optional add-on modules available at production tier.
+      </p>
+      <ol style="margin-left:1.5rem; margin-bottom:1.5rem; line-height:1.7; font-size:0.62rem; color:var(--text-secondary);">
+        <li>Request a production licence key from VeriCrypt Channel Sales.</li>
+        <li>Download the production binaries from the <a href="download.html" style="color:var(--wine-bright);">Download Portal ↗</a>.</li>
+        <li>Follow the <a href="docs/implementation.html" style="color:var(--wine-bright);">Implementation Manual ↗</a> for air-gapped production deployment with TEE.</li>
+        <li>Generate a production quote using the calculator above with the appropriate tier.</li>
+        <li>Deliver compliance training with VeriCrypt certification.</li>
+        <li>Invoice the customer and deploy continuous monitoring with VeriChain STH anchoring.</li>
+      </ol>
+
+      <p class="body-text" style="font-size:0.55rem; color:var(--text-dim);">
+        <strong>Enterprise add-on modules available for upselling (billed by Verity):</strong>
+        Custom ASL Axiom Development (€25K–€75K/pack) · TEE Attestation Configuration (€30K) · VeriChain STH Anchoring Setup (€20K) · Continuous Monitoring Dashboard (€25K/yr) · Multi-Jurisdiction Regulatory Pack (€40K) · Legacy HSM Integration (€35K) · White-Label vericrypt-verify for Counterparty Distribution (€50K) · Regulator Axiom Publishing Programme (€100K).
+      </p>
+      <p class="body-text" style="font-size:0.55rem; color:var(--text-dim);">
+        Partners retain 100% of implementation, inventory preparation, migration planning, training delivery, and regulatory submission support fees at every stage — pilot and production. Licence fees pass through at list price. Partners never discount the licence.
+      </p>
+    </div>
+
+    <!-- ============ WHAT PARTNERS MAY NEVER DO ============ -->
+    <div class="divider" style="margin-top: 3rem;">
+      <div class="divider-line"></div>
+      <div class="divider-label">03 — Partner Obligations</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="restriction-box">
+      <h4>⛔ What Partners May Never Do</h4>
+      <ul>
+        <li><strong>Modify the binary.</strong> The signing chain must trace to Verity's Root Verity Authority Key. Any modification destroys regulator verification and invalidates every report produced.</li>
+        <li><strong>White-label the signed .pqc report.</strong> Partners co-brand their service wrap. The artefact carries Verity's identity. The .pqc signature is the trust anchor — it cannot be substituted.</li>
+        <li><strong>Issue perpetual licences.</strong> All licences are annual. Renewals always include Verity's licence fee at current list price.</li>
+        <li><strong>Represent the axiom library as independently validated in Mode 1.</strong> The correct representation: axioms encode publicly available binding regulatory instruments, are formally compiled through the ASL VM conformance suite, and are fully auditable and editable by the bank.</li>
+        <li><strong>Operate Level 2 or Level 3 support independently.</strong> Partners escalate to Verity. They do not patch, rebuild, or distribute modified binaries.</li>
+        <li><strong>Discount the VeriCrypt licence fee.</strong> The licence fee passes through at list price on every engagement. No exceptions.</li>
+        <li><strong>Bundle or absorb the licence fee.</strong> The licence fee must appear as a distinct, named line item on every customer invoice. Never bundled into a composite services line.</li>
+      </ul>
+    </div>
+
+    <div class="highlight-box">
+      <h4>✓ Partner Certification Requirements</h4>
+      <p>Minimum one VeriCrypt-certified engineer on staff. Signed partner agreement including binary integrity clause. Minimum two documented deployments per 12 months. Certification covered by training materials licence at partner rate €4,500 one-time. Deal registration exclusivity: 90 days from first qualified introduction.</p>
+    </div>
+
+  </div> <!-- /content-wrapper -->
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="final-cta">
+    <div class="final-cta-glow"></div>
+    <div class="final-pre">Become a VeriCrypt Partner</div>
+    <div class="final-title">
+      The PQC Migration Market Is <em>€6.5B</em> and Growing at 22.7% CAGR
+    </div>
+    <div class="final-sub">
+      Every DORA-in-scope financial institution needs what VeriCrypt provides — before the enforcement window closes.
+    </div>
+    <p style="font-family: var(--mono); font-size: 0.65rem; max-width: 680px; margin: 0 auto 2rem; color: var(--text-secondary); line-height: 1.8;">
+      The closest market substitute is a specialist PQC consultancy charging £20,625 for up to 500 assets, producing a PDF a regulator can only read — not independently verify. A Big 4 engagement costs €300K–€800K and produces a non-reproducible document. VeriCrypt delivers a cryptographically signed, Merkle-proofed, regulator-replayable .pqc artefact in under 60 seconds, with open, auditable, and editable compliance rules. There is no comparable product on the market.
+    </p>
+    <p style="font-family: var(--mono); font-size: 0.62rem; max-width: 680px; margin: 0 auto 2.5rem; color: var(--wine-bright); line-height: 1.8;">
+      Contact channel sales to get your partner licence key, download the binaries, and start your first bank engagement. You keep 100% of your services revenue. The licence fee passes through at list price.
+    </p>
+    <div class="final-buttons">
+      <a href="mailto:peterdramsajan@gmail.com?subject=Partner%20Program%20Signup%20—%20[Your%20Company%20Name]" class="btn" style="font-size:0.62rem; padding:1rem 2.2rem;">
+        <span>✉</span> Channel Sales — Email
+      </a>
+      <a href="https://wa.me/18687195236?text=Partner%20Program%20Signup%20—%20[Your%20Company%20Name]" target="_blank" class="btn btn-secondary" style="font-size:0.62rem; padding:1rem 2.2rem; border-color:var(--wine-dim); color:var(--wine-bright);">
+        <span>📱</span> Channel Sales — WhatsApp
+      </a>
+      <a href="tel:+18687195236" class="btn btn-secondary" style="font-size:0.62rem; padding:1rem 2.2rem; border-color:var(--wine-dim); color:var(--wine-bright);">
+        <span>📞</span> Channel Sales — Phone
+      </a>
+    </div>
+    <div style="margin-top: 2.5rem; display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+      <a href="https://wa.me/18687195236" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s;" onmouseover="this.style.color='var(--wine-bright)'" onmouseout="this.style.color='var(--text-dim)'">
+        <span style="font-size: 1rem;">📱</span> WhatsApp
+      </a>
+      <a href="tel:+18687195236" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s;" onmouseover="this.style.color='var(--wine-bright)'" onmouseout="this.style.color='var(--text-dim)'">
+        <span style="font-size: 1rem;">📞</span> +1 (868) 719-5236
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-left">
+      <div class="footer-brand">VERICRYPT<span>.</span></div>
+      <div class="footer-tagline">Machine-Verified · Air-Gapped · Post-Quantum · Regulator-Ready</div>
+    </div>
+    <div class="footer-right">
+      DORA Art. 5–14 · SEC PQFIF · UK NCSC Phase 1–3<br />
+      NIST FIPS 203/204/205 · ECMA-424 · RFC 6962<br />
+      Intel TDX · AMD SEV-SNP · ISO/IEC 25010
+    </div>
+  </footer>
+
+  <!-- ============ JAVASCRIPT ============ -->
+  <script>
+    // ── Tier D entity count toggle ──
+    document.getElementById('tier-select').addEventListener('change', function() {
+      document.getElementById('entity-count').disabled = this.value !== 'D';
+      updateCalculator();
+    });
+
+    // ── Smooth Scroll to Stage ──
+    function scrollToStage(num) {
+      const el = document.getElementById('stage-' + num);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── Progress Tracker ──
+    const stageIds = ['stage-1', 'stage-2', 'stage-3', 'stage-4', 'stage-5', 'stage-6'];
+    const dots = stageIds.map((_, i) => document.getElementById('dot-' + (i + 1)));
+    const lines = stageIds.map((_, i) => i < 5 ? document.getElementById('line-' + (i + 1)) : null);
+    const labels = stageIds.map((_, i) => document.getElementById('label-' + (i + 1)));
+
+    function updateTracker() {
+      let currentStage = 0;
+      const scrollPos = window.scrollY + window.innerHeight / 3;
+      stageIds.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= scrollPos) currentStage = i;
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.remove('active', 'completed');
+        if (i < currentStage) dot.classList.add('completed');
+        if (i === currentStage) dot.classList.add('active');
+      });
+      lines.forEach((line, i) => {
+        if (line) line.classList.toggle('completed', i < currentStage);
+      });
+      labels.forEach((label, i) => {
+        label.classList.remove('active', 'completed');
+        if (i < currentStage) label.classList.add('completed');
+        if (i === currentStage) label.classList.add('active');
+      });
+    }
+    window.addEventListener('scroll', updateTracker);
+    window.addEventListener('load', updateTracker);
+
+    // ── Licence fee lookup ──
+    function getLicenceFee(tier, entityCount) {
+      if (tier === 'A') return 85000;
+      if (tier === 'B') return 350000;
+      if (tier === 'C') return 750000;
+      if (tier === 'D') return Math.min(3000000, 1500000 + (entityCount - 1) * 400000);
+      return 0;
+    }
+
+    function getPSFee(tier, entityCount) {
+      if (tier === 'A') return 40000;
+      if (tier === 'B') return 75000;
+      if (tier === 'C') return 200000;
+      if (tier === 'D') return Math.min(800000, 400000 + (entityCount - 1) * 80000);
+      return 0;
+    }
+
+    function getTierName(tier) {
+      const map = { A: 'A — Proof of Value', B: 'B — Mid-Market Annual', C: 'C — Large Institution Annual', D: 'D — Enterprise / G-SIB' };
+      return map[tier] || tier;
+    }
+
+    function getScopeText(tier) {
+      if (tier === 'A') return 'Single signed .pqc report. Full 7-stage pipeline. CycloneDX 1.7 CBOM. Phase 1/2/3 migration roadmap. 90-day licence window.';
+      if (tier === 'B') return 'Unlimited scans. All standard regulatory frameworks (DORA, NIST, NCSC, PQFIF). Quarterly axiom library updates. Full editable axiom capability. Priority technical support. Regulator liaison documentation package.';
+      if (tier === 'C') return 'Everything in Tier B plus: Dedicated axiom customisation session. HSM-mode signing support. Dedicated technical account manager. Quarterly executive briefing.';
+      return 'Everything in Tier C plus: Multi-entity deployment. White-label vericrypt-verify. VeriChain STH anchoring. GRC platform integration engineering. SLA-backed support. Regulator axiom publishing programme.';
+    }
+
+    function getTrainingConsultingFee(sessions) {
+      const fees = { 0: 0, 1: 20000, 2: 32000, 3: 40000, 4: 28000 };
+      return fees[sessions] || 0;
+    }
+
+    function getTrainingConsultingLabel(sessions) {
+      const labels = { 0: 'None', 1: '1 Full-Day Remote (€20,000)', 2: '1 Half-Day + 1 Full-Day Remote (€32,000)', 3: '2 Full-Day Remote (€40,000)', 4: '1 Full-Day On-Site (€28,000)' };
+      return labels[sessions] || '';
+    }
+
+    // ── Quote Calculator ──
+    function updateCalculator() {
+      const tier = document.getElementById('tier-select').value;
+      const entityCount = parseInt(document.getElementById('entity-count').value) || 1;
+      const partnerRate = parseInt(document.getElementById('partner-rate').value) || 250;
+      const certCount = parseInt(document.getElementById('cert-count').value) || 5000;
+      const implWeeks = parseInt(document.getElementById('impl-weeks').value) || 4;
+      const trainingDays = parseInt(document.getElementById('training-days').value) || 3;
+      const trainingRate = parseInt(document.getElementById('training-rate').value) || 2500;
+      const trainingSessions = parseInt(document.getElementById('training-sessions').value) || 1;
+
+      const inventoryPrep = Math.round(certCount * 2);
+      const implTotal = partnerRate * 40 * implWeeks;
+      const configTotal = Math.round(partnerRate * 60);
+      const analysisTotal = Math.round(partnerRate * 50);
+      const roadmapTotal = Math.round(certCount * 3);
+      const liaisonTotal = Math.round(partnerRate * 40);
+      const trainingDeliveryTotal = trainingRate * trainingDays;
+      const partnerRevenue = inventoryPrep + implTotal + configTotal + analysisTotal + roadmapTotal + liaisonTotal + trainingDeliveryTotal;
+
+      const licenceFee = getLicenceFee(tier, entityCount);
+      const psFee = getPSFee(tier, entityCount);
+      const trainingMaterials = 8500;
+      const trainingConsulting = getTrainingConsultingFee(trainingSessions);
+      const vericryptRevenue = licenceFee + psFee + trainingMaterials + trainingConsulting;
+      const grandTotal = partnerRevenue + vericryptRevenue;
+
+      document.getElementById('result-inventory').textContent = '€' + inventoryPrep.toLocaleString();
+      document.getElementById('result-impl').textContent = '€' + implTotal.toLocaleString();
+      document.getElementById('result-config').textContent = '€' + configTotal.toLocaleString();
+      document.getElementById('result-analysis').textContent = '€' + analysisTotal.toLocaleString();
+      document.getElementById('result-roadmap').textContent = '€' + roadmapTotal.toLocaleString();
+      document.getElementById('result-liaison').textContent = '€' + liaisonTotal.toLocaleString();
+      document.getElementById('result-training-delivery').textContent = '€' + trainingDeliveryTotal.toLocaleString();
+      document.getElementById('result-partner').textContent = '€' + partnerRevenue.toLocaleString();
+      document.getElementById('result-licence').textContent = '€' + licenceFee.toLocaleString();
+      document.getElementById('result-ps-deploy').textContent = '€' + psFee.toLocaleString();
+      document.getElementById('result-training-materials').textContent = '€' + trainingMaterials.toLocaleString();
+      document.getElementById('result-training-consulting').textContent = '€' + trainingConsulting.toLocaleString();
+      document.getElementById('result-vericrypt').textContent = '€' + vericryptRevenue.toLocaleString();
+      document.getElementById('result-total').textContent = '€' + grandTotal.toLocaleString();
+    }
+    updateCalculator();
+
+    // ── Quote Template ──
+    function generateQuoteMarkdown() {
+      const tier = document.getElementById('tier-select').value;
+      const entityCount = parseInt(document.getElementById('entity-count').value) || 1;
+      const partnerRate = parseInt(document.getElementById('partner-rate').value) || 250;
+      const certCount = parseInt(document.getElementById('cert-count').value) || 5000;
+      const implWeeks = parseInt(document.getElementById('impl-weeks').value) || 4;
+      const trainingDays = parseInt(document.getElementById('training-days').value) || 3;
+      const trainingRate = parseInt(document.getElementById('training-rate').value) || 2500;
+      const trainingSessions = parseInt(document.getElementById('training-sessions').value) || 1;
+      const inventoryPrep = Math.round(certCount * 2);
+      const implTotal = partnerRate * 40 * implWeeks;
+      const configTotal = Math.round(partnerRate * 60);
+      const analysisTotal = Math.round(partnerRate * 50);
+      const roadmapTotal = Math.round(certCount * 3);
+      const liaisonTotal = Math.round(partnerRate * 40);
+      const trainingDeliveryTotal = trainingRate * trainingDays;
+      const partnerRevenue = inventoryPrep + implTotal + configTotal + analysisTotal + roadmapTotal + liaisonTotal + trainingDeliveryTotal;
+      const licenceFee = getLicenceFee(tier, entityCount);
+      const psFee = getPSFee(tier, entityCount);
+      const trainingConsulting = getTrainingConsultingFee(trainingSessions);
+      const vericryptRevenue = licenceFee + psFee + 8500 + trainingConsulting;
+      const grandTotal = partnerRevenue + vericryptRevenue;
+      const today = new Date().toISOString().split('T')[0];
+
+      return `# PQC COMPLIANCE PROPOSAL: VeriCrypt Platform — ${getTierName(tier)}
+
+**Prepared For:** [Bank Name]
+**Prepared By:** [Your Company Name]
+**Date:** ${today}
+**Tier:** ${getTierName(tier)}${tier === 'D' ? ' (' + entityCount + ' entities)' : ''}
+
+---
+
+## 1. Executive Summary
+
+This proposal outlines the professional services and licensing required to execute a post-quantum cryptographic compliance engagement using the VeriCrypt platform. The engagement covers certificate inventory ingestion across ~${certCount.toLocaleString()} assets, multiplicative HNDL exposure scoring, ASL VM deterministic compliance verification against DORA/NIST/NCSC/PQFIF requirements, and production of a cryptographically signed, Merkle-proofed .pqc compliance artefact that any regulator can independently verify offline.
+
+## 2. Scope — ${getTierName(tier)}
+
+${getScopeText(tier)}
+
+## 3. Deliverables
+
+- Signed .pqc compliance report with SLH-DSA (NIST FIPS 205) signature — regulator-replayable
+- CycloneDX 1.7 CBOM (ECMA-424) with NIST quantum security levels per asset
+- Phase 1/2/3 PQC migration roadmap with Shapley-ranked priorities
+- Compliance confidence score (P × I × R) with factorised breakdown
+- ASL VM execution schedule trace for independent regulator replay verification
+- TEE attestation quote (if Intel TDX / AMD SEV-SNP available)
+- VeriChain Signed Tree Head for cross-institutional consistency proof (Tier C+)
+- Regulator liaison documentation package
+
+## 4. Pricing Summary
+
+### Partner Services — 100% Retained by [Your Company Name]
+
+| # | Line Item | Total (EUR) |
+|---|---|---|
+| 1 | Certificate Inventory Preparation & Validation (~${certCount.toLocaleString()} assets) | €${inventoryPrep.toLocaleString()} |
+| 2 | Air-Gapped Deployment & Binary Installation (${implWeeks} weeks) | €${implTotal.toLocaleString()} |
+| 3 | Scan Configuration & Pipeline Execution | €${configTotal.toLocaleString()} |
+| 4 | Results Interpretation & Compliance Analysis | €${analysisTotal.toLocaleString()} |
+| 5 | PQC Migration Roadmap Generation (Phase 1/2/3) | €${roadmapTotal.toLocaleString()} |
+| 6 | Regulatory Submission Support & Liaison Package | €${liaisonTotal.toLocaleString()} |
+| 7 | Instructor-Led Training Delivery (${trainingDays} days) | €${trainingDeliveryTotal.toLocaleString()} |
+| | **Partner Revenue Subtotal** | **€${partnerRevenue.toLocaleString()}** |
+
+### VeriCrypt Revenue — Mandatory, Non-Negotiable
+
+| # | Line Item | Total (EUR) |
+|---|---|---|
+| 8 | VeriCrypt Platform Licence (Annual) | €${licenceFee.toLocaleString()} |
+| 9 | Professional Services — Deployment Assurance & Axiom Review | €${psFee.toLocaleString()} |
+| 10 | Training Materials Licence — PDFs, Slide Decks, Workbooks | €8,500 |
+| 11 | Training Consulting — Certification & Regulatory Evidence (${getTrainingConsultingLabel(trainingSessions)}) | €${trainingConsulting.toLocaleString()} |
+| | **VeriCrypt Revenue Subtotal** | **€${vericryptRevenue.toLocaleString()}** |
+
+| | |
+|---|---|
+| **Engagement Grand Total** | **€${grandTotal.toLocaleString()}** |
+
+## 5. Terms & Conditions
+
+- **Payment Terms:** 50% upfront upon proposal acceptance, 50% upon delivery of signed .pqc report and close-out documentation.
+- **Validity:** 30 days from date of issue.
+- **Licence:** Annual. Renewal at then-current list price. Licence fee line item is mandatory and non-discountable.
+- **Professional Services:** Governed by Statement of Work. Partner PS fee is set and retained 100% by partner.
+- **Training Materials:** Verity intellectual property. Licensed per deployment. Not transferable.
+`;
+    }
+
+    function downloadQuote() {
+      const md = generateQuoteMarkdown();
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'VeriCrypt_PQC_Compliance_Quote.md';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function copyQuoteToClipboard() {
+      navigator.clipboard.writeText(generateQuoteMarkdown()).then(() => {
+        alert('Quote template copied to clipboard.');
+      });
+    }
+
+    // ── Invoice Template ──
+    function generateInvoiceMarkdown() {
+      const tier = document.getElementById('tier-select').value;
+      const entityCount = parseInt(document.getElementById('entity-count').value) || 1;
+      const partnerRate = parseInt(document.getElementById('partner-rate').value) || 250;
+      const certCount = parseInt(document.getElementById('cert-count').value) || 5000;
+      const implWeeks = parseInt(document.getElementById('impl-weeks').value) || 4;
+      const trainingDays = parseInt(document.getElementById('training-days').value) || 3;
+      const trainingRate = parseInt(document.getElementById('training-rate').value) || 2500;
+      const trainingSessions = parseInt(document.getElementById('training-sessions').value) || 1;
+      const inventoryPrep = Math.round(certCount * 2);
+      const implTotal = partnerRate * 40 * implWeeks;
+      const configTotal = Math.round(partnerRate * 60);
+      const analysisTotal = Math.round(partnerRate * 50);
+      const roadmapTotal = Math.round(certCount * 3);
+      const liaisonTotal = Math.round(partnerRate * 40);
+      const trainingDeliveryTotal = trainingRate * trainingDays;
+      const partnerRevenue = inventoryPrep + implTotal + configTotal + analysisTotal + roadmapTotal + liaisonTotal + trainingDeliveryTotal;
+      const licenceFee = getLicenceFee(tier, entityCount);
+      const psFee = getPSFee(tier, entityCount);
+      const trainingConsulting = getTrainingConsultingFee(trainingSessions);
+      const vericryptRevenue = licenceFee + psFee + 8500 + trainingConsulting;
+      const grandTotal = partnerRevenue + vericryptRevenue;
+      const today = new Date().toISOString().split('T')[0];
+      const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const invNum = 'VCI-' + Date.now().toString(36).toUpperCase();
+
+      return `# INVOICE
+
+**Invoice Number:** ${invNum}
+**Date:** ${today}
+**Due Date:** ${dueDate}
+
+**From:**
+[Your Company Name]
+[Your Address]
+[Your Tax ID]
+
+**To:**
+[Bank Name]
+[Address]
+[Contact Email]
+
+---
+
+## Services Rendered — VeriCrypt PQC Compliance Engagement (${getTierName(tier)})
+
+### Partner Services — 100% Retained by [Your Company Name]
+
+| # | Description | Line Total (EUR) |
+|---|---|---|
+| 1 | Certificate Inventory Preparation & Validation — Discovery and parsing of ~${certCount.toLocaleString()} cryptographic assets across PEM, DER, PKCS#12, CSV, JSON, and TLS endpoints. Fingerprinting, classification, and quantum vulnerability assessment per asset. | €${inventoryPrep.toLocaleString()} |
+| 2 | Air-Gapped Deployment & Binary Installation — Hardware validation, OS hardening, binary transfer and verification, licence activation, TLS provisioning, systemd service creation, firewall configuration. ${implWeeks} weeks. | €${implTotal.toLocaleString()} |
+| 3 | Scan Configuration & Pipeline Execution — Full 7-stage pipeline: Ingestion, Knowledge Graph construction, HNDL Exposure scoring, ASL VM compliance verification, Prioritization, CBOM generation, Signed .pqc Report assembly. | €${configTotal.toLocaleString()} |
+| 4 | Results Interpretation & Compliance Analysis — HNDL exposure breakdown, Shapley value risk attribution, compliance confidence scoring (P × I × R), DORA/PQFIF/NCSC article mapping, counterexample analysis and remediation recommendations. | €${analysisTotal.toLocaleString()} |
+| 5 | PQC Migration Roadmap Generation — Phase 1 (0–12 months), Phase 2 (12–24 months), Phase 3 (24–36 months) prioritised by Shapley-ranked exposure contribution. EU 2026/2030/2035 milestone alignment. | €${roadmapTotal.toLocaleString()} |
+| 6 | Regulatory Submission Support & Liaison Package — .pqc report preparation for regulator submission, evidence chain of custody documentation, regulator verification procedure guide, liaison documentation package. | €${liaisonTotal.toLocaleString()} |
+| 7 | Instructor-Led Training Delivery — ${trainingDays} days across CISO briefing, security team workshop, compliance team regulatory mapping, and continuous monitoring setup. | €${trainingDeliveryTotal.toLocaleString()} |
+| | **Partner Services Subtotal** | **€${partnerRevenue.toLocaleString()}** |
+
+### VeriCrypt Revenue — Billed by Verity, Passed Through
+
+| # | Description | Line Total (EUR) |
+|---|---|---|
+| 8 | VeriCrypt Platform Licence — Annual right to deploy VeriCrypt binary and generate signed .pqc compliance reports. Includes standard axiom library (DORA, NIST FIPS 203/204/205, NCSC, PQFIF), quarterly RTS updates, and editable axiom capability. | €${licenceFee.toLocaleString()} |
+| 9 | Professional Services — Deployment Assurance & Axiom Review — Remote deployment verification, TEE attestation configuration validation, axiom library review and customisation support, scan output verification, co-signed close-out report for DORA Art. 25 regulatory evidence. | €${psFee.toLocaleString()} |
+| 10 | Training Materials Licence — VeriCrypt regulatory mapping reference guide, .pqc report interpretation workbook, CISO executive briefing deck, security team operations guide, axiom editing guide. Verity IP. Licensed per deployment. | €8,500 |
+| 11 | Training Consulting — Certification & Regulatory Evidence (${getTrainingConsultingLabel(trainingSessions)}) — Verity engineer-led session, competency verification, co-signed training completion certificates, regulatory evidence package for SWIFT CSCF v2026 §4.2 and ISO 27001 §A.7.2.2. | €${trainingConsulting.toLocaleString()} |
+| | **VeriCrypt Revenue Subtotal** | **€${vericryptRevenue.toLocaleString()}** |
+
+| | |
+|---|---|
+| **TOTAL DUE** | **€${grandTotal.toLocaleString()}** |
+
+---
+
+**Payment Instructions:**
+- **Bank Name:** [Your Bank Name]
+- **Account Name:** [Your Company Account Name]
+- **Account Number:** [Your Account Number]
+- **Routing Number:** [Your Routing Number]
+- **SWIFT/BIC:** [Your SWIFT Code]
+- **Reference:** Invoice ${invNum}
+
+**Payment Terms:** Net 30 days. Late payments accrue interest at 1.5% per month or maximum rate permitted by law.
+
+**Regulatory Disclosures:** Services delivered in alignment with DORA (EU 2022/2554), SWIFT CSCF v2026, ISO 27001:2022, and NIST FIPS 203/204/205. VeriCrypt is a product of Verity. The .pqc signature chain traces to Verity's Root Verity Authority Key. This invoice includes mandatory, non-discountable VeriCrypt licence and professional services fees.
+
+**Thank you for your business.**
+`;
+    }
+
+    function downloadInvoice() {
+      const md = generateInvoiceMarkdown();
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'VeriCrypt_Invoice.md';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function copyInvoiceToClipboard() {
+      navigator.clipboard.writeText(generateInvoiceMarkdown()).then(() => {
+        alert('Invoice template copied to clipboard.');
+      });
+    }
+  </script>
+
+</body>
+</html>
+
+  </div> <!-- /content-wrapper -->
+
+  <!-- ============ BATCH 1 ENDS HERE — BATCH 2 CONTAINS STAGES 4-6, CALCULATOR, INVOICE GENERATOR, RESTRICTIONS, FINAL CTA, FOOTER, JAVASCRIPT ============ -->
+
+</body>
+</html>

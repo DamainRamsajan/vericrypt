@@ -4,7 +4,6 @@ use crate::errors::VeriCryptError;
 use crate::graph::CryptoGraph;
 use crate::types::{ExposureResult, MigrationPhase};
 
-/// Generate a risk-prioritized migration roadmap with CMAP and PQCMM scores.
 pub fn generate_roadmap(
     er: &ExposureResult,
     _g: &CryptoGraph,
@@ -18,13 +17,7 @@ pub fn generate_roadmap(
     Ok(e.iter()
         .enumerate()
         .map(|(i, (id, _))| {
-            let ph = if i < p1 {
-                1
-            } else if i < p2 {
-                2
-            } else {
-                3
-            };
+            let ph = if i < p1 { 1 } else if i < p2 { 2 } else { 3 };
             let (cmap, pqcmm, milestone) = match ph {
                 1 => (1u32, 2u32, "EU 2026 PQC transition start"),
                 2 => (2u32, 3u32, "EU 2030 critical infrastructure deadline"),
@@ -41,6 +34,9 @@ pub fn generate_roadmap(
                     2 => "Medium priority — 24 months".into(),
                     _ => "Standard priority — 36 months".into(),
                 },
+                cmap_level: cmap,
+                pqcmm_level: pqcmm,
+                regulatory_milestone: milestone.to_string(),
             }
         })
         .collect())

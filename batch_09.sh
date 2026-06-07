@@ -58,19 +58,19 @@ agent DORA_Compliance stratum: S1 {
     capability { tokens: [cap::crypto_audit, cap::compliance_write] }
     fn main() -> i32 {
         let rsa_check = perform infer<bool>(model: route::select(task::key_size_audit), prompt: "RSA key size >= 3072 bits required by DORA Article 9", budget: think::fast);
-        discharge rsa_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("DORA: RSA key size constraint satisfied"); }
+        discharge rsa_check { 0.90 => { print("DORA: RSA key size constraint satisfied"); }
         let forbidden_check = perform infer<bool>(model: route::select(task::algorithm_audit), prompt: "Verify RSA_1024, RSA_2048, ECDSA_P256 absent per DORA", budget: think::fast);
-        discharge forbidden_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("DORA: Forbidden algorithm check passed"); }
+        discharge forbidden_check { 0.90 => { print("DORA: Forbidden algorithm check passed"); }
         let sig_check = perform infer<bool>(model: route::select(task::signature_audit), prompt: "Confirm ML_DSA/SLH_DSA active per DORA", budget: think::fast);
-        discharge sig_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("DORA: PQC signature suite verified"); }
+        discharge sig_check { 0.90 => { print("DORA: PQC signature suite verified"); }
         let hybrid_check = perform infer<bool>(model: route::select(task::hybrid_mode_audit), prompt: "DORA mandates hybrid classical+PQC mode", budget: think::fast);
-        discharge hybrid_check with { confidence: 0.88, taint: 0.12, budget: 1000 } { print("DORA: Hybrid mode requirement satisfied"); }
+        discharge hybrid_check { 0.88 => { print("DORA: Hybrid mode requirement satisfied"); }
         let ecc_check = perform infer<bool>(model: route::select(task::key_size_audit), prompt: "ECC key size >= 256 bits required by DORA", budget: think::fast);
-        discharge ecc_check with { confidence: 0.88, taint: 0.12, budget: 1000 } { print("DORA: ECC key size constraint satisfied"); }
+        discharge ecc_check { 0.88 => { print("DORA: ECC key size constraint satisfied"); }
         let shelf_check = perform infer<bool>(model: route::select(task::shelf_life_audit), prompt: "Classical shelf life <= 5 years, PQC <= 20 years", budget: think::fast);
-        discharge shelf_check with { confidence: 0.85, taint: 0.15, budget: 1000 } { print("DORA: Shelf-life constraints satisfied"); }
+        discharge shelf_check { 0.85 => { print("DORA: Shelf-life constraints satisfied"); }
         let migration_check = perform infer<bool>(model: route::select(task::migration_audit), prompt: "PQ migration must be complete by 2028-01-01 per DORA", budget: think::fast);
-        discharge migration_check with { confidence: 0.85, taint: 0.15, budget: 1000 } { print("DORA: PQ migration deadline 2028 verified"); }
+        discharge migration_check { 0.85 => { print("DORA: PQ migration deadline 2028 verified"); }
         0
     }
 }
@@ -84,17 +84,17 @@ agent PQFIF_Compliance stratum: S1 {
     capability { tokens: [cap::crypto_audit, cap::compliance_write] }
     fn main() -> i32 {
         let rsa_check = perform infer<bool>(model: route::select(task::key_size_audit), prompt: "RSA key size >= 3072 bits required by PQFIF", budget: think::fast);
-        discharge rsa_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("PQFIF: RSA key size constraint satisfied"); }
+        discharge rsa_check { 0.90 => { print("PQFIF: RSA key size constraint satisfied"); }
         let forbidden_check = perform infer<bool>(model: route::select(task::algorithm_audit), prompt: "Verify RSA_1024, RSA_2048, ECDSA_P256 absent per PQFIF", budget: think::fast);
-        discharge forbidden_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("PQFIF: Forbidden algorithm check passed"); }
+        discharge forbidden_check { 0.90 => { print("PQFIF: Forbidden algorithm check passed"); }
         let sig_check = perform infer<bool>(model: route::select(task::signature_audit), prompt: "Confirm ML_DSA/SLH_DSA active per PQFIF", budget: think::fast);
-        discharge sig_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("PQFIF: PQC signature suite verified"); }
+        discharge sig_check { 0.90 => { print("PQFIF: PQC signature suite verified"); }
         let hybrid_check = perform infer<bool>(model: route::select(task::hybrid_mode_audit), prompt: "PQFIF mandates hybrid classical+PQC mode", budget: think::fast);
-        discharge hybrid_check with { confidence: 0.88, taint: 0.12, budget: 1000 } { print("PQFIF: Hybrid mode requirement satisfied"); }
+        discharge hybrid_check { 0.88 => { print("PQFIF: Hybrid mode requirement satisfied"); }
         let inventory_check = perform infer<bool>(model: route::select(task::inventory_audit), prompt: "PQFIF requires complete cryptographic asset inventory", budget: think::fast);
-        discharge inventory_check with { confidence: 0.88, taint: 0.12, budget: 1000 } { print("PQFIF: Cryptographic asset inventory verified"); }
+        discharge inventory_check { 0.88 => { print("PQFIF: Cryptographic asset inventory verified"); }
         let migration_check = perform infer<bool>(model: route::select(task::migration_audit), prompt: "PQ migration must be complete by 2030-01-01 per PQFIF", budget: think::fast);
-        discharge migration_check with { confidence: 0.85, taint: 0.15, budget: 1000 } { print("PQFIF: PQ migration deadline 2030 verified"); }
+        discharge migration_check { 0.85 => { print("PQFIF: PQ migration deadline 2030 verified"); }
         0
     }
 }
@@ -108,11 +108,11 @@ agent NCSC_Compliance stratum: S1 {
     capability { tokens: [cap::crypto_audit, cap::compliance_write] }
     fn main() -> i32 {
         let rsa_check = perform infer<bool>(model: route::select(task::key_size_audit), prompt: "RSA key size >= 3072 bits required by NCSC", budget: think::fast);
-        discharge rsa_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("NCSC: RSA key size constraint satisfied"); }
+        discharge rsa_check { 0.90 => { print("NCSC: RSA key size constraint satisfied"); }
         let forbidden_check = perform infer<bool>(model: route::select(task::algorithm_audit), prompt: "Verify RSA_1024, RSA_2048, ECDSA_P256 absent per NCSC", budget: think::fast);
-        discharge forbidden_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("NCSC: Forbidden algorithm check passed"); }
+        discharge forbidden_check { 0.90 => { print("NCSC: Forbidden algorithm check passed"); }
         let sig_check = perform infer<bool>(model: route::select(task::signature_audit), prompt: "Confirm ML_DSA/SLH_DSA active per NCSC", budget: think::fast);
-        discharge sig_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("NCSC: PQC signature suite verified"); }
+        discharge sig_check { 0.90 => { print("NCSC: PQC signature suite verified"); }
         let phase1_check = perform infer<bool>(model: route::select(task::discovery_audit), prompt: "NCSC Phase 1 requires complete discovery of all cryptographic assets", budget: think::fast);
         discharge phase1_check with { confidence: 0.88, taint: 0.12, budget: 1000 } { print("NCSC: Phase 1 Discovery complete"); }
         let phase2_check = perform infer<bool>(model: route::select(task::planning_audit), prompt: "NCSC Phase 2 requires a documented PQC migration plan", budget: think::fast);
@@ -120,7 +120,7 @@ agent NCSC_Compliance stratum: S1 {
         let phase3_check = perform infer<bool>(model: route::select(task::execution_audit), prompt: "NCSC Phase 3 requires active execution of PQC migration", budget: think::fast);
         discharge phase3_check with { confidence: 0.85, taint: 0.15, budget: 1000 } { print("NCSC: Phase 3 Execution verified"); }
         let migration_check = perform infer<bool>(model: route::select(task::migration_audit), prompt: "PQ migration must be complete by 2030-01-01 per NCSC", budget: think::fast);
-        discharge migration_check with { confidence: 0.85, taint: 0.15, budget: 1000 } { print("NCSC: PQ migration deadline 2030 verified"); }
+        discharge migration_check { 0.85 => { print("NCSC: PQ migration deadline 2030 verified"); }
         0
     }
 }
@@ -134,16 +134,16 @@ agent NIST_Compliance stratum: S1 {
     capability { tokens: [cap::crypto_audit, cap::compliance_write] }
     fn main() -> i32 {
         let rsa_check = perform infer<bool>(model: route::select(task::key_size_audit), prompt: "RSA key size >= 3072 bits required by NIST SP 800-131A", budget: think::fast);
-        discharge rsa_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("NIST: RSA key size constraint satisfied"); }
+        discharge rsa_check { 0.90 => { print("NIST: RSA key size constraint satisfied"); }
         let forbidden_check = perform infer<bool>(model: route::select(task::algorithm_audit), prompt: "Verify RSA_1024, RSA_2048, ECDSA_P256 absent per NIST", budget: think::fast);
-        discharge forbidden_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("NIST: Forbidden algorithm check passed"); }
+        discharge forbidden_check { 0.90 => { print("NIST: Forbidden algorithm check passed"); }
         let sig_check = perform infer<bool>(model: route::select(task::signature_audit), prompt: "Confirm ML_DSA/SLH_DSA active per NIST FIPS 204/205", budget: think::fast);
-        discharge sig_check with { confidence: 0.90, taint: 0.10, budget: 1000 } { print("NIST: PQC signature suite verified"); }
+        discharge sig_check { 0.90 => { print("NIST: PQC signature suite verified"); }
         print("NIST: Hybrid mode not mandated; direct PQC migration permitted");
         let agility_check = perform infer<bool>(model: route::select(task::agility_audit), prompt: "NIST requires cryptographic agility", budget: think::fast);
-        discharge agility_check with { confidence: 0.88, taint: 0.12, budget: 1000 } { print("NIST: Cryptographic agility requirement satisfied"); }
+        discharge agility_check { 0.88 => { print("NIST: Cryptographic agility requirement satisfied"); }
         let migration_check = perform infer<bool>(model: route::select(task::migration_audit), prompt: "PQ migration must be complete by 2035-01-01 per NIST", budget: think::fast);
-        discharge migration_check with { confidence: 0.85, taint: 0.15, budget: 1000 } { print("NIST: PQ migration deadline 2035 verified"); }
+        discharge migration_check { 0.85 => { print("NIST: PQ migration deadline 2035 verified"); }
         0
     }
 }

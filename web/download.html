@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VeriCrypt — Download</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:       #08090b;
+      --vault:       #0d0f12;
+      --plate:       #111318;
+      --border:      #1e2128;
+      --border-hi:   #2e3240;
+      --wine:        #722f37;
+      --wine-bright: #8b3a44;
+      --wine-dim:    #4a1e24;
+      --wine-glow:   rgba(114,47,55,0.12);
+      --platinum:    #e8e4da;
+      --silver:      #8a8680;
+      --smoke:       #4a4845;
+      --text-primary: #e8e4da;
+      --text-secondary: #8a8680;
+      --text-dim:    #4a4845;
+      --green:       #3a8;
+      --red:         #c44;
+      --mono: 'JetBrains Mono', monospace;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --cond: 'Barlow Condensed', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.6;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.08) 3px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    .status-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 36px;
+      background: rgba(8,9,11,0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .status-indicator .dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #722f37;
+      box-shadow: 0 0 6px #722f37;
+      animation: pulse-wine 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-wine {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .status-right {
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      font-family: var(--mono);
+    }
+
+    .status-divider {
+      width: 1px;
+      height: 14px;
+      background: var(--border);
+    }
+
+    nav {
+      position: fixed;
+      top: 36px; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 3rem;
+      height: 64px;
+      background: rgba(8,9,11,0.88);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-logo {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      text-decoration: none;
+    }
+
+    .nav-logo-mark {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .nav-logo-mark:hover { opacity: 0.8; }
+
+    .nav-logo-mark span { color: var(--wine); }
+
+    .nav-logo-sub {
+      font-size: 0.5rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: var(--mono);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      list-style: none;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0 1.4rem;
+      height: 64px;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-left: 1px solid var(--border);
+      transition: color 0.2s, background 0.2s;
+      font-family: var(--mono);
+      position: relative;
+    }
+
+    .nav-links a:last-child { border-right: 1px solid var(--border); }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: var(--wine);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--wine-bright);
+      background: var(--wine-glow);
+    }
+
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    .nav-links a.primary-link {
+      color: var(--wine-bright);
+      border-color: var(--wine-dim);
+      background: rgba(114,47,55,0.06);
+    }
+
+    .nav-links a.primary-link:hover {
+      background: rgba(114,47,55,0.14);
+    }
+
+    .nav-links a.active {
+      color: var(--wine-bright);
+      background: var(--wine-glow);
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .nav-links a.active::after { transform: scaleX(1); }
+
+    .content-wrapper {
+      padding: 160px 3rem 6rem;
+      max-width: 640px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .section-label {
+      font-size: 0.5rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--wine-dim);
+      margin-bottom: 1rem;
+    }
+
+    .section-heading {
+      font-family: var(--serif);
+      font-size: 2.8rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      line-height: 1.1;
+    }
+
+    .section-heading em { color: var(--wine); font-style: italic; }
+
+    .body-text {
+      font-size: 0.62rem;
+      line-height: 1.85;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+    }
+
+    .download-card {
+      background: var(--vault);
+      border: 1px solid var(--border);
+      padding: 3rem 2rem;
+      margin: 2rem 0;
+      text-align: left;
+    }
+
+    .download-card h2 {
+      font-family: var(--cond);
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: var(--plate);
+      border: 1px solid var(--border-hi);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--wine);
+      box-shadow: 0 0 0 1px var(--wine-glow);
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2rem;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: transparent;
+      color: var(--wine-bright);
+      border: 1px solid var(--wine);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--wine);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s ease;
+      z-index: -1;
+    }
+
+    .btn-primary:hover {
+      color: var(--platinum);
+    }
+
+    .btn-primary:hover::before {
+      transform: scaleX(1);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .download-info {
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      margin-top: 1rem;
+      line-height: 1.7;
+    }
+
+    .download-info code {
+      background: var(--plate);
+      padding: 0.2em 0.4em;
+      font-size: 0.55rem;
+      color: var(--wine-bright);
+      border: 1px solid var(--border-hi);
+      font-family: var(--mono);
+    }
+
+    .download-info a {
+      color: var(--wine-bright);
+      text-decoration: none;
+    }
+
+    .download-info a:hover { text-decoration: underline; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin: 3rem 0;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider-label {
+      font-size: 0.5rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .message {
+      padding: 0.8rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      border: 1px solid;
+      display: none;
+    }
+
+    .message.error {
+      display: block;
+      color: var(--red);
+      border-color: var(--red);
+      background: rgba(204,68,68,0.08);
+    }
+
+    .message.success {
+      display: block;
+      color: var(--green);
+      border-color: var(--green);
+      background: rgba(51,170,136,0.08);
+    }
+
+    .checksum-table {
+      width: 100%;
+      margin-top: 1rem;
+      font-size: 0.55rem;
+      border-collapse: collapse;
+    }
+
+    .checksum-table th {
+      text-align: left;
+      font-size: 0.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .checksum-table td {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      color: var(--text-secondary);
+    }
+
+    .checksum-table code {
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 0.5rem;
+    }
+
+    footer {
+      padding: 2rem 3rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .footer-brand {
+      font-family: var(--serif);
+      font-size: 0.9rem;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      color: var(--text-secondary);
+    }
+
+    .footer-brand span { color: var(--wine); }
+
+    .footer-tagline {
+      font-size: 0.48rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .footer-right {
+      font-size: 0.5rem;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      text-align: right;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 600px) {
+      .status-bar { display: none; }
+      nav { top: 0; }
+      .content-wrapper { padding: 100px 1.5rem 4rem; }
+      .section-heading { font-size: 2rem; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-right { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="status-indicator"><span class="dot"></span><span>CDN Operational</span></div>
+      <div class="status-divider"></div>
+      <div class="status-indicator"><span>Storage: Supabase</span></div>
+      <div class="status-divider"></div>
+      <div class="status-indicator"><span>v0.1.0 Latest</span></div>
+    </div>
+    <div class="status-right">SHA256 · SLH-DSA Signed · Reproducible Builds · SLSA Level 3</div>
+  </div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">VERICRYPT<span>.</span></div>
+      <div class="nav-logo-sub">Post-Quantum Compliance Engine</div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="download.html" class="primary-link active">Download</a></li>
+      <li><a href="partners.html">Partners</a></li>
+      <li><a href="docs/user.html">User Manual</a></li>
+      <li><a href="docs/implementation.html">Implementation Manual</a></li>
+    </ul>
+  </nav>
+
+  <div class="content-wrapper">
+    <div class="section-label">Secure Binary Delivery</div>
+    <h1 class="section-heading">
+      Download <em>VeriCrypt</em>
+    </h1>
+    <p class="body-text">
+      Enter your licence key to download the latest VeriCrypt binary. Each binary is statically linked against musl, SLH-DSA signed, and SHA-256 checksummed. The same key activates signed report generation in the CLI.
+    </p>
+
+    <div class="download-card">
+      <h2>▼ Obtain Binary</h2>
+
+      <div id="message" class="message"></div>
+
+      <div class="form-group">
+        <label for="license-key">Licence Key</label>
+        <input type="text" id="license-key" placeholder="PASETO v4 token" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="platform-select">Platform</label>
+        <select id="platform-select">
+          <option value="linux-x86_64">Linux x86_64 (musl) — Recommended</option>
+          <option value="linux-arm64">Linux ARM64 (musl)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="binary-select">Binary</label>
+        <select id="binary-select">
+          <option value="vericrypt">vericrypt (Compliance Scanner)</option>
+          <option value="vericrypt-verify">vericrypt-verify (Offline Verifier)</option>
+        </select>
+      </div>
+
+      <button id="download-btn" class="btn btn-primary">
+        <span>↓</span> Download
+      </button>
+
+      <p class="download-info" style="margin-top: 1.5rem;">
+        After download, verify integrity:<br />
+        <code>sha256sum vericrypt</code> and compare against the checksums below.
+      </p>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-label">Checksums — v0.1.0</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <table class="checksum-table">
+      <thead>
+        <tr><th>Binary</th><th>Platform</th><th>SHA256</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>vericrypt</td>
+          <td>linux-x86_64</td>
+          <td><code>—</code></td>
+        </tr>
+        <tr>
+          <td>vericrypt-verify</td>
+          <td>linux-x86_64</td>
+          <td><code>—</code></td>
+        </tr>
+        <tr>
+          <td>vericrypt</td>
+          <td>linux-arm64</td>
+          <td><code>—</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="download-info" style="margin-top: 2rem;">
+      Need a licence? Contact <a href="mailto:peterdramsajan@gmail.com">support@vericrypt.io</a>.<br />
+      First scan is free — licence required for signed .pqc reports.<br />
+      Already installed? See the <a href="docs/implementation.html">Implementation Manual</a>.
+    </p>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-label">System Requirements</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <p class="download-info" style="text-align:left; max-width:500px; margin:0 auto;">
+      <strong>Air-Gapped Scan Host:</strong> Linux kernel 5.15+ · 8 cores · 32 GB · 512 GB SSD<br />
+      <strong>Optional TEE:</strong> Intel TDX or AMD SEV-SNP enabled hardware<br />
+      <strong>No runtime dependencies.</strong> Single static binary. No package manager required.
+    </p>
+  </div>
+
+      <div class="divider" style="margin-top: 3rem;">
+      <div class="divider-line"></div>
+      <div class="divider-label">Get a Licence Key</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div style="text-align: center; padding: 2rem 0;">
+      <p style="font-family: var(--mono); font-size: 0.6rem; color: var(--text-secondary); line-height: 1.8; max-width: 500px; margin: 0 auto 1.5rem;">
+        Signed .pqc reports require a licence key. Contact channel sales to purchase.
+      </p>
+      <a href="mailto:peterdramsajan@gmail.com?subject=VeriCrypt%20Channel%20Sales%20Enquiry" class="btn btn-primary" style="width: auto; display: inline-flex;">
+        <span>◆</span> Contact Channel Sales
+      </a>
+      <div style="margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+        <a href="https://wa.me/18687195236" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s;" onmouseover="this.style.color='var(--wine-bright)'" onmouseout="this.style.color='var(--text-dim)'">
+          <span style="font-size: 1rem;">📱</span> WhatsApp
+        </a>
+        <a href="tel:+18687195236" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s;" onmouseover="this.style.color='var(--wine-bright)'" onmouseout="this.style.color='var(--text-dim)'">
+          <span style="font-size: 1rem;">📞</span> +1 (868) 719-5236
+        </a>
+      </div>
+    </div>
+
+  <footer>
+    <div class="footer-left">
+      <div class="footer-brand">VERICRYPT<span>.</span></div>
+      <div class="footer-tagline">Machine-Verified · Air-Gapped · Post-Quantum · Regulator-Ready</div>
+    </div>
+    <div class="footer-right">
+      DORA Art. 5–14 · SEC PQFIF · UK NCSC Phase 1–3<br />
+      NIST FIPS 203/204/205 · ECMA-424 · RFC 6962
+    </div>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://umcjybsayugpcxbqhhmr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtY2p5YnNheXVncGN4YnFoaG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NjI4NTcsImV4cCI6MjA5NjMzODg1N30.eKn5j0TeaSl1Iix8ZeZSPSIkjATFrV_qrnHwHVmLo2o';
+
+    document.getElementById('download-btn').addEventListener('click', async function() {
+      const key = document.getElementById('license-key').value.trim();
+      const platform = document.getElementById('platform-select').value;
+      const binary = document.getElementById('binary-select').value;
+      const btn = document.getElementById('download-btn');
+      const msg = document.getElementById('message');
+
+      msg.className = 'message';
+      msg.style.display = 'none';
+
+      if (!key) {
+        msg.className = 'message error';
+        msg.textContent = 'Please enter a licence key.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>⟳</span> Validating...';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/validate-download`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            license_key: key,
+            binary_name: binary,
+            platform: platform,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.className = 'message error';
+          msg.textContent = data.error || 'Licence validation failed.';
+          btn.disabled = false;
+          btn.innerHTML = '<span>↓</span> Download';
+          return;
+        }
+
+        const a = document.createElement('a');
+        a.href = data.download_url;
+        a.download = binary;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        msg.className = 'message success';
+        msg.textContent = `Download started — ${binary} for ${platform}. SHA256: ${data.sha256}`;
+        btn.innerHTML = '<span>✓</span> Downloaded';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = '<span>↓</span> Download';
+        }, 5000);
+
+      } catch (err) {
+        msg.className = 'message error';
+        msg.textContent = 'Network error — please try again.';
+        btn.disabled = false;
+        btn.innerHTML = '<span>↓</span> Download';
+      }
+    });
+  </script>
+</body>
+</html>

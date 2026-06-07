@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VeriCrypt — User Manual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:       #08090b;
+      --vault:       #0d0f12;
+      --plate:       #111318;
+      --border:      #1e2128;
+      --border-hi:   #2e3240;
+      --wine:        #722f37;
+      --wine-bright: #8b3a44;
+      --wine-dim:    #4a1e24;
+      --wine-glow:   rgba(114,47,55,0.12);
+      --platinum:    #e8e4da;
+      --silver:      #8a8680;
+      --smoke:       #4a4845;
+      --text-primary: #e8e4da;
+      --text-secondary: #8a8680;
+      --text-dim:    #4a4845;
+      --green:       #3a8;
+      --amber:       #d4853a;
+      --mono: 'JetBrains Mono', monospace;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --cond: 'Barlow Condensed', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: 0.6;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+      pointer-events: none; z-index: 998;
+    }
+
+    .status-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 36px;
+      background: rgba(8,9,11,0.92); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .status-left { display: flex; align-items: center; gap: 1.5rem; }
+    .status-indicator {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim);
+    }
+    .status-indicator .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #722f37; box-shadow: 0 0 6px #722f37;
+      animation: pulse-wine 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-wine { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .status-right { font-size: 0.58rem; letter-spacing: 0.12em; color: var(--text-dim); }
+    .status-divider { width: 1px; height: 14px; background: var(--border); }
+
+    nav {
+      position: fixed; top: 36px; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 3rem; height: 64px;
+      background: rgba(8,9,11,0.88); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+    .nav-logo { display: flex; flex-direction: column; gap: 1px; text-decoration: none; }
+    .nav-logo-mark {
+      font-family: var(--serif); font-size: 1.3rem; font-weight: 300;
+      letter-spacing: 0.25em; color: var(--text-primary); line-height: 1;
+    }
+    .nav-logo-mark:hover { opacity: 0.8; }
+    .nav-logo-mark span { color: var(--wine); }
+    .nav-logo-sub {
+      font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--text-dim); font-family: var(--mono);
+    }
+    .nav-links { display: flex; align-items: center; list-style: none; }
+    .nav-links a {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0 1.2rem; height: 64px;
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-secondary); text-decoration: none;
+      border-left: 1px solid var(--border);
+      transition: color 0.2s, background 0.2s;
+      font-family: var(--mono); position: relative;
+    }
+    .nav-links a:last-child { border-right: 1px solid var(--border); }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 1px; background: var(--wine);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.25s ease;
+    }
+    .nav-links a:hover { color: var(--wine-bright); background: var(--wine-glow); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active { color: var(--wine-bright); background: var(--wine-glow); cursor: default; pointer-events: none; }
+    .nav-links a.active::after { transform: scaleX(1); }
+
+    .content-wrapper { padding: 140px 3rem 6rem; max-width: 860px; margin: 0 auto; }
+    .section-label { font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--wine-dim); margin-bottom: 0.5rem; }
+    .section-heading { font-family: var(--serif); font-size: 2.4rem; font-weight: 300; letter-spacing: 0.05em; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.1; }
+    .section-heading em { color: var(--wine); font-style: italic; }
+    .body-text { font-size: 0.62rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+    h2 {
+      font-family: var(--cond); font-size: 1rem; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--text-primary); margin: 3rem 0 1rem;
+      padding-top: 1.5rem; border-top: 1px solid var(--border);
+    }
+    h3 {
+      font-family: var(--cond); font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--wine-bright); margin: 2rem 0 0.8rem;
+    }
+
+    p { font-size: 0.58rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 1rem; }
+    ul, ol { margin-left: 1.5rem; margin-bottom: 1.5rem; line-height: 1.7; font-size: 0.58rem; color: var(--text-secondary); }
+    li { margin-bottom: 0.4rem; }
+
+    code {
+      background: var(--plate); padding: 0.15em 0.4em;
+      font-size: 0.56rem; color: var(--wine-bright);
+      border: 1px solid var(--border-hi); font-family: var(--mono);
+      white-space: nowrap;
+    }
+    pre {
+      background: var(--vault); border: 1px solid var(--border-hi);
+      padding: 1.2rem 1.5rem; margin: 1rem 0 1.5rem;
+      overflow-x: auto; font-size: 0.52rem; line-height: 1.8;
+      color: var(--text-primary);
+    }
+    pre code {
+      background: transparent; border: none; padding: 0;
+      font-size: inherit; color: inherit; white-space: pre;
+    }
+
+    .note {
+      background: var(--vault); border-left: 2px solid var(--wine);
+      padding: 1rem 1.5rem; margin: 1.5rem 0;
+      font-size: 0.55rem; line-height: 1.7; color: var(--text-dim);
+    }
+    .note strong { color: var(--wine-bright); }
+
+    .highlight-box {
+      background: var(--plate); border: 1px solid var(--wine-dim);
+      padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .highlight-box h4 {
+      font-family: var(--cond); font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--wine-bright); margin-bottom: 0.8rem;
+    }
+
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.55rem;
+      margin: 1rem 0 2rem; border: 1px solid var(--border);
+    }
+    th {
+      text-align: left; padding: 0.5rem 0.8rem;
+      font-size: 0.45rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--wine-dim); border-bottom: 1px solid var(--border);
+      background: var(--vault);
+    }
+    td {
+      padding: 0.5rem 0.8rem; color: var(--text-secondary);
+      border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    .formula {
+      background: var(--vault); border: 1px solid var(--border);
+      padding: 1.2rem 1.5rem; margin: 1rem 0;
+      font-family: var(--mono); font-size: 0.58rem; color: var(--wine-bright);
+      text-align: center; letter-spacing: 0.05em;
+    }
+
+    .divider { display: flex; align-items: center; gap: 1.5rem; margin: 3rem 0; }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-label { font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.8rem 1.8rem; font-family: var(--mono);
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      text-decoration: none; transition: all 0.2s ease;
+      cursor: pointer; border: 1px solid var(--wine);
+      background: transparent; color: var(--wine-bright);
+    }
+    .btn:hover { color: var(--platinum); background: var(--wine); }
+
+    footer { padding: 2rem 3rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .footer-left { display: flex; flex-direction: column; gap: 0.3rem; }
+    .footer-brand { font-family: var(--serif); font-size: 0.9rem; font-weight: 300; letter-spacing: 0.2em; color: var(--text-secondary); }
+    .footer-brand span { color: var(--wine); }
+    .footer-tagline { font-size: 0.48rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+    .footer-right { font-size: 0.5rem; letter-spacing: 0.15em; color: var(--text-dim); text-align: right; line-height: 1.8; }
+
+    @media (max-width: 900px) {
+      nav { padding: 0 1.5rem; }
+      .content-wrapper { padding: 140px 1.5rem 4rem; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-right { text-align: center; }
+    }
+    @media (max-width: 600px) {
+      .status-bar { display: none; } nav { top: 0; }
+      .content-wrapper { padding-top: 100px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="status-indicator"><span class="dot"></span><span>Documentation v1.0</span></div>
+      <div class="status-divider"></div>
+      <div class="status-indicator"><span>For CISOs · Compliance Officers · Security Architects</span></div>
+    </div>
+    <div class="status-right">DORA Art. 5–14 · NIST FIPS 203/204/205 · ECMA-424</div>
+  </div>
+
+  <nav>
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-mark">VERICRYPT<span>.</span></div>
+      <div class="nav-logo-sub">Post-Quantum Compliance Engine</div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../download.html">Download</a></li>
+      <li><a href="../partners.html">Partners</a></li>
+      <li><a href="user.html" class="active">User Manual</a></li>
+      <li><a href="implementation.html">Implementation Manual</a></li>
+    </ul>
+  </nav>
+
+  <div class="content-wrapper">
+
+    <div class="section-label">For CISOs, Compliance Officers &amp; Security Architects</div>
+    <h1 class="section-heading">User <em>Manual</em></h1>
+    <p class="body-text">
+      VeriCrypt produces a cryptographically signed, Merkle-proofed .pqc compliance artefact that proves your organisation's cryptographic posture satisfies DORA, PQFIF, NCSC, and NIST requirements. This manual explains what the report contains, how to interpret every metric, and how to use the results for board reporting, regulatory submission, and migration planning.
+    </p>
+
+    <!-- ============ 1. WHAT VERICRYPT DOES ============ -->
+    <h2>1. What VeriCrypt Does</h2>
+
+    <p>VeriCrypt is a single static binary that ingests your organisation's cryptographic inventory — certificates, keys, TLS configurations, HSM records, code dependencies — and executes a 7-stage pipeline to produce a regulator-ready .pqc compliance artefact.</p>
+
+    <p>The seven stages are:</p>
+    <ol>
+      <li><strong>Ingestion</strong> — Discovers and parses every cryptographic asset from files, network endpoints, and CMDB exports</li>
+      <li><strong>Knowledge Graph</strong> — Constructs a heterogeneous dependency graph showing which assets trust, sign, encrypt, or configure each other</li>
+      <li><strong>HNDL Exposure Analysis</strong> — Computes quantum exposure using the multiplicative model proven necessary by Rufino et al. (2026)</li>
+      <li><strong>ASL VM Compliance Verification</strong> — Executes regulatory axioms as deterministic bytecode against your inventory, producing a verifiable execution trace</li>
+      <li><strong>Prioritization</strong> — Generates a Phase 1/2/3 migration roadmap with Shapley value risk attribution</li>
+      <li><strong>CBOM Generation</strong> — Produces a CycloneDX 1.7 Cryptographic Bill of Materials (ECMA-424)</li>
+      <li><strong>Report Assembly &amp; Signing</strong> — Assembles the .pqc report with Merkle root, SLH-DSA signature, and TEE attestation quote</li>
+    </ol>
+
+    <div class="note">
+      <strong>Key differentiator:</strong> Unlike every other PQC tool, VeriCrypt's compliance rules are <em>open, auditable, and editable</em>. The regulatory axioms are ASL source files — your legal counsel or compliance team can inspect them, edit them to reflect your jurisdiction's specific requirements, recompile, and produce a .pqc report proved against your exact rules. No competitor offers this capability.
+    </div>
+
+    <!-- ============ 2. UNDERSTANDING YOUR .PQC REPORT ============ -->
+    <h2>2. Understanding Your .pqc Report</h2>
+
+    <p>The <code>report.pqc</code> file is a self-contained JSON artefact. It is the primary evidence for regulatory submission. Every field is cryptographically bound to the Merkle root and covered by the SLH-DSA signature.</p>
+
+    <h3>Report Structure</h3>
+    <table>
+      <thead>
+        <tr><th>Field</th><th>Description</th><th>Business Significance</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);"><code>report_id</code></td>
+          <td>UUID v4 unique to this scan</td>
+          <td>Identifies this specific compliance artefact for audit trail purposes</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>scan_timestamp</code></td>
+          <td>ISO 8601 timestamp of scan execution</td>
+          <td>Establishes the point-in-time cryptographic posture. Regulators compare against DORA deadline timelines</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>binary_hash</code></td>
+          <td>SHA-256 of the VeriCrypt binary that executed the scan</td>
+          <td>Proves which version of the compliance engine produced this report. Verifiable against published checksums</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>input_hash</code></td>
+          <td>Merkle root of all certificate fingerprints in the inventory</td>
+          <td>Cryptographically binds the report to the exact inventory that was scanned. Any change to the inventory produces a different hash</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>total_assets</code></td>
+          <td>Count of all discovered cryptographic assets</td>
+          <td>Scope of the scan. Regulators assess whether this aligns with the organisation's known infrastructure</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>quantum_vulnerable_count</code></td>
+          <td>Assets using quantum-vulnerable algorithms</td>
+          <td>The size of your PQC migration problem. Every asset here needs a replacement before the relevant deadline</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>violations_found</code></td>
+          <td>Number of compliance counterexamples</td>
+          <td>Specific assets that violate regulatory requirements. Each is listed in violations.txt with remediation guidance</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>cbom_merkle_root</code></td>
+          <td>Merkle root of the entire CBOM</td>
+          <td>Enables O(1) verification that the CBOM has not been modified. A regulator can verify this in under one second</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>compliance_theorems</code></td>
+          <td>Array of ASL VM execution results</td>
+          <td>One entry per regulatory framework. Each contains the theorem status (PROVED/COUNTEREXAMPLE) and execution trace</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>tee_attestation</code></td>
+          <td>TEE attestation quote (if available)</td>
+          <td>Hardware proof that the binary ran untampered in a confidential computing enclave</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><code>signature</code></td>
+          <td>SLH-DSA (NIST FIPS 205) signature</td>
+          <td>Post-quantum signature over the Merkle root and metadata. The cryptographic anchor of the entire report</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============ 3. HNDL EXPOSURE SCORES ============ -->
+    <h2>3. HNDL Exposure Scores</h2>
+
+    <p>HNDL — Harvest Now, Decrypt Later — is the quantum threat model where encrypted data is captured today for decryption when quantum computers mature. VeriCrypt computes exposure using the multiplicative HNDL model from Rufino et al. (May 2026), which proves that additive scoring frameworks cannot capture the structural interaction between cryptographic vulnerability and operational exposure.</p>
+
+    <div class="formula">
+      HNDL_exposure(G) = temporal_hazard × (vulnerability × exposure) / (1 + defense_attack_ratio)
+    </div>
+
+    <h3>Factor Breakdown</h3>
+    <table>
+      <thead>
+        <tr><th>Factor</th><th>What It Measures</th><th>Business Question Answered</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);">Temporal Hazard</td>
+          <td>Ld > Ha condition — is the data's confidentiality lifetime longer than the attacker's quantum capability horizon?</td>
+          <td>"Will this data still be sensitive when quantum computers can break this algorithm?"</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Crypto Vulnerability</td>
+          <td>Is the algorithm quantum-vulnerable? What NIST security level does it provide?</td>
+          <td>"Can a quantum computer break this algorithm at all?"</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Operational Exposure</td>
+          <td>How widely is this asset deployed? How many systems depend on it?</td>
+          <td>"If this asset is compromised, how much of our infrastructure is affected?"</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Defense-Attack Ratio</td>
+          <td>The organisation's defensive posture relative to attacker capability</td>
+          <td>"How well are we defending against HNDL attacks overall?"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box">
+      <h4>Why Multiplicative Matters</h4>
+      <p style="font-size:0.55rem; line-height:1.7; color:var(--text-dim);">Additive models — used by every other PQC tool — treat vulnerability and exposure as independent scores and add them together. Rufino et al. (2026) proved this is mathematically inadequate: a highly vulnerable asset with zero exposure scores the same as a moderately vulnerable asset with moderate exposure. The multiplicative model correctly captures that a vulnerable asset protecting critical data is exponentially more dangerous than either factor alone. VeriCrypt is the only tool that uses the structurally-justified model.</p>
+    </div>
+
+    <!-- ============ 4. COMPLIANCE CONFIDENCE ============ -->
+    <h2>4. Compliance Confidence (P × I × R)</h2>
+
+    <p>The compliance confidence score is the central metric for regulatory submission. It is a multiplicative composite of three independent factors, each assessed separately and transparently.</p>
+
+    <div class="formula">
+      compliance_confidence = P × I × R
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Factor</th><th>Range</th><th>What It Measures</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);"><strong>P — Proof Confidence</strong></td>
+          <td>0.0–1.0</td>
+          <td>Were the regulatory axioms successfully executed by the ASL VM? 1.0 = all frameworks PROVED. 0.7 = some theorems UNVERIFIED. 0.3 = degraded mode.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><strong>I — Inventory Confidence</strong></td>
+          <td>0.0–1.0</td>
+          <td>How complete is the certificate inventory? Derived from: endpoint coverage, subnet coverage, cert transparency correlation, AD/LDAP reconciliation, HSM reconciliation, duplicate chain analysis, expected-vs-observed entropy, and network topology consistency.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);"><strong>R — Regulatory Axiom Confidence</strong></td>
+          <td>0.0–1.0</td>
+          <td>What is the provenance of the axioms used? 1.0 = axioms reviewed and signed by a qualified regulatory expert. 0.8 = reviewed by internal compliance team. 0.5 = auto-generated without human review.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Thresholds for Deployment Modes</h3>
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>Threshold</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color:var(--text-primary);">Phase 3 — Primary</td><td>≥ 0.90</td><td>.pqc report is the primary compliance evidence. Traditional documentation is supplementary.</td></tr>
+        <tr><td style="color:var(--text-primary);">Phase 2 — Parallel</td><td>≥ 0.70</td><td>.pqc report submitted alongside traditional documentation. Regulators can compare.</td></tr>
+        <tr><td style="color:var(--text-primary);">Phase 1 — Shadow</td><td>≥ 0.50</td><td>Reports generated but not submitted. Builds internal trust in the tool's output.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ============ 5. MIGRATION ROADMAP ============ -->
+    <h2>5. Reading the Migration Roadmap</h2>
+
+    <p>The <code>roadmap.md</code> file contains a Phase 1/2/3 prioritised migration plan. Every asset is ranked by its Shapley value — a game-theoretic measure of that asset's marginal contribution to total system exposure.</p>
+
+    <h3>Phase Structure</h3>
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>Timeline</th><th>Priority</th><th>EU Milestone</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);">Phase 1</td>
+          <td>0–12 months</td>
+          <td>Highest Shapley value assets. Assets with HNDL exposure above threshold.</td>
+          <td>EU 2026 PQC transition start</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Phase 2</td>
+          <td>12–24 months</td>
+          <td>Medium-priority assets. Infrastructure requiring coordinated migration.</td>
+          <td>EU 2030 critical infrastructure deadline</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Phase 3</td>
+          <td>24–36 months</td>
+          <td>Low-priority assets. Assets with short data lifetimes.</td>
+          <td>EU 2035 completion target</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Each entry includes: asset ID, current algorithm, NIST PQC replacement recommendation, estimated migration complexity, and regulatory article references (DORA Art. 12.3, PQFIF Phase requirements, NCSC migration milestones).</p>
+
+    <div class="note">
+      <strong>Shapley values are additive:</strong> The sum of all Shapley values equals the total system exposure. This means the roadmap is a mathematically sound decomposition — you can trace exactly how much each asset contributes to your overall risk, and prioritise accordingly.
+    </div>
+
+    <!-- ============ 6. CBOM ============ -->
+    <h2>6. Understanding the CBOM</h2>
+
+    <p>The <code>cbom.json</code> file is a CycloneDX 1.7 Cryptographic Bill of Materials (ECMA-424). It lists every cryptographic asset as a component with standardised <code>cryptoProperties</code>.</p>
+
+    <h3>Key Fields Per Asset</h3>
+    <table>
+      <thead>
+        <tr><th>Property</th><th>Example</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>algorithm</code></td><td>RSA-2048</td><td>The cryptographic algorithm</td></tr>
+        <tr><td><code>keySize</code></td><td>2048</td><td>Key size in bits</td></tr>
+        <tr><td><code>quantumSecurityLevel</code></td><td>1</td><td>NIST quantum security level (1–5). 1 = vulnerable, 5 = highest resistance</td></tr>
+        <tr><td><code>mode</code></td><td>pkcs1v15</td><td>Operational mode</td></tr>
+        <tr><td><code>padding</code></td><td>oaep</td><td>Padding scheme</td></tr>
+        <tr><td><code>curve</code></td><td>P-256</td><td>Elliptic curve (if applicable)</td></tr>
+      </tbody>
+    </table>
+
+    <p>The CBOM is interoperable with any CBOM-consuming tool — SIEM platforms, GRC systems, asset management databases. PQC algorithm naming follows the CycloneDX Cryptography Registry (e.g., <code>ML-DSA-87</code>, <code>SLH-DSA-256s</code>).</p>
+
+  <!-- ============ BATCH 2 BEGINS — Append inside content-wrapper before closing </div> ============ -->
+
+    <!-- ============ 7. DEPLOYMENT MODES ============ -->
+    <h2>7. Deployment Modes</h2>
+
+    <p>VeriCrypt supports a three-phase deployment model aligned with the Lean-Agent Protocol's regulatory adoption framework. Each phase represents increasing trust in the tool's output and increasing regulatory reliance on .pqc reports.</p>
+
+    <table>
+      <thead>
+        <tr><th>Mode</th><th>CLI Flag</th><th>Duration</th><th>What Happens</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);">Phase 1 — Shadow Verification</td>
+          <td><code>--mode shadow</code></td>
+          <td>3–6 months</td>
+          <td>VeriCrypt runs alongside existing compliance processes. .pqc reports are generated and stored but <strong>not submitted to regulators</strong>. The organisation builds trust in the tool's output, validates inventory completeness, and trains staff on report interpretation.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Phase 2 — Parallel Submission</td>
+          <td><code>--mode parallel</code></td>
+          <td>6–12 months</td>
+          <td>.pqc reports are submitted <strong>alongside traditional documentation</strong>. Regulators can compare VeriCrypt's machine-verified findings with traditional audit results. Compliance confidence threshold: ≥ 0.70.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Phase 3 — Primary Compliance Artefact</td>
+          <td><code>--mode primary</code></td>
+          <td>Ongoing</td>
+          <td>.pqc files become the <strong>primary evidence</strong> for cryptographic compliance. Traditional documentation becomes supplementary. Compliance confidence threshold: ≥ 0.90. This is the long-term operating mode for institutions that have fully adopted VeriCrypt.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Recommendation:</strong> Start in Shadow mode for the first scan. Review the unsigned report, validate the inventory, and confirm the pipeline is correctly configured. Move to Parallel mode after the first successful scan with compliance confidence ≥ 0.70. Graduate to Primary mode when confidence reaches ≥ 0.90 and your compliance team is comfortable with the output.
+    </div>
+
+    <!-- ============ 8. EDITABLE AXIOM CAPABILITY ============ -->
+    <h2>8. The Editable Axiom Capability</h2>
+
+    <p>This is VeriCrypt's unique differentiator. Every other PQC compliance tool on the market is a black box — the compliance rules are hidden inside proprietary code. Banks, regulators, and legal counsel have no visibility into how regulations are encoded, no ability to audit the encoding, and no way to correct it if it is wrong.</p>
+
+    <p>VeriCrypt is the only system that makes the compliance rules <strong>fully transparent, auditable, and editable</strong> — and then formally verifies whatever rules are used against the bank's actual cryptographic inventory.</p>
+
+    <h3>Three Operating Modes</h3>
+
+    <div class="highlight-box">
+      <h4>Mode 1 — Standard Axiom Library</h4>
+      <p style="font-size:0.55rem; line-height:1.7; color:var(--text-dim);">
+        The bank uses Verity's axiom library as shipped, which encodes published regulatory instruments directly (DORA, NIST FIPS 203/204/205, NCSC, PQFIF). This is appropriate for the majority of engagements. The <code>regulatory_axiom_confidence</code> value reflects that the axioms faithfully implement public law. No customisation required.
+      </p>
+    </div>
+
+    <div class="highlight-box">
+      <h4>Mode 2 — Bank-Customised Axioms</h4>
+      <p style="font-size:0.55rem; line-height:1.7; color:var(--text-dim);">
+        The bank's compliance team or legal counsel edits the ASL axiom source files to reflect internal policy, a stricter jurisdictional interpretation, or a specific supervisory expectation. They recompile through <code>seedc</code>, run through <code>seedvm</code>, and produce a signed .pqc report proved against the exact rules the bank chose. The execution trace shows precisely which rules were applied — the regulator can see exactly what was proved.
+      </p>
+      <p style="font-size:0.55rem; line-height:1.7; color:var(--text-dim); margin-top:0.5rem;">
+        <strong>Example:</strong> A German bank's legal counsel determines that DORA Art. 6 requires a stricter key size threshold than the standard axiom encodes. They edit the <code>dora.asl</code> source file, change <code>min_rsa_key_size</code> from 3072 to 4096, recompile, and re-run. The resulting .pqc report proves compliance — or identifies counterexamples — against the stricter German interpretation, with a complete verifiable trace.
+      </p>
+    </div>
+
+    <div class="highlight-box">
+      <h4>Mode 3 — Regulator-Specified Axioms</h4>
+      <p style="font-size:0.55rem; line-height:1.7; color:var(--text-dim);">
+        A national competent authority, supervisory body, or industry consortium publishes their own ASL axiom specifications encoding their precise requirements. Banks load those axioms, run them through VeriCrypt, and produce a .pqc report proved against the regulator's exact rules. The regulator can replay the execution independently to confirm the proof.
+      </p>
+      <p style="font-size:0.55rem; line-height:1.7; color:var(--text-dim); margin-top:0.5rem;">
+        <strong>Example:</strong> The ECB publishes an ASL axiom pack specifying exact cryptographic requirements for all supervised institutions. Every bank in the Eurozone loads the ECB axioms, runs VeriCrypt, and submits a .pqc report proved against the ECB's own rules. The ECB verifies each report independently using <code>vericrypt-verify</code> — offline, in under one second, with zero trust in the bank or Verity.
+      </p>
+    </div>
+
+    <div class="note">
+      <strong>Why this matters to you:</strong> DORA deliberately does not specify which algorithms are acceptable — it requires banks to demonstrate that their cryptographic posture is "state of the art" and resilient against cyber threats. What "state of the art" means for your specific bank, in your specific jurisdiction, with your specific risk profile, requires judgment. VeriCrypt provides the formal verification engine. Your legal counsel or your regulator provides the judgment. The combination is provable, auditable, and replayable in a way that nothing else on the market can match.
+    </div>
+
+    <!-- ============ 9. REGULATORY SUBMISSION GUIDE ============ -->
+    <h2>9. Regulatory Submission Guide</h2>
+
+    <h3>What to Submit</h3>
+    <p>For a complete DORA cryptographic compliance submission, provide your regulator with:</p>
+    <ol>
+      <li><strong><code>report.pqc</code></strong> — The signed .pqc compliance artefact (primary evidence)</li>
+      <li><strong><code>cbom.json</code></strong> — CycloneDX 1.7 Cryptographic Bill of Materials (supplementary)</li>
+      <li><strong><code>roadmap.md</code></strong> — Phase 1/2/3 migration roadmap (supplementary)</li>
+      <li><strong><code>vericrypt-verify</code></strong> — The freely-distributable offline verifier binary (so they can independently verify)</li>
+    </ol>
+
+    <h3>DORA Article Mapping</h3>
+    <p>Your .pqc report maps findings to specific DORA articles:</p>
+
+    <table>
+      <thead>
+        <tr><th>DORA Article</th><th>Requirement</th><th>How VeriCrypt Demonstrates Compliance</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-primary);">Art. 5</td>
+          <td>ICT Governance</td>
+          <td>Report metadata establishes governance framework — scan timestamp, binary hash, operator identity</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Art. 6</td>
+          <td>ICT Risk Management Framework</td>
+          <td>HNDL exposure scores quantify cryptographic risk. Multiplicative model captures vulnerability-exposure interaction</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Art. 9</td>
+          <td>Protection of ICT Systems</td>
+          <td>ASL VM compliance theorems verify cryptographic protections satisfy regulatory requirements</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Art. 10</td>
+          <td>Detection</td>
+          <td>Counterexamples identify specific assets that violate requirements. Violations.txt provides remediation paths</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Art. 12</td>
+          <td>Crypto-Agility</td>
+          <td>Migration roadmap demonstrates Phase 1/2/3 plan. CMAP and PQCMM maturity scores show current state and trajectory</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Art. 13</td>
+          <td>ICT Incident Management</td>
+          <td>TEE attestation quote provides hardware proof of untampered execution. Evidence chain of custody documented</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-primary);">Art. 14</td>
+          <td>Reporting</td>
+          <td>.pqc report is a self-contained, cryptographically signed, independently verifiable compliance artefact</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Multi-Jurisdiction Submissions</h3>
+    <p>VeriCrypt supports concurrent compliance verification against multiple frameworks. A single scan can prove compliance against DORA (EU), PQFIF (US SEC), NCSC (UK), and NIST standards simultaneously. Each framework produces its own compliance theorem with independent status and execution trace.</p>
+
+    <h3>What Regulators See</h3>
+    <p>When a regulator runs <code>./vericrypt-verify report.pqc</code>, they see:</p>
+    <pre><code>VERIFIED — scan at 2026-06-05T14:30:00Z, 2,437 assets, 12 violations</code></pre>
+    <p>The verification is <strong>O(1)</strong> — constant time regardless of scan size. The regulator needs no access to your systems, no trust in Verity, and no network connection. They trust only the embedded Verity public key and the mathematics of the Merkle proof and SLH-DSA signature.</p>
+
+    <!-- ============ 10. BOARD PRESENTATION TEMPLATE ============ -->
+    <h2>10. Board Presentation Template</h2>
+
+    <p>Use the following structure to present VeriCrypt results to your board or risk committee. Every data point is directly extractable from your .pqc report.</p>
+
+    <h3>Slide 1: Executive Summary</h3>
+    <ul>
+      <li><strong>Scan date:</strong> [scan_timestamp]</li>
+      <li><strong>Assets discovered:</strong> [total_assets] cryptographic assets across the organisation</li>
+      <li><strong>Quantum-vulnerable:</strong> [quantum_vulnerable_count] assets require migration</li>
+      <li><strong>Compliance violations:</strong> [violations_found] specific regulatory counterexamples</li>
+      <li><strong>Compliance confidence:</strong> [composite] (P=[proof] × I=[inventory] × R=[axiom])</li>
+    </ul>
+
+    <h3>Slide 2: Regulatory Exposure</h3>
+    <ul>
+      <li><strong>DORA enforcement status:</strong> Active. Penalties up to 2% of annual turnover or €10M per violation</li>
+      <li><strong>Our exposure:</strong> [total_assets - compliant_assets] assets not yet compliant</li>
+      <li><strong>Deadline:</strong> DORA enforcement is active now. Informal tolerance period ended early 2026</li>
+      <li><strong>Personal liability:</strong> Up to €1M for senior managers under DORA Art. 50</li>
+    </ul>
+
+    <h3>Slide 3: Migration Roadmap</h3>
+    <ul>
+      <li><strong>Phase 1 (0–12 months):</strong> [count] highest-priority assets. Target: EU 2026 transition start</li>
+      <li><strong>Phase 2 (12–24 months):</strong> [count] medium-priority assets. Target: EU 2030 critical infrastructure</li>
+      <li><strong>Phase 3 (24–36 months):</strong> [count] low-priority assets. Target: EU 2035 completion</li>
+      <li><strong>Methodology:</strong> Shapley value risk attribution — game-theoretic decomposition of systemic exposure</li>
+    </ul>
+
+    <h3>Slide 4: What We Need</h3>
+    <ul>
+      <li><strong>Budget:</strong> [from quote calculator] for licence + implementation + training</li>
+      <li><strong>Timeline:</strong> [impl_weeks] weeks to first signed .pqc report</li>
+      <li><strong>Team:</strong> Security engineering + compliance + legal counsel (for Mode 2 axiom customisation if needed)</li>
+      <li><strong>Infrastructure:</strong> Air-gapped Linux host (8+ cores, 32GB RAM, 512GB SSD)</li>
+    </ul>
+
+    <div class="note">
+      <strong>Board-ready evidence:</strong> Every number in this presentation is cryptographically bound to the .pqc report. The board — and regulators — can verify every claim independently using <code>vericrypt-verify</code>. This is not a consultant's opinion. It is a mathematical proof.
+    </div>
+
+    <!-- ============ 11. GLOSSARY ============ -->
+    <h2>11. Glossary</h2>
+
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Definition</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color:var(--text-primary);">ASL</td><td>Account Specification Language — Verity's DSL for regulatory axioms, compiled by seedc to VM bytecode, executed deterministically by seedvm</td></tr>
+        <tr><td style="color:var(--text-primary);">CBOM</td><td>Cryptographic Bill of Materials — CycloneDX 1.7 JSON document (ECMA-424) listing every cryptographic asset with properties and dependencies</td></tr>
+        <tr><td style="color:var(--text-primary);">CMAP</td><td>Crypto-Agility Maturity Assessment Program — four-level maturity model: Crawl → Walk → Run → Fly</td></tr>
+        <tr><td style="color:var(--text-primary);">Compliance Confidence</td><td>Multiplicative composite score: P × I × R. The central metric for regulatory submission</td></tr>
+        <tr><td style="color:var(--text-primary);">DORA</td><td>Digital Operational Resilience Act (EU 2022/2554) — mandates crypto-agility and ICT risk management for financial entities. Active enforcement began 2026</td></tr>
+        <tr><td style="color:var(--text-primary);">HNDL</td><td>Harvest Now, Decrypt Later — quantum attack where encrypted data is captured today for decryption when quantum computers mature</td></tr>
+        <tr><td style="color:var(--text-primary);">NIST FIPS 203</td><td>ML-KEM — Module-Lattice Key Encapsulation Mechanism. Post-quantum key encapsulation standard</td></tr>
+        <tr><td style="color:var(--text-primary);">NIST FIPS 204</td><td>ML-DSA — Module-Lattice Digital Signature Algorithm. Post-quantum signature standard</td></tr>
+        <tr><td style="color:var(--text-primary);">NIST FIPS 205</td><td>SLH-DSA — Stateless Hash-Based Digital Signature Algorithm. Post-quantum signature standard used for .pqc report signing</td></tr>
+        <tr><td style="color:var(--text-primary);">PASETO v4</td><td>Platform-Agnostic Security Token — capability-token format used for VeriCrypt licence keys. v4.public uses Ed25519 signatures</td></tr>
+        <tr><td style="color:var(--text-primary);">.pqc report</td><td>VeriCrypt's output artefact: a self-contained, cryptographically signed, Merkle-proofed compliance artefact containing CBOM, proofs, roadmap, and TEE attestation</td></tr>
+        <tr><td style="color:var(--text-primary);">PQC</td><td>Post-Quantum Cryptography — cryptographic algorithms designed to be secure against quantum computer attacks</td></tr>
+        <tr><td style="color:var(--text-primary);">PQCMM</td><td>Post-Quantum Cryptography Maturity Model — PKI Consortium five-level framework adopted by industry and regulators</td></tr>
+        <tr><td style="color:var(--text-primary);">PQFIF</td><td>Post-Quantum Financial Infrastructure Framework — US SEC guidance for financial market infrastructure</td></tr>
+        <tr><td style="color:var(--text-primary);">seedc</td><td>ASL compiler — compiles regulatory axiom source files (.asl) to deterministic VM bytecode (.aslb) at build time</td></tr>
+        <tr><td style="color:var(--text-primary);">seedvm</td><td>ASL virtual machine — executes compiled bytecode deterministically at scan time, producing a verifiable schedule trace</td></tr>
+        <tr><td style="color:var(--text-primary);">Shapley Value</td><td>Game-theoretic attribution method that computes each asset's marginal contribution to total system exposure. Sum of all Shapley values equals total exposure</td></tr>
+        <tr><td style="color:var(--text-primary);">SLH-DSA</td><td>Stateless Hash-Based Digital Signature Algorithm (NIST FIPS 205) — quantum-resistant signature scheme. 256-bit classical security, 128-bit quantum security</td></tr>
+        <tr><td style="color:var(--text-primary);">TEE</td><td>Trusted Execution Environment — hardware-enforced isolated compute (Intel TDX or AMD SEV-SNP). Provides cryptographic proof that the binary ran untampered</td></tr>
+        <tr><td style="color:var(--text-primary);">VeriChain</td><td>Verity's Merkle-proofed audit chain — provides RFC 6962 Signed Tree Heads with consistency proofs and non-equivocation guarantees</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ============ 12. SUPPORT ============ -->
+    <h2>12. Support &amp; Resources</h2>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 2rem;">
+      <a href="mailto:peterdramsajan@gmail.com?subject=VeriCrypt%20User%20Question%20—" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; background: var(--plate); border: 1px solid var(--border-hi); padding: 0.8rem 1.2rem; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--wine-dim)'" onmouseout="this.style.borderColor='var(--border-hi)'">
+        <span style="font-size:1.2rem;">✉</span> peterdramsajan@gmail.com
+      </a>
+      <a href="https://wa.me/18687195236" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; background: var(--plate); border: 1px solid var(--border-hi); padding: 0.8rem 1.2rem; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--wine-dim)'" onmouseout="this.style.borderColor='var(--border-hi)'">
+        <span style="font-size:1.2rem;">📱</span> +1 (868) 719-5236
+      </a>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-label">Related Documentation</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+      <a href="implementation.html" class="btn">
+        <span>⊞</span> Implementation Manual
+      </a>
+      <a href="../download.html" class="btn">
+        <span>↓</span> Download Portal
+      </a>
+      <a href="../partners.html" class="btn">
+        <span>◆</span> Partners
+      </a>
+    </div>
+
+  </div> <!-- /content-wrapper -->
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-left">
+      <div class="footer-brand">VERICRYPT<span>.</span></div>
+      <div class="footer-tagline">Machine-Verified · Air-Gapped · Post-Quantum · Regulator-Ready</div>
+    </div>
+    <div class="footer-right">
+      DORA Art. 5–14 · SEC PQFIF · UK NCSC Phase 1–3<br />
+      NIST FIPS 203/204/205 · ECMA-424 · RFC 6962
+    </div>
+  </footer>
+
+</body>
+</html> 
+
+</div> <!-- /content-wrapper -->
+
+</body>
+</html>

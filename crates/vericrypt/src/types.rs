@@ -102,6 +102,8 @@ pub enum TeeStatus {
         quote_bytes: Vec<u8>,
         measurement: String,
         tee_type: String,
+        firmware_version: Option<String>,
+        known_cves: Vec<String>,
     },
     Unavailable {
         reason: String,
@@ -122,6 +124,12 @@ pub struct PqcReport {
     pub compliance_theorems: Vec<ComplianceTheorem>,
     pub tee_attestation: TeeStatus,
     pub signature: Option<SlhDsaSignature>,
+    pub axiom_mode: String,
+    pub axiom_source_hash: Option<String>,
+    pub axiom_bytecode_hash: Option<String>,
+    pub axiom_issuer: Option<String>,
+    pub axiom_issuer_signature: Option<String>,
+    pub sandbox_constraints: Option<String>,
 }
 
 // =============================================================================
@@ -166,6 +174,9 @@ pub struct MigrationPhase {
     pub recommended_replacement: String,
     pub regulatory_reference: String,
     pub estimated_complexity: String,
+    pub cmap_level: u32,
+    pub pqcmm_level: u32,
+    pub regulatory_milestone: String,
 }
 
 /// Inventory confidence model.

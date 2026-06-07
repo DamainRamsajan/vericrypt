@@ -43,11 +43,20 @@ pub fn assemble_report(
         compliance_theorems: theorems.clone(),
         tee_attestation,
         signature: None,
+        axiom_mode: "STANDARD".into(),
+        axiom_source_hash: None,
+        axiom_bytecode_hash: None,
+        axiom_issuer: None,
+        axiom_issuer_signature: None,
+        sandbox_constraints: None,
     };
 
     if license::is_licensed() {
         let mut hasher = blake3::Hasher::new();
         hasher.update(report.cbom_merkle_root.as_bytes());
+        hasher.update(report.axiom_mode.as_bytes());
+        if let Some(ref h) = report.axiom_source_hash { hasher.update(h.as_bytes()); }
+        if let Some(ref h) = report.axiom_bytecode_hash { hasher.update(h.as_bytes()); }
         hasher.update(report.scan_timestamp.to_rfc3339().as_bytes());
         hasher.update(custody.custody_root.as_bytes());
         report.signature = Some(SlhDsaSignature {
@@ -66,8 +75,14 @@ pub fn assemble_report(
     let mut md = String::from("# VeriCrypt PQC Migration Roadmap\n\n");
     for entry in &roadmap {
         md.push_str(&format!(
-            "## Phase {} — Asset {}\n- Current: {}\n- Recommended: {}\n\n",
-            entry.phase, entry.asset_id, entry.current_algorithm, entry.recommended_replacement,
+            "## Phase {} — Asset {}
+- CMAP Level: {} | PQCMM Level: {} | Milestone: {}
+- Current: {}
+- Recommended: {}
+
+",
+            entry.phase, entry.asset_id, entry.cmap_level, entry.pqcmm_level, entry.regulatory_milestone, entry.current_algorithm, entry.recommended_replacement,
+        ));
         ));
     }
     std::fs::write(output_path.join("roadmap.md"), md)?;
@@ -96,6 +111,9 @@ pub fn verify_file(path: &PathBuf) -> Result<String, VeriCryptError> {
     if let Some(sig) = &report.signature {
         let mut hasher = blake3::Hasher::new();
         hasher.update(report.cbom_merkle_root.as_bytes());
+        hasher.update(report.axiom_mode.as_bytes());
+        if let Some(ref h) = report.axiom_source_hash { hasher.update(h.as_bytes()); }
+        if let Some(ref h) = report.axiom_bytecode_hash { hasher.update(h.as_bytes()); }
         hasher.update(report.scan_timestamp.to_rfc3339().as_bytes());
         let valid = slh_dsa::verify_slh_dsa(sig, hasher.finalize().as_bytes())?;
         if !valid {
