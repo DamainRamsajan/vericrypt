@@ -75,14 +75,8 @@ pub fn assemble_report(
     let mut md = String::from("# VeriCrypt PQC Migration Roadmap\n\n");
     for entry in &roadmap {
         md.push_str(&format!(
-            "## Phase {} — Asset {}
-- CMAP Level: {} | PQCMM Level: {} | Milestone: {}
-- Current: {}
-- Recommended: {}
-
-",
+            "## Phase {} — Asset {}\n- CMAP Level: {} | PQCMM Level: {} | Milestone: {}\n- Current: {}\n- Recommended: {}\n\n",
             entry.phase, entry.asset_id, entry.cmap_level, entry.pqcmm_level, entry.regulatory_milestone, entry.current_algorithm, entry.recommended_replacement,
-        ));
         ));
     }
     std::fs::write(output_path.join("roadmap.md"), md)?;
