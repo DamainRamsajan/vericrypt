@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use std::io::Write;
 use std::path::PathBuf;
 
 fn main() {
@@ -19,10 +20,18 @@ fn main() {
             .filter(|e| e.path().extension().is_some_and(|ext| ext == "asl"))
             .collect::<Vec<_>>();
         found.sort_by_key(|e| e.path());
+
+        eprintln!("cargo:warning=Found {} axiom files to compile", found.len());
+        std::io::stderr().flush().ok();
+
         for entry in found {
             let path = entry.path();
             let framework = path.file_stem().unwrap().to_string_lossy().to_uppercase();
             let source = fs::read_to_string(&path).unwrap_or_default();
+
+            eprintln!("cargo:warning=Compiling {} ({} bytes)...", framework, source.len());
+            std::io::stderr().flush().ok();
+
             match seedc::compile(&source) {
                 Ok(bytecode) => {
                     embed_code.push_str(&format!(
@@ -30,12 +39,16 @@ fn main() {
                         framework, bytecode
                     ));
                     eprintln!("cargo:warning=Compiled axiom {} ({} bytes)", framework, bytecode.len());
+                    std::io::stderr().flush().ok();
                 }
                 Err(e) => {
                     panic!("build error: failed to compile axiom '{}' at {}: {:?}", framework, path.display(), e);
                 }
             }
         }
+    } else {
+        eprintln!("cargo:warning=Axiom directory not found or unreadable");
+        std::io::stderr().flush().ok();
     }
 
     embed_code.push_str("    map\n");
