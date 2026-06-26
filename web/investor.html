@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VeriCrypt — Investor Business Plan · June 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --black:    #080A0E;
+  --surface:  #0D1017;
+  --card:     #111620;
+  --border:   #1E2535;
+  --border2:  #2A3347;
+  --dim:      #3A4A63;
+  --muted:    #6B7FA3;
+  --body:     #A8B8D0;
+  --head:     #E2EAF4;
+  --white:    #F0F6FF;
+  --cyan:     #00D4FF;
+  --cyan2:    #0099CC;
+  --green:    #00FF88;
+  --green2:   #00CC6A;
+  --amber:    #FFB800;
+  --red:      #FF4444;
+  --glow:     rgba(0,212,255,0.12);
+  --glow2:    rgba(0,212,255,0.04);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--body);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(8,10,14,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700;
+  color: var(--white); letter-spacing: .08em;
+  text-decoration: none;
+}
+.nav-brand span { color: var(--cyan); }
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a {
+  font-size: 12px; font-weight: 500; letter-spacing: .05em;
+  color: var(--muted); text-decoration: none; text-transform: uppercase;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--cyan); }
+.nav-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--cyan); border: 1px solid var(--cyan2);
+  padding: 3px 10px; border-radius: 2px; letter-spacing: .06em;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 120px 2rem 80px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(ellipse, rgba(0,212,255,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; align-items: center;
+  max-width: 1200px; margin: 0 auto; width: 100%;
+}
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: .15em;
+  color: var(--cyan); text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  display: flex; align-items: center; gap: 10px;
+}
+.hero-eyebrow::before {
+  content: ''; display: block;
+  width: 32px; height: 1px; background: var(--cyan);
+}
+.hero-headline {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: 800; line-height: 1.08;
+  color: var(--white); letter-spacing: -.02em;
+  margin-bottom: 1.5rem;
+}
+.hero-headline em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero-sub {
+  font-size: 16px; color: var(--body); line-height: 1.7;
+  margin-bottom: 2.5rem; max-width: 520px;
+}
+.hero-cta-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+.btn-primary {
+  background: var(--cyan); color: var(--black);
+  font-weight: 700; font-size: 13px; letter-spacing: .04em;
+  padding: 12px 28px; border: none; border-radius: 3px;
+  text-decoration: none; cursor: pointer;
+  transition: background .2s, transform .15s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { background: #33DDFF; transform: translateY(-1px); }
+.btn-secondary {
+  border: 1px solid var(--border2); color: var(--head);
+  font-weight: 500; font-size: 13px; letter-spacing: .04em;
+  padding: 12px 28px; border-radius: 3px;
+  text-decoration: none; cursor: pointer;
+  transition: border-color .2s, color .2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); }
+.valuation-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--amber); text-decoration: none;
+  border-bottom: 1px solid rgba(255,184,0,0.3);
+  padding-bottom: 1px;
+  transition: border-color .2s;
+}
+.valuation-link:hover { border-color: var(--amber); }
+
+/* ── TERMINAL (hero signature element) ── */
+.terminal {
+  background: #080C12;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,212,255,0.08), 0 24px 80px rgba(0,0,0,0.6);
+}
+.terminal-bar {
+  background: #0F1520;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+.td-red { background: #FF5F57; }
+.td-amber { background: #FFBD2E; }
+.td-green { background: #28CA41; }
+.terminal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted); margin-left: auto;
+}
+.terminal-body {
+  padding: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.8;
+}
+.t-prompt { color: var(--cyan); }
+.t-cmd { color: var(--white); }
+.t-comment { color: var(--dim); }
+.t-ok { color: var(--green); }
+.t-warn { color: var(--amber); }
+.t-err { color: var(--red); }
+.t-val { color: var(--cyan); }
+.t-label { color: var(--muted); }
+.t-cursor {
+  display: inline-block;
+  width: 8px; height: 14px;
+  background: var(--cyan);
+  vertical-align: middle;
+  animation: blink 1.1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── METRICS STRIP ── */
+.metrics-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 2.5rem 2rem;
+}
+.metrics-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2rem;
+}
+.metric-item { text-align: center; }
+.metric-num {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.2rem; font-weight: 800;
+  color: var(--white); letter-spacing: -.03em;
+  line-height: 1;
+  margin-bottom: .3rem;
+}
+.metric-num.cyan { color: var(--cyan); }
+.metric-num.green { color: var(--green); }
+.metric-num.amber { color: var(--amber); }
+.metric-label {
+  font-size: 11px; font-weight: 500; letter-spacing: .06em;
+  color: var(--muted); text-transform: uppercase;
+}
+.metric-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+/* ── SECTION ── */
+.section {
+  padding: 6rem 2rem;
+  max-width: 1200px; margin: 0 auto;
+}
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: .18em;
+  color: var(--cyan); text-transform: uppercase;
+  margin-bottom: .75rem;
+}
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800; color: var(--white);
+  letter-spacing: -.02em; line-height: 1.15;
+  margin-bottom: 1rem;
+}
+.section-title em {
+  font-style: normal; color: var(--cyan);
+}
+.section-lead {
+  font-size: 16px; color: var(--body); line-height: 1.7;
+  max-width: 680px; margin-bottom: 3rem;
+}
+.divider {
+  border: none; border-top: 1px solid var(--border);
+  margin: 0 2rem;
+}
+
+/* ── THESIS BLOCK ── */
+.thesis-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+  border-radius: 4px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 3rem;
+}
+.thesis-block p {
+  font-size: 16px; color: var(--head); line-height: 1.75;
+}
+.thesis-block strong { color: var(--white); font-weight: 600; }
+
+/* ── CARDS GRID ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem; margin-bottom: 3rem;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.75rem;
+  transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card-icon {
+  font-size: 1.6rem; margin-bottom: 1rem;
+}
+.card-title {
+  font-size: 14px; font-weight: 700; color: var(--white);
+  margin-bottom: .5rem; letter-spacing: -.01em;
+}
+.card-body { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.card-cite {
+  margin-top: .75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--dim); letter-spacing: .05em;
+}
+
+/* ── EIGHT FIRSTS ── */
+.firsts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+.first-item {
+  background: var(--card);
+  padding: 1.75rem;
+  display: flex; gap: 1.25rem;
+  transition: background .2s;
+}
+.first-item:hover { background: #141B27; }
+.first-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700; color: var(--cyan);
+  min-width: 28px; padding-top: 2px;
+}
+.first-text .first-title {
+  font-size: 13px; font-weight: 600; color: var(--white);
+  margin-bottom: .3rem;
+}
+.first-text .first-desc {
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+}
+
+/* ── COMPETITOR TABLE ── */
+.comp-table-wrap { overflow-x: auto; margin-bottom: 3rem; }
+.comp-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+}
+.comp-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); font-weight: 500;
+  padding: .75rem 1rem; text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.comp-table td {
+  padding: .875rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--body); vertical-align: top;
+}
+.comp-table tr:last-child td { border-bottom: none; }
+.comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+.comp-table td:first-child { font-weight: 600; color: var(--head); }
+.check-yes { color: var(--green); font-weight: 700; }
+.check-no { color: var(--red); }
+.check-part { color: var(--amber); }
+.highlight-row td { background: rgba(0,212,255,0.04); }
+.highlight-row td:first-child { color: var(--cyan); }
+
+/* ── VALUATION BRIDGE ── */
+.val-bridge {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2.5rem;
+  margin-bottom: 3rem;
+}
+.val-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 2rem;
+}
+.bridge-item {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1rem;
+}
+.bridge-label {
+  font-size: 13px; color: var(--body); min-width: 240px;
+}
+.bridge-bar-wrap {
+  flex: 1; height: 6px;
+  background: var(--border);
+  border-radius: 3px; overflow: hidden;
+}
+.bridge-bar {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--green));
+}
+.bridge-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--cyan);
+  min-width: 70px; text-align: right;
+}
+.bridge-total {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.bridge-total-label { font-size: 14px; font-weight: 600; color: var(--white); }
+.bridge-total-val {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem; font-weight: 800; color: var(--cyan);
+  letter-spacing: -.03em;
+}
+
+/* ── REVENUE TABLE ── */
+.rev-table-wrap { overflow-x: auto; margin-bottom: 3rem; }
+.rev-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.rev-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); padding: .75rem 1rem; text-align: right;
+  border-bottom: 1px solid var(--border); background: var(--surface);
+}
+.rev-table th:first-child { text-align: left; }
+.rev-table td {
+  padding: .875rem 1rem; border-bottom: 1px solid var(--border);
+  color: var(--body); text-align: right;
+}
+.rev-table td:first-child { text-align: left; color: var(--head); }
+.rev-table tr:last-child td { border-bottom: none; }
+.rev-table .total-row td {
+  font-weight: 700; color: var(--white);
+  border-top: 1px solid var(--border2); font-size: 14px;
+}
+.rev-table .total-row td:first-child { color: var(--cyan); }
+
+/* ── PRICING TIERS ── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem; margin-bottom: 3rem;
+}
+.price-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px; padding: 2rem;
+  position: relative;
+}
+.price-card.featured {
+  border-color: var(--cyan);
+  background: linear-gradient(160deg, rgba(0,212,255,0.05) 0%, var(--card) 100%);
+}
+.price-badge {
+  position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+  background: var(--cyan); color: var(--black);
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  padding: 3px 12px; border-radius: 2px; white-space: nowrap;
+}
+.price-tier {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: .5rem;
+}
+.price-amount {
+  font-size: 1.8rem; font-weight: 800; color: var(--white);
+  letter-spacing: -.03em; margin-bottom: .25rem;
+}
+.price-period { font-size: 12px; color: var(--muted); }
+.price-desc { font-size: 13px; color: var(--body); margin: 1rem 0; line-height: 1.6; }
+.price-features { list-style: none; }
+.price-features li {
+  font-size: 12px; color: var(--muted);
+  padding: .3rem 0; display: flex; align-items: flex-start; gap: 8px;
+}
+.price-features li::before { content: '✓'; color: var(--green); flex-shrink: 0; }
+
+/* ── RISK TABLE ── */
+.risk-table-wrap { overflow-x: auto; margin-bottom: 3rem; }
+.risk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.risk-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); padding: .75rem 1rem; text-align: left;
+  border-bottom: 1px solid var(--border); background: var(--surface);
+}
+.risk-table td {
+  padding: .875rem 1rem; border-bottom: 1px solid var(--border);
+  color: var(--body); vertical-align: top;
+}
+.risk-table tr:last-child td { border-bottom: none; }
+.risk-id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cyan); }
+.sev-high { color: var(--red); font-weight: 600; font-size: 11px; }
+.sev-med { color: var(--amber); font-weight: 600; font-size: 11px; }
+.sev-low { color: var(--green); font-weight: 600; font-size: 11px; }
+
+/* ── TIMELINE ── */
+.timeline { position: relative; padding-left: 2rem; margin-bottom: 3rem; }
+.timeline::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.tl-item {
+  position: relative; margin-bottom: 2rem;
+  padding-left: 1.5rem;
+}
+.tl-item::before {
+  content: ''; position: absolute; left: -2.5rem; top: 6px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+}
+.tl-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .1em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: .3rem;
+}
+.tl-title { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: .25rem; }
+.tl-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.tl-impact {
+  margin-top: .4rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--amber);
+}
+
+/* ── ACADEMIC GRID ── */
+.academic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border); border-radius: 4px;
+  overflow: hidden; margin-bottom: 3rem;
+}
+.academic-item {
+  background: var(--card); padding: 1.5rem;
+}
+.ac-paper {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--cyan); margin-bottom: .4rem;
+}
+.ac-title { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: .4rem; }
+.ac-impl { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* ── CTA SECTION ── */
+.cta-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 5rem 2rem;
+  text-align: center;
+}
+.cta-inner { max-width: 680px; margin: 0 auto; }
+.cta-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .18em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.cta-headline {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 800; color: var(--white);
+  letter-spacing: -.02em; line-height: 1.15;
+  margin-bottom: 1.25rem;
+}
+.cta-sub { font-size: 15px; color: var(--body); line-height: 1.7; margin-bottom: 2.5rem; }
+.cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 2.5rem 2rem;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+.footer-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--muted);
+}
+.footer-brand span { color: var(--cyan); }
+.footer-legal { font-size: 11px; color: var(--dim); max-width: 500px; line-height: 1.5; }
+
+/* ── UTIL ── */
+.tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 2px 8px;
+  border-radius: 2px; margin-right: 4px; margin-bottom: 4px;
+}
+.tag-cyan { background: rgba(0,212,255,0.1); color: var(--cyan); }
+.tag-green { background: rgba(0,255,136,0.1); color: var(--green); }
+.tag-amber { background: rgba(255,184,0,0.1); color: var(--amber); }
+.tag-red { background: rgba(255,68,68,0.1); color: var(--red); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+}
+@media (max-width: 600px) {
+  .three-col { grid-template-columns: 1fr; }
+  .metrics-inner { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-brand">VERI<span>CRYPT</span></a>
+  <div class="nav-links">
+    <a href="#thesis">Thesis</a>
+    <a href="#ip">IP & Firsts</a>
+    <a href="#market">Market</a>
+    <a href="#revenue">Revenue</a>
+    <a href="#valuation">Valuation</a>
+    <a href="#risks">Risks</a>
+    <a href="#roadmap">Roadmap</a>
+  </div>
+  <span class="nav-badge">CONFIDENTIAL · INVESTOR</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow">Investment Business Plan · June 2026</div>
+      <h1 class="hero-headline">
+        The world's only<br>
+        <em>machine-provable</em><br>
+        compliance engine
+      </h1>
+      <p class="hero-sub">
+        VeriCrypt produces cryptographically signed, formally proven, air-gapped compliance artifacts that financial regulators can independently verify without trusting the bank or the vendor. No competitor makes this claim. None can.
+      </p>
+      <div class="hero-cta-row">
+        <a href="https://intellica-15c.pages.dev/vcv" target="_blank" class="btn-primary">
+          ↗ Full Valuation Report · €380M–€620M
+        </a>
+        <a href="#thesis" class="btn-secondary">Read the Thesis ↓</a>
+      </div>
+      <div style="margin-top:1.5rem">
+        <a href="https://intellica-15c.pages.dev/vcv" target="_blank" class="valuation-link">
+          View complete investment valuation report — arc42 96/100 · 8 novel firsts · €480M base case →
+        </a>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="terminal-dot td-red"></span>
+        <span class="terminal-dot td-amber"></span>
+        <span class="terminal-dot td-green"></span>
+        <span class="terminal-title">vericrypt · dora-scan · air-gapped</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$ </span><span class="t-cmd">./vericrypt scan \</span></div>
+        <div style="padding-left:1.5rem"><span class="t-cmd">--cert-dir /data/certificates/ \</span></div>
+        <div style="padding-left:1.5rem"><span class="t-cmd">--mode parallel --output ./report/</span></div>
+        <div style="margin-top:.5rem"><span class="t-label">[ STAGE 1 ] </span><span class="t-ok">✓</span><span class="t-label"> Certificate ingestion — 847 assets</span></div>
+        <div><span class="t-label">[ STAGE 2 ] </span><span class="t-ok">✓</span><span class="t-label"> Knowledge graph — 1,204 edges</span></div>
+        <div><span class="t-label">[ STAGE 3 ] </span><span class="t-warn">⚠</span><span class="t-label"> HNDL exposure — </span><span class="t-warn">312 assets at risk</span></div>
+        <div><span class="t-label">[ STAGE 4 ] </span><span class="t-ok">✓</span><span class="t-label"> ASL VM — DORA axioms compiled</span></div>
+        <div><span class="t-label">[ STAGE 5 ] </span><span class="t-label"> Executing regulatory proof…</span></div>
+        <div style="margin-top:.5rem">
+          <span class="t-label">  DORA Art.9(4)(c) RSA floor  </span><span class="t-err">COUNTEREXAMPLE</span>
+        </div>
+        <div><span class="t-label">  DORA Art.6 crypto-agility   </span><span class="t-err">COUNTEREXAMPLE</span></div>
+        <div><span class="t-label">  NCSC Phase 1 discovery      </span><span class="t-ok">PROVED</span></div>
+        <div><span class="t-label">  NIST FIPS 203 ML-KEM        </span><span class="t-warn">PARTIAL</span></div>
+        <div style="margin-top:.5rem"><span class="t-label">[ STAGE 6 ] </span><span class="t-ok">✓</span><span class="t-label"> CycloneDX 1.7 CBOM generated</span></div>
+        <div><span class="t-label">[ STAGE 7 ] </span><span class="t-ok">✓</span><span class="t-label"> SLH-DSA signing — FIPS 205</span></div>
+        <div style="margin-top:.75rem">
+          <span class="t-label">report: </span><span class="t-val">./report/scan_20260615.pqc</span>
+        </div>
+        <div><span class="t-label">signed: </span><span class="t-ok">SLH-DSA-256 · Merkle root anchored</span></div>
+        <div><span class="t-label">time:   </span><span class="t-val">47 seconds</span></div>
+        <div style="margin-top:.5rem"><span class="t-prompt">$ </span><span class="t-cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS STRIP -->
+<div class="metrics-strip">
+  <div class="metrics-inner">
+    <div class="metric-item">
+      <div class="metric-num cyan">€480M</div>
+      <div class="metric-label">Base Valuation</div>
+      <div class="metric-sub">Strategic-acquirer · June 2026</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-num">€380–620M</div>
+      <div class="metric-label">Valuation Range</div>
+      <div class="metric-sub">Three-method triangulation</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-num green">96/100</div>
+      <div class="metric-label">arc42 Maturity</div>
+      <div class="metric-sub">Grade A+ · 5 addenda · 23 ADRs</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-num amber">8</div>
+      <div class="metric-label">World Firsts</div>
+      <div class="metric-sub">No competitor implements all</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-num">€18.3B</div>
+      <div class="metric-label">PQC Market 2026</div>
+      <div class="metric-sub">22% CAGR → €40.5B by 2030</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-num cyan">22,000</div>
+      <div class="metric-label">DORA-Affected Entities</div>
+      <div class="metric-sub">Mandatory spend · EU financial</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- THESIS -->
+<div id="thesis" class="section">
+  <div class="section-eyebrow">01 — Investment Thesis</div>
+  <h2 class="section-title">Every competitor produces<br>an <em>opinion</em>. VeriCrypt produces a <em>proof</em>.</h2>
+  <p class="section-lead">The paradigm shift is precise: from "our consultants said so" to "the ASL VM executed these regulatory axioms and the schedule trace is bit-identically reproducible by any regulator in the world."</p>
+
+  <div class="thesis-block">
+    <p>VeriCrypt is the only commercially-ready system that produces a <strong>cryptographically-signed, machine-provable, air-gapped compliance artifact (.pqc)</strong> that a financial regulator can independently verify without trusting either the bank or the vendor. DORA entered full enforcement January 17, 2025, covering 20 types of EU financial entities with fines up to 2% of global annual turnover. NIST finalised FIPS 203, 204, and 205 in 2024, triggering an estimated <strong>$4.2B in net-new compliance spending</strong> in 2025–2026. Every CISO of every EU bank needs a DORA Art. 5–14 compliant cryptographic posture report. VeriCrypt produces one in under 60 seconds. No competitor can make that claim with formal proof.</p>
+  </div>
+
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">Forcing Function: DORA + NIST</div>
+      <div class="card-body">DORA is in effect. Fines reach €200M per infraction for a €10B bank. NIST PQC standards triggered $4.2B in forced spend. This is mandatory budget, not optional.</div>
+      <div class="card-cite">DORA Art. 65 · NIST FIPS 203/204/205 · Aug 2024</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <div class="card-title">Air-Gapped. No Cloud Upload.</div>
+      <div class="card-body">DORA Art. 5–14 data sovereignty requirements prohibit cloud upload for many EU banks. SandboxAQ and IBM require cloud. VeriCrypt is a single static binary — the only option for strict air-gap environments.</div>
+      <div class="card-cite">DORA Art. 5–14 · ADR-021</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📐</div>
+      <div class="card-title">Formal Proof, Not Opinion</div>
+      <div class="card-body">Regulatory axioms are compiled to ASL bytecode, executed deterministically by seedvm, producing a schedule trace any regulator can bit-identically replay. This is computer science, not marketing.</div>
+      <div class="card-cite">arXiv:2604.01483 · ADR-023</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌐</div>
+      <div class="card-title">The One-Message Sale</div>
+      <div class="card-body">Send the binary. CISO runs one command. Sees 847 RSA-2048 certificates with HNDL exposure quantified per asset. DORA Art. 9 returns COUNTEREXAMPLE. License purchase is a risk management decision, not a sales decision.</div>
+      <div class="card-cite">Proof-Carrying Output · ADR-022</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚛️</div>
+      <div class="card-title">HNDL: The Invisible Threat</div>
+      <div class="card-body">"Harvest Now, Decrypt Later" attacks are active now. EU Rec 2024/1101 Recital 8 names this explicitly. VeriCrypt is the only tool that quantifies HNDL exposure per asset with Shapley coalition attribution and the formal Ld &gt; Ha temporal hazard model.</div>
+      <div class="card-cite">EU Rec 2024/1101 Recital 8 · CTI-Shapley 2025</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏛️</div>
+      <div class="card-title">Acquirer-Ready Architecture</div>
+      <div class="card-body">arc42 score 96/100. 23 ADRs. 49 conformance checks. Living Index pattern. Terminology canon. 18-class threat model. 5 addenda. The documentation alone reduces acquirer due diligence cost materially — priced into the €480M base case.</div>
+      <div class="card-cite">arc42 A+ · ISO 25010 · TOGAF ACMM L4–5</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- IP & EIGHT FIRSTS -->
+<div id="ip" class="section">
+  <div class="section-eyebrow">02 — Novel IP & First-Mover Contributions</div>
+  <h2 class="section-title">Eight architectural firsts.<br><em>Unbridgeable</em> without a complete rewrite.</h2>
+  <p class="section-lead">No published commercial system implements all eight. This is the moat that makes VeriCrypt defensible against every competitor including Arqit, IBM QSE, and SandboxAQ.</p>
+
+  <div class="firsts-grid">
+    <div class="first-item">
+      <div class="first-num">F-01</div>
+      <div class="first-text">
+        <div class="first-title">ASL Virtual Machine Runtime</div>
+        <div class="first-desc">Regulatory axioms compiled to deterministic bytecode. Bit-identical replay without trusting the vendor. ADR-021.</div>
+      </div>
+    </div>
+    <div class="first-item">
+      <div class="first-num">F-02</div>
+      <div class="first-text">
+        <div class="first-title">Proof-Carrying Output (.pqc)</div>
+        <div class="first-desc">Report embeds bytecode + seed + schedule trace + ProofMeta. Regulator verifies independently offline. ADR-023.</div>
+      </div>
+    </div>
+    <div class="first-item">
+      <div class="first-num">F-03</div>
+      <div class="first-text">
+        <div class="first-title">Compile-Time Regulatory Enforcement</div>
+        <div class="first-desc">ASL contract clauses reject non-compliant configurations before execution, not at scan time. ADR-022.</div>
+      </div>
+    </div>
+    <div class="first-item">
+      <div class="first-num">F-04</div>
+      <div class="first-text">
+        <div class="first-title">Multiplicative HNDL + Shapley Attribution</div>
+        <div class="first-desc">Per-asset risk contribution with coalition-structured Shapley (CTI-Shapley 2025) and formal Ld &gt; Ha temporal hazard. ADR-002.</div>
+      </div>
+    </div>
+    <div class="first-item">
+      <div class="first-num">F-05</div>
+      <div class="first-text">
+        <div class="first-title">Constant-Size Evidence Structures</div>
+        <div class="first-desc">Q-Audit Integrity, Q-Non-Equivocation, Q-Binding proofs (Kao arXiv:2511.17118). Uniform verification cost regardless of inventory size.</div>
+      </div>
+    </div>
+    <div class="first-item">
+      <div class="first-num">F-06</div>
+      <div class="first-text">
+        <div class="first-title">Per-Customer Key Architecture + Offline Revocation</div>
+        <div class="first-desc">No embedded private key. Customer-local Report Signing Key. 4-layer PKI hierarchy verifiable in every .pqc. ADR-010, ADR-015.</div>
+      </div>
+    </div>
+    <div class="first-item">
+      <div class="first-num">F-07</div>
+      <div class="first-text">
+        <div class="first-title">VeriChain STH + Non-Equivocation Proof</div>
+        <div class="first-desc">RFC 6962-compatible Signed Tree Heads. ∀e: publish(root_a,e) ∧ publish(root_b,e) ⇒ root_a=root_b formally proven. ADR-012, ADR-018.</div>
+      </div>
+    </div>
+    <div class="first-item">
+      <div class="first-num">F-08</div>
+      <div class="first-text">
+        <div class="first-title">Compliance Confidence Calculus</div>
+        <div class="first-desc">P × I × R model with three independently-assessed sub-components. First formally-specified compliance confidence metric for PQC posture assessment.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-eyebrow" style="margin-top:3rem">Academic grounding</div>
+  <div class="academic-grid">
+    <div class="academic-item">
+      <div class="ac-paper">arXiv:2604.01483 · Apr 2026</div>
+      <div class="ac-title">Lean-Agent Protocol</div>
+      <div class="ac-impl">Microsecond compliance via pre-compiled axioms. SEC/FINRA rule mapping. VeriCrypt is the commercial product this paper proves is possible.</div>
+    </div>
+    <div class="academic-item">
+      <div class="ac-paper">ResearchGate · Mar 2026</div>
+      <div class="ac-title">HNDL Temporal Hazard</div>
+      <div class="ac-impl">Ld &gt; Ha model formally implemented in Quantum Exposure Analyzer. temporal_hazard(asset) = max(0,1−Ha/Ld). 100+ primary sources.</div>
+    </div>
+    <div class="academic-item">
+      <div class="ac-paper">AIMS Sciences · Apr 2025</div>
+      <div class="ac-title">CTI-Shapley</div>
+      <div class="ac-impl">Coalition-structured Shapley for attack graph vulnerability ranking. Four coalition types mapped to VeriCrypt DependencyType edges.</div>
+    </div>
+    <div class="academic-item">
+      <div class="ac-paper">arXiv:2511.17118 · Feb 2026</div>
+      <div class="ac-title">Kao Constant-Size Evidence</div>
+      <div class="ac-impl">Q-Audit Integrity, Q-Non-Equivocation, Q-Binding full security proofs. VeriCrypt's constant-size evidence structure directly implements this.</div>
+    </div>
+    <div class="academic-item">
+      <div class="ac-paper">arXiv:2605.17909 · May 2026</div>
+      <div class="ac-title">EHV TEE Framework</div>
+      <div class="ac-impl">TEE epoch-based attestation caching. O(1) overhead per inference. VeriCrypt's TEE Attestation Module implements epoch caching.</div>
+    </div>
+    <div class="academic-item">
+      <div class="ac-paper">arXiv:2502.17898 · Feb 2026</div>
+      <div class="ac-title">VeriPlan Formal Verification</div>
+      <div class="ac-impl">Model checking as external guardrail for probabilistic systems. Underpins ASL VM's deterministic execution boundary.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem; padding:1.5rem 2rem; background:rgba(255,184,0,0.06); border:1px solid rgba(255,184,0,0.2); border-radius:4px">
+    <div class="section-eyebrow" style="margin-bottom:.5rem">⚠ Highest-Priority Pre-Raise Action</div>
+    <p style="font-size:14px; color:var(--head); line-height:1.7">The ASL VM + PCO (.pqc) architecture is patentable as a complete system. Five core claims cover the full invention. Per Windsor Drake Q1 2026, companies with clustered 5–7 patent portfolios command <strong style="color:var(--amber)">2–4× acquisition premiums</strong>. A 5-claim provisional patent application is 6–8 weeks of attorney time — estimated €15–30K — and materially changes every acquirer conversation. Risk VR1: unexercised patent opportunity currently suppresses valuation by −15–25%.</p>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- MARKET -->
+<div id="market" class="section">
+  <div class="section-eyebrow">03 — Market Analysis</div>
+  <h2 class="section-title">The only <em>mandatory spend</em> category<br>in enterprise security.</h2>
+  <p class="section-lead">DORA is law. NIST standards are finalised. The regulatory convergence is not a trend — it is a forcing function. 22,000 financial entities must act. VeriCrypt owns the highest-value layer of the compliance stack.</p>
+
+  <div class="cards-grid" style="margin-bottom:2rem">
+    <div class="card">
+      <div class="metric-num cyan" style="font-size:1.8rem">$18.3B</div>
+      <div class="metric-label" style="margin:.3rem 0">PQC Market 2026</div>
+      <div class="card-body">Surge driven by DORA enforcement + NIST PQC finalisation. $4.2B net-new federal and regulated-industry spend in 2025–2026 alone.</div>
+    </div>
+    <div class="card">
+      <div class="metric-num" style="font-size:1.8rem">$40.5B</div>
+      <div class="metric-label" style="margin:.3rem 0">PQC Market 2030</div>
+      <div class="card-body">22% CAGR. Mandatory regulatory demand as primary driver — not discretionary technology spend.</div>
+    </div>
+    <div class="card">
+      <div class="metric-num green" style="font-size:1.8rem">22,000</div>
+      <div class="metric-label" style="margin:.3rem 0">DORA-Affected Entities</div>
+      <div class="card-body">Credit institutions, payment institutions, investment firms, insurance undertakings, CASPs, and 15 other types. At VeriCrypt's Tier A pricing of €125K, 1% of this market is €27.5M ARR.</div>
+    </div>
+    <div class="card">
+      <div class="metric-num amber" style="font-size:1.8rem">2%</div>
+      <div class="metric-label" style="margin:.3rem 0">DORA Fine Ceiling</div>
+      <div class="card-body">Of global annual turnover per violation. For a €10B bank: €200M per infraction. VeriCrypt at €125K–€950K is insurance at 0.06–0.5% of penalty exposure.</div>
+    </div>
+  </div>
+
+  <div class="section-eyebrow">Compliance deadline pressure</div>
+  <div class="timeline" style="margin-top:1.5rem">
+    <div class="tl-item">
+      <div class="tl-date">Jan 17, 2025 — Past, overdue</div>
+      <div class="tl-title">DORA Full Enforcement</div>
+      <div class="tl-desc">Crypto-agility and ICT risk management mandatory for all EU financial entities. First year of active supervisory enforcement, CTPP oversight, on-site inspections.</div>
+      <div class="tl-impact">↗ Every EU bank is in remediation now</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">Sep 21, 2026 — 3 months</div>
+      <div class="tl-title">FIPS 140-2 → Historical</div>
+      <div class="tl-desc">All FIPS 140-2 certificates move to the Historical list. Only FIPS 140-3 validated modules acceptable for federal procurement. Banks with federal contracts must act immediately.</div>
+      <div class="tl-impact">↗ Immediate procurement trigger for US-connected EU banks</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">Dec 2026 — 6 months</div>
+      <div class="tl-title">EU PQC National Strategy Deadline</div>
+      <div class="tl-desc">EU NIS Cooperation Group: member states must publish national PQC strategies, initiate cryptographic inventories, and launch pilot projects. CBOM is prerequisite.</div>
+      <div class="tl-impact">↗ All EU financial entities must have completed cryptographic inventories</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">2028</div>
+      <div class="tl-title">NCSC Phase 1 Deadline / Europol Q-Day Warning</div>
+      <div class="tl-desc">NCSC: complete cryptographic asset discovery by 2028. Europol Quantum Safe Financial Forum (Feb 2025): Q-Day could arrive as early as 2028. HNDL data with horizon beyond 2028 is at immediate risk.</div>
+      <div class="tl-impact">↗ Harvest-Now-Decrypt-Later data already compromised</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">2030</div>
+      <div class="tl-title">High-Risk Critical Infrastructure PQC Deadline</div>
+      <div class="tl-desc">EU NIS CG Roadmap: high-risk systems must be quantum-safe. NSA CNSA 2.0: NSS full migration. NCSC Phase 2. BSI hybrid mandate.</div>
+      <div class="tl-impact">↗ Peak enterprise migration spend window</div>
+    </div>
+  </div>
+
+  <div class="section-eyebrow" style="margin-top:3rem">Competitive landscape</div>
+  <div class="comp-table-wrap" style="margin-top:1.5rem">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Vendor</th>
+          <th>Category</th>
+          <th>Formal Proofs</th>
+          <th>Air-Gapped</th>
+          <th>Signed Artifact</th>
+          <th>Regulator Verifiable</th>
+          <th>Price Signal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td>VeriCrypt ◈</td>
+          <td>PQC Compliance Proof Engine</td>
+          <td class="check-yes">✓ ASL VM</td>
+          <td class="check-yes">✓ Single binary</td>
+          <td class="check-yes">✓ SLH-DSA .pqc</td>
+          <td class="check-yes">✓ vericrypt-verify</td>
+          <td>€125K–€3.8M</td>
+        </tr>
+        <tr>
+          <td>SandboxAQ AQtive Guard</td>
+          <td>Crypto inventory</td>
+          <td class="check-no">✗</td>
+          <td class="check-no">✗ Cloud required</td>
+          <td class="check-no">✗ PDF report</td>
+          <td class="check-no">✗</td>
+          <td>$200K+ est.</td>
+        </tr>
+        <tr>
+          <td>IBM Quantum Safe Explorer</td>
+          <td>Code-level scanning</td>
+          <td class="check-no">✗</td>
+          <td class="check-no">✗ IBM stack</td>
+          <td class="check-no">✗ PDF/CBOM</td>
+          <td class="check-no">✗</td>
+          <td>$200K+ (bundled)</td>
+        </tr>
+        <tr>
+          <td>Arqit Encryption Intelligence</td>
+          <td>Crypto inventory</td>
+          <td class="check-no">✗</td>
+          <td class="check-no">✗</td>
+          <td class="check-no">✗ Report only</td>
+          <td class="check-no">✗</td>
+          <td>$623K / 11 contracts H1 FY26</td>
+        </tr>
+        <tr>
+          <td>Big 4 PQC Advisory</td>
+          <td>Consulting</td>
+          <td class="check-no">✗</td>
+          <td class="check-part">◐ Manual</td>
+          <td class="check-no">✗ Word doc</td>
+          <td class="check-no">✗</td>
+          <td>€50K–€500K per engagement</td>
+        </tr>
+        <tr>
+          <td>Venari / Boutique PQC</td>
+          <td>Consulting</td>
+          <td class="check-no">✗</td>
+          <td class="check-part">◐ Manual</td>
+          <td class="check-no">✗ PDF report</td>
+          <td class="check-no">✗</td>
+          <td>£15K–£50K per assessment</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="padding:1.25rem 1.5rem; background:var(--card); border:1px solid var(--border); border-radius:4px; font-size:13px; color:var(--muted)">
+    <strong style="color:var(--white)">The gap is architectural, not incremental.</strong> Arqit — the closest public comparable — launched Encryption Intelligence in January 2026 and generated $623K from 11 contracts in H1 FY2026. Arqit does NOT produce formal proofs. It produces reports. VeriCrypt produces proofs. The gap is unbridgeable without a complete rewrite of Arqit's compliance engine. Time-to-copy for IBM or SandboxAQ: 18–36 months minimum. Patent filing closes this window permanently.
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- REVENUE -->
+<div id="revenue" class="section">
+  <div class="section-eyebrow">04 — Revenue Architecture</div>
+  <h2 class="section-title">Five phases. <em>Compounding</em><br>from engagement to platform.</h2>
+  <p class="section-lead">Revenue architecture is designed to expand with every customer relationship. Phase 1 closes in days. Phase 5 reaches trillion-transaction scale. The architecture is already designed for all five.</p>
+
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">Tier A</div>
+      <div class="price-amount">€125K</div>
+      <div class="price-period">one-time · Proof of Value</div>
+      <div class="price-desc">Single signed .pqc report. Full 7-stage pipeline. CycloneDX 1.7 CBOM. Phase 1/2/3 roadmap. 90-day licence window.</div>
+      <ul class="price-features">
+        <li>847-asset certificate scan</li>
+        <li>HNDL exposure per asset (Shapley)</li>
+        <li>DORA Art.5–14 compliance proof</li>
+        <li>SLH-DSA signed .pqc artifact</li>
+        <li>vericrypt-verify for regulator</li>
+      </ul>
+    </div>
+    <div class="price-card featured">
+      <div class="price-badge">PRIMARY COMMERCIAL OFFER</div>
+      <div class="price-tier">Tier B</div>
+      <div class="price-amount">€425K</div>
+      <div class="price-period">Year 1 · €350K renewal · Mid-Market Annual</div>
+      <div class="price-desc">Unlimited scans. All frameworks. Quarterly axiom updates. Full editable axiom capability (Mode 2). Priority support. €1B–€50B AUM.</div>
+      <ul class="price-features">
+        <li>Unlimited signed .pqc scans</li>
+        <li>DORA + NCSC + NIST + PQFIF axioms</li>
+        <li>Editable axiom library (Mode 2)</li>
+        <li>Quarterly regulatory axiom updates</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <div class="price-tier">Tier C</div>
+      <div class="price-amount">€950K</div>
+      <div class="price-period">Year 1 · €750K renewal · Large Institution</div>
+      <div class="price-desc">All Tier B + dedicated axiom customisation, HSM-mode signing, technical account manager. €50B–€500B AUM.</div>
+      <ul class="price-features">
+        <li>All Tier B features</li>
+        <li>Dedicated axiom customisation</li>
+        <li>HSM-mode signing</li>
+        <li>Technical account manager</li>
+        <li>Quarterly executive briefing</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <div class="price-tier">Tier D</div>
+      <div class="price-amount">€1.9–3.8M</div>
+      <div class="price-period">Annual · Negotiated renewal · G-SIB / Enterprise</div>
+      <div class="price-desc">All Tier C + multi-entity, white-label verifier, VeriChain STH, GRC integration, Regulator Axiom Publishing Programme. Systemically important.</div>
+      <ul class="price-features">
+        <li>All Tier C features</li>
+        <li>Multi-entity unlimited scans</li>
+        <li>White-label vericrypt-verify</li>
+        <li>VeriChain STH anchoring</li>
+        <li>Regulator axiom publishing</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-eyebrow" style="margin-top:3rem">5-year financial projections</div>
+  <div class="rev-table-wrap" style="margin-top:1.5rem">
+    <table class="rev-table">
+      <thead>
+        <tr>
+          <th>Revenue Stream</th>
+          <th>Year 1</th>
+          <th>Year 2</th>
+          <th>Year 3</th>
+          <th>Year 4</th>
+          <th>Year 5</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tier A engagements</td>
+          <td>€375K</td>
+          <td>€750K</td>
+          <td>€1.25M</td>
+          <td>€1.5M</td>
+          <td>€2.0M</td>
+        </tr>
+        <tr>
+          <td>Tier B annual licences</td>
+          <td>€850K</td>
+          <td>€3.5M</td>
+          <td>€10.5M</td>
+          <td>€24.5M</td>
+          <td>€49.0M</td>
+        </tr>
+        <tr>
+          <td>Tier C / D enterprise</td>
+          <td>—</td>
+          <td>€1.9M</td>
+          <td>€7.6M</td>
+          <td>€19.0M</td>
+          <td>€38.0M</td>
+        </tr>
+        <tr>
+          <td>Axiom jurisdiction packs</td>
+          <td>€125K</td>
+          <td>€500K</td>
+          <td>€1.5M</td>
+          <td>€3.5M</td>
+          <td>€7.0M</td>
+        </tr>
+        <tr>
+          <td>Partner channel (30–40% share)</td>
+          <td>—</td>
+          <td>€600K</td>
+          <td>€2.4M</td>
+          <td>€6.0M</td>
+          <td>€12.0M</td>
+        </tr>
+        <tr>
+          <td>Professional services</td>
+          <td>€250K</td>
+          <td>€750K</td>
+          <td>€1.5M</td>
+          <td>€3.0M</td>
+          <td>€5.0M</td>
+        </tr>
+        <tr class="total-row">
+          <td>Total Revenue</td>
+          <td>€1.6M</td>
+          <td>€8.0M</td>
+          <td>€24.75M</td>
+          <td>€57.5M</td>
+          <td>€113.0M</td>
+        </tr>
+        <tr>
+          <td style="color:var(--muted)">Gross Margin</td>
+          <td style="color:var(--muted)">82%</td>
+          <td style="color:var(--muted)">85%</td>
+          <td style="color:var(--muted)">87%</td>
+          <td style="color:var(--muted)">88%</td>
+          <td style="color:var(--muted)">90%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cards-grid" style="margin-top:2.5rem">
+    <div class="card">
+      <div class="card-title">Phase 3 — Regulatory Axiom Marketplace</div>
+      <div class="card-body">Third-party regulatory experts write and sign ASL axioms. VeriCrypt takes 20–30% platform rev-share. Every new axiom (SEC PQFIF, MAS TRM, APRA CPS 234) expands geographic reach without additional engineering. Network effect mechanism.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Phase 4 — AI Agent Compliance Firewall</div>
+      <div class="card-body">As agentic AI executes financial transactions, each transaction requiring regulatory compliance evidence triggers a VeriCrypt proof call. At trillion-transaction scale: €0.01/proof = €10B+ ARR potential. Architecture already designed for this.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Phase 5 — ISO Standard Certification</div>
+      <div class="card-body">VeriCrypt becomes the ISO standard for machine-verifiable cryptographic compliance artifacts. The .pqc format becomes the industry standard the way PDF became the document standard. 10+ year horizon but architecture-ready today.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- VALUATION -->
+<div id="valuation" class="section">
+  <div class="section-eyebrow">05 — Valuation</div>
+  <h2 class="section-title">€380M – €620M.<br>Three-method <em>triangulation</em>.</h2>
+  <p class="section-lead">Strategic-acquirer scenario. Base case €480M. Calibrated to deep-tech PQC compliance IP: strategic IP value × forward revenue multiple × regulatory-mandate pricing premium × arc42 quality applied throughout.</p>
+
+  <div class="val-bridge">
+    <div class="val-title">Valuation bridge — IP premium components → €480M base case</div>
+    <div class="bridge-item">
+      <div class="bridge-label">Base deep-tech crypto compliance IP floor</div>
+      <div class="bridge-bar-wrap"><div class="bridge-bar" style="width:15%"></div></div>
+      <div class="bridge-val">+€70M</div>
+    </div>
+    <div class="bridge-item">
+      <div class="bridge-label">ASL VM uniqueness — bit-identical replay, no competitor</div>
+      <div class="bridge-bar-wrap"><div class="bridge-bar" style="width:31%"></div></div>
+      <div class="bridge-val">+€150M</div>
+    </div>
+    <div class="bridge-item">
+      <div class="bridge-label">PCO .pqc format — regulator-replayable, novel worldwide</div>
+      <div class="bridge-bar-wrap"><div class="bridge-bar" style="width:21%"></div></div>
+      <div class="bridge-val">+€100M</div>
+    </div>
+    <div class="bridge-item">
+      <div class="bridge-label">DORA regulatory mandate — forced spend, immediate TAM</div>
+      <div class="bridge-bar-wrap"><div class="bridge-bar" style="width:17%"></div></div>
+      <div class="bridge-val">+€80M</div>
+    </div>
+    <div class="bridge-item">
+      <div class="bridge-label">arc42 documentation quality — reduces acquirer DD cost</div>
+      <div class="bridge-bar-wrap"><div class="bridge-bar" style="width:10%"></div></div>
+      <div class="bridge-val">+€50M</div>
+    </div>
+    <div class="bridge-item" style="opacity:.5">
+      <div class="bridge-label">Patent cluster (unexercised — highest-priority action)</div>
+      <div class="bridge-bar-wrap"><div class="bridge-bar" style="width:25%; background: linear-gradient(90deg, var(--amber), #FF6B00)"></div></div>
+      <div class="bridge-val" style="color:var(--amber)">+€80–150M</div>
+    </div>
+    <div class="bridge-total">
+      <div class="bridge-total-label">Base case valuation (June 2026)</div>
+      <div class="bridge-total-val">€480M</div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:3rem">
+    <div class="card">
+      <div class="card-title" style="color:var(--cyan); margin-bottom:1rem">Method 1 — Deep-Tech IP Value (Primary)</div>
+      <p style="font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:.75rem">Correct primary method for pre-commercial-scale, formally-specified, novel-architecture with regulatory mandate. Comparable: nCipher (£3.6B for cryptographic infrastructure IP before commercial scale). Eight architectural firsts constitute the IP bundle.</p>
+      <div style="font-size:1.5rem; font-weight:800; color:var(--white)">€300M – €600M</div>
+      <div style="font-size:12px; color:var(--muted)">Centre: €450M</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--cyan); margin-bottom:1rem">Method 2 — Forward ARR Multiple (Secondary)</div>
+      <p style="font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:.75rem">15 Tier B bank contracts at €350K renewal = €5.25M ARR × 12× compliance-SaaS multiple (Veracode/Checkmarx comps) × 1.8× formal-proof premium = €113M. Stacks to €480M with IP premium. Highly consistent with Method 1.</p>
+      <div style="font-size:1.5rem; font-weight:800; color:var(--white)">€400M – €640M</div>
+      <div style="font-size:12px; color:var(--muted)">At Phase 2 with 15 bank contracts</div>
+    </div>
+  </div>
+
+  <div style="padding:1.5rem 2rem; background:var(--card); border:1px solid var(--border2); border-radius:4px; margin-bottom:2rem">
+    <div style="font-size:13px; color:var(--head); line-height:1.75">
+      <strong style="color:var(--cyan)">Primary acquirers:</strong> Thales (highest fit — VeriCrypt sits on top of Thales HSMs), IBM (QSE customer base, needs formal proof layer), SWIFT (member bank distribution flywheel), Broadcom, CertiK/Lambda256, Arqit. All have well-defined acquisition budgets for security tooling in the €300M–€800M range at pre-commercial-scale. The €480M base case is the midpoint of what this acquirer pool has historically paid for comparable deep-tech security IP with formal proof moats.
+    </div>
+  </div>
+
+  <p style="font-size:12px; color:var(--dim); line-height:1.6">
+    Full valuation methodology, comparable transaction universe, arc42 quality premium table, and complete risk register available in the Investment Valuation Report: <a href="https://intellica-15c.pages.dev/vcv" target="_blank" style="color:var(--cyan)">intellica-15c.pages.dev/vcv</a>
+  </p>
+</div>
+
+<hr class="divider">
+
+<!-- RISKS -->
+<div id="risks" class="section">
+  <div class="section-eyebrow">06 — Risk Register</div>
+  <h2 class="section-title">Identified. <em>Quantified.</em><br>Actively mitigated.</h2>
+  <p class="section-lead">All risks synthesised from arc42 Addenda 1–5, threat model T1–T18, and external gap analysis. Valuation impact assessed per risk.</p>
+
+  <div class="risk-table-wrap">
+    <table class="risk-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Risk</th>
+          <th>Severity</th>
+          <th>Val. Impact</th>
+          <th>Mitigation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="risk-id">VR1</td>
+          <td>No patents filed — first-mover advantage unprotected</td>
+          <td class="sev-high">HIGH</td>
+          <td style="color:var(--red)">−15–25%</td>
+          <td>Provisional patent cluster (5 claims) is the single highest-leverage pre-raise action. 6–8 weeks attorney time. ~€15–30K cost. Changes every acquirer conversation.</td>
+        </tr>
+        <tr>
+          <td class="risk-id">VR2</td>
+          <td>Pre-revenue — no signed commercial contracts</td>
+          <td class="sev-med">MED</td>
+          <td style="color:var(--amber)">−20–30%</td>
+          <td>First DORA engagement (€125K Tier A) converts IP value to revenue multiple eligibility — 3× valuation uplift per signed contract. Sep 21 FIPS deadline is the urgency hook.</td>
+        </tr>
+        <tr>
+          <td class="risk-id">VR3</td>
+          <td>agentseed path dependency (seedc/seedvm IP ownership)</td>
+          <td class="sev-med">MED</td>
+          <td style="color:var(--amber)">−5–10%</td>
+          <td>Dependency documented in Consolidation Report. IP ownership of agentseed must be clarified before M&A. Vendored copy or licensing agreement required pre-raise.</td>
+        </tr>
+        <tr>
+          <td class="risk-id">VR4</td>
+          <td>Continuous monitoring dashboard deferred (ADR-020)</td>
+          <td class="sev-low">LOW</td>
+          <td style="color:var(--green)">−3–5%</td>
+          <td>.pqc report format already includes all fields for aggregation. Dashboard deferred but architecture-ready. Phase 3 deliverable.</td>
+        </tr>
+        <tr>
+          <td class="risk-id">VR5</td>
+          <td>PASETO v4 license token is quantum-vulnerable (Ed25519)</td>
+          <td class="sev-low">LOW</td>
+          <td style="color:var(--green)">−1–2%</td>
+          <td>Formal risk acceptance documented. Migration to ML-DSA token in v1.1 (2027). Quantum attack on license token requires 100K–20M qubits — well beyond 2026 horizon.</td>
+        </tr>
+        <tr>
+          <td class="risk-id">VR8</td>
+          <td>IBM / Thales could build similar formal proof layer</td>
+          <td class="sev-med">MED</td>
+          <td style="color:var(--amber)">−8–12%</td>
+          <td>Time-to-copy: 18–36 months minimum. Patent filing closes this window. ASL VM + PCO architecture took years of research synthesis — not replicable in a sprint.</td>
+        </tr>
+        <tr>
+          <td class="risk-id">VR10</td>
+          <td>Single developer dependency (bus factor)</td>
+          <td class="sev-med">MED</td>
+          <td style="color:var(--amber)">−2–3%</td>
+          <td>Consolidation Report + 5 addenda + 49 conformance checks + 23 ADRs constitute the primary mitigation. Architecture is fully specified. Any senior Rust engineer can continue.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ROADMAP -->
+<div id="roadmap" class="section">
+  <div class="section-eyebrow">07 — Value Creation Roadmap</div>
+  <h2 class="section-title">Four horizons from<br><em>IP asset</em> to <em>platform standard</em>.</h2>
+  <p class="section-lead">Ranked by valuation impact. Each horizon compounds the previous. The architecture for all four is already designed and documented.</p>
+
+  <div class="cards-grid">
+    <div class="card" style="border-color:var(--amber)">
+      <div class="tag tag-amber">HORIZON 0 · 0–6 WEEKS</div>
+      <div class="card-title" style="margin-top:.75rem">IP Protection</div>
+      <div style="font-size:1.4rem; font-weight:800; color:var(--amber); margin:.5rem 0">+€80–150M</div>
+      <div class="card-body">File provisional patent application: 5 core claims covering ASL VM, PCO format, HNDL Shapley model, compile-time enforcement, and 4-layer PKI. Cost: €15–30K attorney fees. Highest ROI action available. Also: clarify agentseed IP ownership.</div>
+    </div>
+    <div class="card" style="border-color:var(--cyan)">
+      <div class="tag tag-cyan">HORIZON 1 · 0–3 MONTHS</div>
+      <div class="card-title" style="margin-top:.75rem">First DORA Customer</div>
+      <div style="font-size:1.4rem; font-weight:800; color:var(--cyan); margin:.5rem 0">+€100–200M</div>
+      <div class="card-body">Target EU mid-tier bank (€5B–€50B assets) facing DORA Art.9 deadline. Send binary. They run it. See COUNTEREXAMPLE on RSA-2048. Buy Tier A at €125K. Activate verify.vericrypt.io regulator portal — most powerful sales asset in any investor or CISO conversation.</div>
+    </div>
+    <div class="card">
+      <div class="tag tag-green">HORIZON 2 · 3–9 MONTHS</div>
+      <div class="card-title" style="margin-top:.75rem">Strategic Partnership</div>
+      <div style="font-size:1.4rem; font-weight:800; color:var(--green); margin:.5rem 0">+€80–120M</div>
+      <div class="card-body">Approach Thales (highest-fit acquirer and potential distribution partner). Submit to SWIFT PQC working group as compliance evidence standard. Contact BaFin-regulated Sparkassen and Volksbanken — most active under 2026 BaFin PQC agenda. Channel partner programme (Venari, evolutionQ).</div>
+    </div>
+    <div class="card">
+      <div class="tag tag-cyan">HORIZON 3 · 9–24 MONTHS</div>
+      <div class="card-title" style="margin-top:.75rem">Phase 2 SDK + Axiom Marketplace</div>
+      <div style="font-size:1.4rem; font-weight:800; color:var(--white); margin:.5rem 0">€480M+ thesis</div>
+      <div class="card-body">10–20 Tier B bank contracts at €350K ARR enters Veracode-comparable multiple territory (8–10× ARR). IP premium stacks on top. Launch Regulatory Axiom Marketplace — Phase 3 network effect mechanism. Every new jurisdiction pack expands reach without engineering cost.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:2.5rem; padding:2rem 2.5rem; background:var(--card); border:1px solid var(--border); border-radius:4px">
+    <div class="section-eyebrow" style="margin-bottom:.75rem">The partner channel — launch-day revenue</div>
+    <div class="two-col">
+      <div>
+        <p style="font-size:14px; color:var(--head); font-weight:600; margin-bottom:.5rem">Certified Delivery Partners</p>
+        <p style="font-size:13px; color:var(--muted); line-height:1.65">PQC consultancies and cybersecurity firms. 100% of professional services fee + 100% of training consulting. Licence fee passes through at list price. One active partner with 5 bank clients = €625K+ in Year 1 without any additional VeriCrypt sales effort.</p>
+      </div>
+      <div>
+        <p style="font-size:14px; color:var(--head); font-weight:600; margin-bottom:.5rem">Strategic Referral Partners</p>
+        <p style="font-size:13px; color:var(--muted); line-height:1.65">Big 4 cyber practices with DORA mandates. 15% referral fee on first-year licence value. Full advisory mandate retained by partner. PwC DE, Deloitte, EY are all actively publishing PQC content — they need a tool. VeriCrypt is the only tool that produces a regulator-verifiable artifact.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <div class="cta-label">Investment Opportunity · June 2026</div>
+    <h2 class="cta-headline">The compliance proof layer that no competitor can build.</h2>
+    <p class="cta-sub">VeriCrypt is the only commercially-ready system producing machine-provable cryptographic compliance artifacts. DORA enforcement is active. The Sep 21 FIPS deadline is 3 months away. The window is open now.</p>
+    <div class="cta-buttons">
+      <a href="https://intellica-15c.pages.dev/vcv" target="_blank" class="btn-primary">
+        ↗ Full Valuation Report · €380M–€620M
+      </a>
+      <a href="https://vericrypt-7qp.pages.dev/partners" target="_blank" class="btn-secondary">
+        Partner Programme →
+      </a>
+    </div>
+    <div style="margin-top:2rem; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim)">
+      Contact: <a href="mailto:peterdramsajan@gmail.com" style="color:var(--cyan)">peterdramsajan@gmail.com</a>
+      &nbsp;·&nbsp;
+      <a href="tel:+18687195236" style="color:var(--cyan)">+1 (868) 719-5236</a>
+      &nbsp;·&nbsp;
+      <a href="https://wa.me/18687195236" style="color:var(--cyan)">WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">VERI<span>CRYPT</span> · Intellica AI LLC ·  901 N Market St, Suite 100, Wilmington, DE 19801 · 2026
+</div>
+  <div class="footer-legal">
+    Confidential — For Qualified Investors Only. All valuations are estimates based on publicly available comparable data, arc42 architecture assessment methodology, and industry benchmarks current as of June 2026. Not audited financial statements. Strategic-acquirer scenario valuations only.
+  </div>
+</footer>
+
+</body>
+</html>

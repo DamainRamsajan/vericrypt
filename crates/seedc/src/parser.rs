@@ -90,6 +90,7 @@ impl<'a> Parser<'a> {
         let start = self.pos;
         let mut items = Vec::new();
         while !self.at(TokenKind::Eof) {
+            let pos_before = self.pos;
             match self.parse_top_level_item() {
                 Ok(item) => items.push(item),
                 Err(e) => {
@@ -111,11 +112,15 @@ impl<'a> Parser<'a> {
                         TokenKind::RBrace,
                         TokenKind::Eof,
                     ]);
+                    if self.pos == pos_before {
+                        self.advance();
+                    }
                 }
             }
         }
         Ok(Program {
             items,
+            span: self.span_from(start),
             span: self.span_from(start),
         })
     }

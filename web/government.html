@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intellica — Government AI Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --void:       #050810;
+  --deep:       #080C16;
+  --surface:    #0C1220;
+  --card:       #0F1628;
+  --card-hi:    #131D35;
+  --lift:       #192236;
+  --border:     rgba(148,163,210,0.10);
+  --border-hi:  rgba(148,163,210,0.22);
+  --border-act: rgba(148,163,210,0.40);
+  --cyan:       #00C8FF;
+  --cyan-dim:   rgba(0,200,255,0.08);
+  --amber:      #E8A617;
+  --amber-dim:  rgba(232,166,23,0.08);
+  --green:      #35D47A;
+  --green-dim:  rgba(53,212,122,0.08);
+  --red:        #FF4D4D;
+  --text:       #C8D4F0;
+  --text-hi:    #E8EEFF;
+  --muted:      #6678A0;
+  --faint:      rgba(148,163,210,0.35);
+  --mono:       'IBM Plex Mono',monospace;
+  --display:    'Syne',sans-serif;
+  --body:       'IBM Plex Sans',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--void);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 4rem;height:60px;
+  background:rgba(5,8,16,0.88);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.nav-brand{
+  font-family:var(--display);font-size:1rem;font-weight:700;
+  letter-spacing:0.12em;color:var(--text-hi);text-decoration:none;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.nav-brand::before{
+  content:'';display:block;width:6px;height:6px;
+  background:var(--cyan);border-radius:50%;
+  box-shadow:0 0 10px var(--cyan);
+}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{
+  font-family:var(--mono);font-size:0.68rem;color:var(--muted);
+  text-decoration:none;letter-spacing:0.06em;transition:color 0.2s;
+}
+.nav-links a:hover{color:var(--cyan)}
+.nav-cta{
+  font-family:var(--mono);font-size:0.68rem;color:var(--void);
+  background:var(--cyan);padding:0.4rem 1.1rem;
+  border-radius:2px;text-decoration:none;font-weight:500;
+  letter-spacing:0.06em;transition:opacity 0.2s;
+}
+.nav-cta:hover{opacity:0.85}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:8rem 2rem 5rem;
+  position:relative;overflow:hidden;
+}
+.hero-canvas{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+}
+.hero-inner{position:relative;z-index:1;max-width:860px}
+
+/* Classification strip */
+.hero-class{
+  display:inline-flex;align-items:center;gap:1.2rem;
+  font-family:var(--mono);font-size:0.62rem;
+  letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:3rem;
+}
+.hero-class::before,.hero-class::after{
+  content:'';display:block;width:40px;height:1px;background:var(--border-hi);
+}
+
+/* Main heading */
+.hero h1{
+  font-family:var(--display);
+  font-size:clamp(3.2rem,7.5vw,7rem);
+  font-weight:800;
+  line-height:0.92;
+  letter-spacing:-0.04em;
+  color:var(--text-hi);
+  margin-bottom:1.5rem;
+}
+.hero h1 .line-accent{
+  display:block;
+  color:transparent;
+  -webkit-text-stroke:1px var(--cyan);
+}
+.hero h1 .line-dim{
+  display:block;
+  color:var(--muted);
+  font-size:0.55em;
+  font-weight:400;
+  letter-spacing:-0.01em;
+  line-height:1.3;
+  margin-top:1rem;
+}
+
+/* Proof bar */
+.hero-proof{
+  display:flex;align-items:center;justify-content:center;
+  gap:0;margin:2.5rem 0;
+  border:1px solid var(--border-hi);
+  border-radius:3px;overflow:hidden;
+  max-width:680px;margin-left:auto;margin-right:auto;
+}
+.proof-cell{
+  flex:1;padding:1rem 1.2rem;
+  border-right:1px solid var(--border);
+  text-align:center;
+  background:var(--surface);
+}
+.proof-cell:last-child{border-right:none}
+.proof-num{
+  font-family:var(--display);font-size:1.6rem;font-weight:700;
+  color:var(--cyan);line-height:1;margin-bottom:0.25rem;
+}
+.proof-label{
+  font-family:var(--mono);font-size:0.58rem;
+  color:var(--muted);letter-spacing:0.1em;
+  text-transform:uppercase;line-height:1.4;
+}
+
+/* CTA row */
+.hero-cta{
+  display:flex;align-items:center;justify-content:center;
+  gap:1rem;margin-bottom:3rem;flex-wrap:wrap;
+}
+.btn-primary{
+  font-family:var(--mono);font-size:0.76rem;letter-spacing:0.06em;
+  color:var(--void);background:var(--cyan);border:none;
+  padding:0.9rem 2.2rem;border-radius:2px;
+  text-decoration:none;font-weight:500;cursor:pointer;
+  transition:opacity 0.2s;
+}
+.btn-primary:hover{opacity:0.85}
+.btn-ghost{
+  font-family:var(--mono);font-size:0.76rem;letter-spacing:0.06em;
+  color:var(--cyan);background:transparent;
+  border:1px solid var(--border-hi);
+  padding:0.9rem 2.2rem;border-radius:2px;
+  text-decoration:none;cursor:pointer;
+  transition:border-color 0.2s,background 0.2s;
+}
+.btn-ghost:hover{border-color:var(--cyan);background:var(--cyan-dim)}
+
+/* Verification badges */
+.hero-verify{
+  display:flex;align-items:center;justify-content:center;
+  gap:1.5rem;flex-wrap:wrap;
+}
+.verify-badge{
+  display:flex;align-items:center;gap:0.5rem;
+  font-family:var(--mono);font-size:0.62rem;
+  color:var(--muted);letter-spacing:0.06em;
+}
+.verify-badge svg{width:14px;height:14px;flex-shrink:0}
+.vb-check{color:var(--green)}
+.vb-check svg path{stroke:var(--green)}
+
+/* ── SIGNAL BAND ── */
+.signal-band{
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:0.9rem 4rem;
+  display:flex;gap:2.5rem;align-items:center;
+  overflow-x:auto;background:var(--surface);
+  position:relative;
+}
+.signal-band::before{
+  content:'LIVE PROCUREMENT SIGNALS';
+  font-family:var(--mono);font-size:0.56rem;
+  letter-spacing:0.18em;color:var(--muted);
+  white-space:nowrap;padding-right:2rem;
+  border-right:1px solid var(--border-hi);
+  margin-right:0.5rem;
+}
+.sig{
+  display:flex;align-items:center;gap:0.5rem;
+  white-space:nowrap;font-family:var(--mono);
+  font-size:0.64rem;color:var(--muted);letter-spacing:0.04em;
+}
+.dot{
+  width:6px;height:6px;border-radius:50%;flex-shrink:0;
+  animation:pulse 2s infinite;
+}
+.dot.g{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot.a{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+.dot.r{background:var(--red);box-shadow:0 0 6px var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+
+/* ── SECTION / LAYOUT ── */
+.section{
+  padding:6rem 4rem;
+  max-width:1320px;margin:0 auto;
+  position:relative;z-index:1;
+}
+.sec-eye{
+  font-family:var(--mono);font-size:0.65rem;
+  color:var(--cyan);letter-spacing:0.22em;
+  text-transform:uppercase;margin-bottom:0.6rem;
+}
+.sec-title{
+  font-family:var(--display);
+  font-size:clamp(1.8rem,3.5vw,2.8rem);
+  font-weight:700;letter-spacing:-0.025em;
+  line-height:1.05;margin-bottom:0.9rem;
+  color:var(--text-hi);
+}
+.sec-sub{
+  font-size:0.95rem;color:var(--muted);
+  max-width:540px;margin-bottom:3rem;line-height:1.7;
+}
+
+/* ── DOMAIN DIVIDER ── */
+.dom-div{
+  display:flex;align-items:center;gap:1.5rem;
+  padding:4.5rem 4rem 1.5rem;
+  max-width:1320px;margin:0 auto;
+}
+.dom-tag{
+  font-family:var(--mono);font-size:0.65rem;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid rgba(0,200,255,0.25);
+  padding:0.3rem 0.8rem;border-radius:2px;white-space:nowrap;
+}
+.dom-line{flex:1;height:1px;background:var(--border)}
+
+/* ── GRID ── */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:4px;
+  overflow:hidden;
+  max-width:1320px;margin:0 auto;
+}
+
+/* ── CARD ── */
+.card{
+  background:var(--card);
+  padding:2rem 2.2rem;
+  display:flex;flex-direction:column;gap:0.9rem;
+  position:relative;overflow:hidden;
+  transition:background 0.2s;
+  cursor:default;
+}
+.card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--cyan),transparent 70%);
+  opacity:0;transition:opacity 0.25s;
+}
+.card:hover{background:var(--card-hi)}
+.card:hover::before{opacity:1}
+
+/* Classification corner mark */
+.card::after{
+  content:attr(data-class);
+  position:absolute;top:1rem;right:1rem;
+  font-family:var(--mono);font-size:0.52rem;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(102,120,160,0.5);
+  pointer-events:none;
+}
+
+/* Card header */
+.card-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.card-type{
+  font-family:var(--mono);font-size:0.6rem;
+  color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;
+}
+
+/* Badges */
+.badge{
+  display:inline-flex;align-items:center;gap:0.35rem;
+  font-family:var(--mono);font-size:0.57rem;
+  letter-spacing:0.06em;text-transform:uppercase;
+  padding:0.22rem 0.6rem;border-radius:2px;white-space:nowrap;flex-shrink:0;
+}
+.badge.rfp{background:rgba(232,166,23,0.1);color:var(--amber);border:1px solid rgba(232,166,23,0.22)}
+.badge.live{background:rgba(53,212,122,0.1);color:var(--green);border:1px solid rgba(53,212,122,0.2)}
+.badge.req{background:rgba(255,77,77,0.1);color:var(--red);border:1px solid rgba(255,77,77,0.2)}
+.badge.univ{background:rgba(0,200,255,0.06);color:var(--cyan);border:1px solid rgba(0,200,255,0.2)}
+
+/* Card title */
+.card-title{
+  font-family:var(--display);font-size:1.2rem;font-weight:600;
+  line-height:1.2;letter-spacing:-0.01em;color:var(--text-hi);
+}
+
+/* Card body */
+.card-body{
+  font-size:0.88rem;color:var(--muted);line-height:1.68;
+}
+.card-body strong{color:var(--text);font-weight:500}
+
+/* Deliverables */
+.dlv{border-top:1px solid var(--border);padding-top:0.9rem}
+.dlv-lbl{
+  font-family:var(--mono);font-size:0.58rem;
+  color:var(--muted);letter-spacing:0.14em;
+  text-transform:uppercase;margin-bottom:0.5rem;
+}
+.dlv ul{list-style:none;display:flex;flex-direction:column;gap:0.32rem}
+.dlv li{
+  font-size:0.82rem;color:var(--text);
+  padding-left:1.1rem;position:relative;line-height:1.5;
+}
+.dlv li::before{
+  content:'→';position:absolute;left:0;
+  color:var(--cyan);font-size:0.72rem;
+}
+
+/* TCO box */
+.tco{
+  background:rgba(0,200,255,0.04);
+  border:1px solid rgba(0,200,255,0.14);
+  border-radius:3px;padding:1.1rem 1.2rem;
+}
+.tco-lbl{
+  font-family:var(--mono);font-size:0.58rem;
+  color:var(--cyan);letter-spacing:0.14em;
+  text-transform:uppercase;margin-bottom:0.4rem;
+}
+.tco p{font-size:0.84rem;color:var(--text);line-height:1.6}
+.tco strong{color:var(--cyan)}
+
+/* Option blocks */
+.opt-block{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:3px;padding:0.85rem 1rem;
+}
+.opt-lbl{
+  font-family:var(--mono);font-size:0.58rem;
+  color:var(--cyan);letter-spacing:0.14em;margin-bottom:0.25rem;
+}
+.opt-title{
+  font-family:var(--display);font-size:0.9rem;
+  font-weight:600;color:var(--text-hi);margin-bottom:0.2rem;
+}
+.opt-body{font-size:0.79rem;color:var(--muted);line-height:1.55}
+
+/* Card footer */
+.card-ft{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-top:auto;border-top:1px solid var(--border);
+  padding-top:0.9rem;gap:1rem;flex-wrap:wrap;
+}
+.price{
+  font-family:var(--display);font-size:1.05rem;
+  font-weight:700;color:var(--cyan);
+}
+.price-note{
+  font-family:var(--mono);font-size:0.58rem;
+  color:var(--muted);margin-top:0.15rem;
+}
+.markets{
+  font-family:var(--mono);font-size:0.6rem;
+  color:var(--muted);text-align:right;line-height:1.55;
+}
+.tags{display:flex;flex-wrap:wrap;gap:0.35rem}
+.tag{
+  font-family:var(--mono);font-size:0.56rem;
+  color:var(--muted);border:1px solid var(--border);
+  padding:0.12rem 0.45rem;border-radius:2px;letter-spacing:0.04em;
+}
+
+/* ── FEATURED CARD ── */
+.card.feat{
+  grid-column:1/-1;
+  flex-direction:row;gap:3rem;align-items:flex-start;
+}
+.feat-l{flex:1.3}
+.feat-r{flex:1}
+.opt-stack{display:flex;flex-direction:column;gap:0.5rem;margin-top:0.75rem}
+
+/* Price table */
+.ptable{width:100%;border-collapse:collapse;margin-top:0.5rem}
+.ptable tr{border-bottom:1px solid var(--border)}
+.ptable tr:last-child{border-bottom:none}
+.ptable td{padding:0.45rem 0;font-size:0.81rem}
+.ptable td:first-child{color:var(--muted);padding-right:1rem}
+.ptable td:last-child{color:var(--text);text-align:right;font-family:var(--mono);font-size:0.76rem}
+.ptable tr.total td{color:var(--cyan)!important;font-weight:600;font-size:0.86rem!important;padding-top:0.7rem!important}
+
+/* Phase ladder */
+.phases{display:flex;flex-direction:column;gap:0;margin-top:0.75rem}
+.phase{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:0.8rem 0;border-bottom:1px solid var(--border);
+}
+.phase:last-child{border-bottom:none}
+.ph-num{
+  font-family:var(--mono);font-size:0.65rem;
+  color:var(--cyan);min-width:2rem;padding-top:0.1rem;
+}
+.ph-c{flex:1}
+.ph-name{
+  font-family:var(--display);font-size:0.88rem;
+  font-weight:600;color:var(--text-hi);margin-bottom:0.15rem;
+}
+.ph-desc{font-size:0.78rem;color:var(--muted)}
+.ph-price{
+  font-family:var(--mono);font-size:0.72rem;
+  color:var(--cyan);white-space:nowrap;padding-top:0.1rem;
+}
+
+/* ── MARKET MAP ── */
+.mmap{
+  padding:5rem 4rem;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.mmap-inner{max-width:1320px;margin:0 auto}
+.mmap-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:4px;
+  overflow:hidden;margin-top:2rem;
+}
+.mcell{background:var(--void);padding:1.4rem}
+.mreg{
+  font-family:var(--mono);font-size:0.62rem;
+  color:var(--cyan);letter-spacing:0.16em;
+  text-transform:uppercase;margin-bottom:0.7rem;
+}
+.mitems{list-style:none;display:flex;flex-direction:column;gap:0.3rem}
+.mitems li{
+  font-size:0.77rem;color:var(--muted);
+  display:flex;align-items:center;gap:0.45rem;
+}
+.md{width:4px;height:4px;border-radius:50%;flex-shrink:0;background:var(--green)}
+.md.a{background:var(--amber)}
+
+/* ── WHY SECTION ── */
+.why-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.2rem;margin-top:2.2rem;
+}
+.why-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:3px;padding:1.6rem;
+  transition:border-color 0.2s;
+}
+.why-card:hover{border-color:var(--border-act)}
+.why-icon{
+  font-family:var(--mono);font-size:0.65rem;
+  color:var(--cyan);letter-spacing:0.14em;
+  text-transform:uppercase;margin-bottom:0.8rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.why-icon::before{content:'//';opacity:0.5}
+.why-title{
+  font-family:var(--display);font-size:1rem;
+  font-weight:600;color:var(--text-hi);margin-bottom:0.4rem;
+}
+.why-body{font-size:0.83rem;color:var(--muted);line-height:1.65}
+
+/* ── CTA ── */
+.cta-sec{
+  padding:7rem 4rem;text-align:center;
+  position:relative;overflow:hidden;
+}
+.cta-inner{max-width:620px;margin:0 auto;position:relative;z-index:1}
+.cta-sec::before{
+  content:'';position:absolute;
+  bottom:-240px;left:50%;transform:translateX(-50%);
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(0,200,255,0.05) 0%,transparent 65%);
+  pointer-events:none;
+}
+.cta-sec h2{
+  font-family:var(--display);
+  font-size:clamp(2.2rem,4.5vw,3.5rem);
+  font-weight:800;letter-spacing:-0.03em;
+  line-height:1.05;color:var(--text-hi);
+  margin:1.5rem 0 1.2rem;
+}
+.cta-sub{color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:2.5rem}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:1.8rem 4rem;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:1rem;
+}
+.foot-brand{
+  font-family:var(--mono);font-size:0.72rem;
+  font-weight:500;color:var(--muted);letter-spacing:0.12em;
+}
+.foot-brand span{color:var(--cyan)}
+.foot-links{display:flex;gap:1.5rem;list-style:none}
+.foot-links a{
+  font-family:var(--mono);font-size:0.62rem;
+  color:var(--muted);text-decoration:none;
+  letter-spacing:0.06em;transition:color 0.2s;
+}
+.foot-links a:hover{color:var(--cyan)}
+.foot-r{font-family:var(--mono);font-size:0.6rem;color:rgba(102,120,160,0.5);letter-spacing:0.08em}
+
+/* ── SCROLL FADE ── */
+.fade{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease}
+.fade.vis{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){.fade{opacity:1;transform:none;transition:none}}
+
+/* ── MOBILE ── */
+@media(max-width:900px){
+  nav{padding:0 1.25rem}
+  .nav-links{display:none}
+  .hero{padding:7rem 1.25rem 4rem}
+  .hero h1{font-size:clamp(2.5rem,9vw,4.5rem)}
+  .hero-proof{flex-wrap:wrap}
+  .proof-cell{min-width:120px}
+  .signal-band{padding:0.9rem 1.25rem}
+  .signal-band::before{display:none}
+  .section{padding:4rem 1.25rem}
+  .dom-div{padding:3rem 1.25rem 1rem}
+  .grid{grid-template-columns:1fr}
+  .card.feat{flex-direction:column}
+  .mmap{padding:4rem 1.25rem}
+  .cta-sec{padding:5rem 1.25rem}
+  footer{padding:1.8rem 1.25rem;flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://vericrypt-7qp.pages.dev/dpr" class="nav-brand">INTELLICA</a>
+  <ul class="nav-links">
+    <li><a href="#sovereign">Sovereign</a></li>
+    <li><a href="#agentic">Agentic</a></li>
+    <li><a href="#citizen">Services</a></li>
+    <li><a href="#governance">Governance</a></li>
+    <li><a href="#training">Training</a></li>
+    <li><a href="#sector">Sector</a></li>
+  </ul>
+  <a href="mailto:dpramsajan@meeting-mind.com" class="nav-cta">Request briefing →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <canvas class="hero-canvas" id="grid-canvas"></canvas>
+  <div class="hero-inner">
+
+    <div class="hero-class">
+      Intellica AI LLC &nbsp;·&nbsp; Government Capability Register &nbsp;·&nbsp; 2026
+    </div>
+
+    <h1>
+      Government AI<br>
+      <span class="line-accent">that holds.</span>
+      <span class="line-dim">
+        Formally verified. Post-quantum hardened.<br>Sovereign by design. Deployed in weeks.
+      </span>
+    </h1>
+
+    <!-- Proof strip -->
+    <div class="hero-proof">
+      <div class="proof-cell">
+        <div class="proof-num">85%</div>
+        <div class="proof-label">SaaS cost<br>eliminated</div>
+      </div>
+      <div class="proof-cell">
+        <div class="proof-num">41%</div>
+        <div class="proof-label">Gov AI blocked<br>by data silos</div>
+      </div>
+      <div class="proof-cell">
+        <div class="proof-num">Aug '26</div>
+        <div class="proof-label">EU AI Act<br>enforcement</div>
+      </div>
+      <div class="proof-cell">
+        <div class="proof-num">6</div>
+        <div class="proof-label">Active RFPs<br>open now</div>
+      </div>
+      <div class="proof-cell">
+        <div class="proof-num">48h</div>
+        <div class="proof-label">Architecture<br>turnaround</div>
+      </div>
+    </div>
+
+    <div class="hero-cta">
+      <a href="mailto:dpramsajan@meeting-mind.com" class="btn-primary">Send us your problem</a>
+      <a href="https://wa.me/18687195236" class="btn-ghost">WhatsApp Damian →</a>
+    </div>
+
+    <div class="hero-verify">
+      <div class="verify-badge vb-check">
+        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 7.5L5.5 10.5L11.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        TLA+ model-checked
+      </div>
+      <div class="verify-badge vb-check">
+        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 7.5L5.5 10.5L11.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Lean 4 theorem proven
+      </div>
+      <div class="verify-badge vb-check">
+        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 7.5L5.5 10.5L11.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        NIST FIPS 203/204/205
+      </div>
+      <div class="verify-badge vb-check">
+        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 7.5L5.5 10.5L11.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        EU AI Act Annex IV
+      </div>
+      <div class="verify-badge vb-check">
+        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 7.5L5.5 10.5L11.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Post-quantum in production
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SIGNAL BAND -->
+<div class="signal-band">
+  <div class="sig"><span class="dot r"></span>US FOIA RFP — Active</div>
+  <div class="sig"><span class="dot r"></span>Cyber RFP — Jun 24</div>
+  <div class="sig"><span class="dot r"></span>Clinical AI CA — Jun 23</div>
+  <div class="sig"><span class="dot a"></span>Ontario HPC — Jul 6</div>
+  <div class="sig"><span class="dot a"></span>Florida AI Strategy — Jul 16</div>
+  <div class="sig"><span class="dot a"></span>Ontario AI Gov — Jun 2026</div>
+  <div class="sig"><span class="dot g"></span>UAE Agentic — Production</div>
+  <div class="sig"><span class="dot g"></span>Singapore NAIS 2.0 — Active</div>
+  <div class="sig"><span class="dot a"></span>EU AI Act — Aug 2026</div>
+</div>
+
+
+<!-- ══ DOMAIN 01: SOVEREIGN INFRASTRUCTURE ══ -->
+<div class="dom-div" id="sovereign">
+  <span class="dom-tag">01 // Sovereign Infrastructure</span>
+  <div class="dom-line"></div>
+</div>
+
+<div class="grid fade">
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Software · Infrastructure</span>
+      <span class="badge live">Active procurement</span>
+    </div>
+    <h3 class="card-title">Sovereign On-Prem AI Inference Platform</h3>
+    <p class="card-body">Commercial SaaS AI costs compound annually, data leaves your jurisdiction, and per-seat licensing scales against you. <strong>We deploy a self-hosted open-weight inference stack on your hardware — fully air-gapped, with API gateway, RBAC, and usage metering built in.</strong></p>
+    <div class="tco">
+      <div class="tco-lbl">TCO case</div>
+      <p>1,000-user agency at $30/seat/month = <strong>$360K/year recurring</strong>, no asset ownership, data leaves jurisdiction. Sovereign on-prem equivalent: <strong>$50–120K hardware one-time</strong>, zero per-user licensing. Break-even in 6–18 months.</p>
+    </div>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>Full inference stack deployment (vLLM / Ollama / TGI) on agency hardware</li>
+        <li>API gateway with rate limiting, authentication, and full audit logging</li>
+        <li>Model registry and use-case selection matrix</li>
+        <li>3-year TCO model vs commercial SaaS alternative</li>
+        <li>Air-gap isolation configuration and operational runbook</li>
+        <li>Hardware sizing specification: GPU type, VRAM, storage, network</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">$10,800 – $17,940</div><div class="price-note">Assessment + Architecture engagement</div></div>
+      <div class="markets">UAE · Canada · EU member states<br>Active procurement 2026</div>
+    </div>
+    <div class="tags"><span class="tag">on-prem</span><span class="tag">sovereign</span><span class="tag">open-weight</span><span class="tag">vLLM</span></div>
+  </div>
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Software · Integration</span>
+      <span class="badge univ">Universal</span>
+    </div>
+    <h3 class="card-title">Cross-Agency Data Fabric & Semantic Integration Layer</h3>
+    <p class="card-body">Siloed ministry databases — HR, finance, policy repositories, case management — are the number one barrier to government AI. <strong>41% of government AI programmes cite data integration as the primary blocker</strong> (Gartner 2025). We build the governed interoperability layer connecting them over a unified semantic API.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>Data source inventory: quality, PII exposure, and AI-readiness scores per system</li>
+        <li>Current-state data flow diagram across all agency systems</li>
+        <li>Target-state integration architecture with technology recommendations</li>
+        <li>PII and sensitivity classification register</li>
+        <li>Phased implementation roadmap with effort estimates per phase</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">$9,720 – $15,180</div><div class="price-note">Discovery + Architecture</div></div>
+      <div class="markets">US · UK · Singapore · UAE<br>Flagged in national programmes</div>
+    </div>
+    <div class="tags"><span class="tag">data fabric</span><span class="tag">semantic API</span><span class="tag">integration</span></div>
+  </div>
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Software · Data Engineering</span>
+      <span class="badge univ">Universal</span>
+    </div>
+    <h3 class="card-title">Legacy Data Migration & AI-Powered Document Extraction</h3>
+    <p class="card-body">Paper archives, scanned PDFs, and legacy databases represent decades of institutional knowledge locked in formats no AI system can query. <strong>We accelerate migration using LLM-based extraction pipelines with human-in-the-loop review queues</strong>, converting unstructured estates into structured, queryable intelligence.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>LLM extraction pipeline for scanned PDFs, paper, and legacy databases</li>
+        <li>Human-in-the-loop review queue design and tooling</li>
+        <li>Structured output schema aligned to target data model</li>
+        <li>Quality and confidence scoring per extracted record</li>
+        <li>Migration runbook and ongoing maintenance documentation</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div><div class="price-note">By volume and document complexity</div></div>
+      <div class="markets">All governments with<br>pre-cloud legacy estates</div>
+    </div>
+    <div class="tags"><span class="tag">ETL</span><span class="tag">unstructured</span><span class="tag">migration</span></div>
+  </div>
+
+</div>
+
+
+<!-- ══ DOMAIN 02: AGENTIC AI ══ -->
+<div class="dom-div" id="agentic">
+  <span class="dom-tag">02 // Agentic AI Systems</span>
+  <div class="dom-line"></div>
+</div>
+
+<div class="grid fade">
+
+  <!-- Featured: Agentic Pilot -->
+  <div class="card feat" data-class="// phase-1">
+    <div class="feat-l">
+      <div class="card-hd">
+        <span class="card-type">Software · Build</span>
+        <span class="badge live">Phase 1 of 3</span>
+      </div>
+      <h3 class="card-title" style="font-size:1.45rem;margin-top:0.5rem">Agentic AI Pilot — Single Use Case</h3>
+      <p class="card-body" style="margin-top:0.5rem">Full production agentic systems are $250K+ multi-month programmes. <strong>This is the correct entry point.</strong> We deliver a production-ready pilot on one targeted use case, with architecture designed to scale. The pilot pays for itself by proving ROI for the larger contract.</p>
+      <div class="opt-stack">
+        <div class="opt-block">
+          <div class="opt-lbl">Option A</div>
+          <div class="opt-title">Document Q&amp;A Agent</div>
+          <div class="opt-body">Staff and citizen queries grounded in agency documents (policies, regulations, forms). RAG over vector store. Tool-use: retrieval, citation generation, escalation routing.</div>
+        </div>
+        <div class="opt-block">
+          <div class="opt-lbl">Option B</div>
+          <div class="opt-title">Case Triage Agent</div>
+          <div class="opt-body">Reads incoming case text, classifies type and priority, routes to correct team, drafts initial recommendation. Integrates with existing case management via API.</div>
+        </div>
+        <div class="opt-block">
+          <div class="opt-lbl">Option C</div>
+          <div class="opt-title">Regulatory Summarisation Agent</div>
+          <div class="opt-body">Monitors new regulatory documents (gazette, legislation), extracts key changes, generates plain-language briefing notes, routes to relevant staff. Scheduled and event-driven.</div>
+        </div>
+      </div>
+      <div class="tags" style="margin-top:1rem">
+        <span class="tag">LangGraph</span><span class="tag">Ollama</span><span class="tag">pgvector</span><span class="tag">FastAPI</span><span class="tag">RAG</span><span class="tag">Docker</span>
+      </div>
+    </div>
+    <div class="feat-r">
+      <div class="dlv-lbl">Engagement breakdown</div>
+      <table class="ptable">
+        <tr><td>Discovery &amp; use-case scoping (3 days)</td><td>$3,240 – $4,140</td></tr>
+        <tr><td>Data pipeline &amp; RAG setup (5 days)</td><td>$5,400 – $6,900</td></tr>
+        <tr><td>Agent build &amp; tool integration (10 days)</td><td>$10,800 – $13,800</td></tr>
+        <tr><td>UI, evaluation &amp; hardening (5 days)</td><td>$5,400 – $6,900</td></tr>
+        <tr><td>Documentation &amp; handover (2 days)</td><td>$2,160 – $2,760</td></tr>
+        <tr class="total"><td>Phase 1 pilot total</td><td>$23,760 – $38,640</td></tr>
+      </table>
+      <div style="margin-top:1.4rem">
+        <div class="dlv-lbl">Scale-up trajectory</div>
+        <div class="phases">
+          <div class="phase">
+            <div class="ph-num">P1</div>
+            <div class="ph-c"><div class="ph-name">Pilot (this engagement)</div><div class="ph-desc">Single use case, 20-test eval harness, deployment runbook</div></div>
+            <div class="ph-price">$24–39K</div>
+          </div>
+          <div class="phase">
+            <div class="ph-num">P2</div>
+            <div class="ph-c"><div class="ph-name">Multi-agent expansion</div><div class="ph-desc">Additional use cases, agent-to-agent coordination</div></div>
+            <div class="ph-price">$150–300K</div>
+          </div>
+          <div class="phase">
+            <div class="ph-num">P3</div>
+            <div class="ph-c"><div class="ph-name">Production hardening &amp; rollout</div><div class="ph-desc">Agency-wide deployment, performance at scale</div></div>
+            <div class="ph-price">Enterprise</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Software · Agentic</span>
+      <span class="badge rfp">Active mandate</span>
+    </div>
+    <h3 class="card-title">Citizen-Facing Agentic Service Portal</h3>
+    <p class="card-body">Form-based portals generate abandonment, call centre overflow, and inequality of access. <strong>We replace them with an LLM-backed agent that handles natural language queries, navigates eligibility rules, and autonomously completes multi-step applications</strong> on behalf of citizens without human intervention for routine cases.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Capabilities delivered</div>
+      <ul>
+        <li>Natural language query handling across all service lines</li>
+        <li>Eligibility rule navigation and dynamic form completion</li>
+        <li>Multi-step autonomous application submission</li>
+        <li>Escalation routing to human agents with full context transfer</li>
+        <li>Multilingual support and accessibility compliance</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">See Agentic Pilot</div></div>
+      <div class="markets">UAE: 50% federal services<br>to agentic AI by 2028</div>
+    </div>
+    <div class="tags"><span class="tag">agentic</span><span class="tag">citizen services</span><span class="tag">NLP</span></div>
+  </div>
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Software · Agentic</span>
+      <span class="badge live">In production</span>
+    </div>
+    <h3 class="card-title">Agentic Case Triage & Workflow Automation</h3>
+    <p class="card-body">Manual case processing — permits, benefits, regulatory filings — consumes disproportionate staff time on decisions that are highly automatable. <strong>Our autonomous agent reads incoming case files, classifies type, routes to the correct team, drafts the initial recommendation, and flags anomalies</strong> requiring human review.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Capabilities delivered</div>
+      <ul>
+        <li>Automated case classification and priority scoring</li>
+        <li>Team and specialist routing via API integration</li>
+        <li>Initial decision recommendation with supporting rationale</li>
+        <li>Anomaly detection and escalation flagging</li>
+        <li>Full audit trail for every automated decision</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">See Agentic Pilot</div></div>
+      <div class="markets">UAE · Saudi Arabia (SDAIA)<br>UK: HMRC, DWP pilots</div>
+    </div>
+    <div class="tags"><span class="tag">agentic</span><span class="tag">case management</span><span class="tag">automation</span></div>
+  </div>
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Software · Agentic · RAG</span>
+      <span class="badge univ">Multi-jurisdiction</span>
+    </div>
+    <h3 class="card-title">Agentic Document Drafting & Regulatory Summarisation</h3>
+    <p class="card-body">Legal and policy teams produce briefing notes and regulatory summaries from source documents too voluminous to read in full. <strong>Our agent reads court filings, legislation, and policy documents — producing draft outputs grounded in your agency's own knowledge base</strong> with full provenance tracking on every assertion.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Capabilities delivered</div>
+      <ul>
+        <li>Legislation and gazette monitoring with key-change extraction</li>
+        <li>Plain-language briefing note generation with citation links</li>
+        <li>Correspondence drafting grounded in agency knowledge base</li>
+        <li>Provenance tracking: every claim linked to source document and page</li>
+        <li>Routing and distribution to relevant staff on trigger</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">See Agentic Pilot</div></div>
+      <div class="markets">UK (GOV.UK AI tools)<br>US federal · EU regulators</div>
+    </div>
+    <div class="tags"><span class="tag">agentic</span><span class="tag">legal</span><span class="tag">RAG</span><span class="tag">provenance</span></div>
+  </div>
+
+  <div class="card" data-class="// rfp-jun24">
+    <div class="card-hd">
+      <span class="card-type">Software · Security · Agentic</span>
+      <span class="badge rfp">RFP closes Jun 24, 2026</span>
+    </div>
+    <h3 class="card-title">Agentic Cybersecurity & Penetration Testing Platform</h3>
+    <p class="card-body">Government networks are too large and dynamic for periodic manual pen-testing cycles. <strong>We deploy AI agents for continuous vulnerability scanning, automated pen-test execution, and threat modelling</strong> across government networks. Tied directly to the active US federal RFP closing June 24, 2026.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Capabilities delivered</div>
+      <ul>
+        <li>Continuous automated vulnerability scanning across network perimeter</li>
+        <li>Structured pen-test execution with machine-readable results</li>
+        <li>AI-driven threat modelling and remediation prioritisation</li>
+        <li>NCSC and NIST alignment with exportable compliance reports</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div><div class="price-note">Per network scope</div></div>
+      <div class="markets">US DoD / federal · UK NCSC<br>NATO member states</div>
+    </div>
+    <div class="tags"><span class="tag">agentic</span><span class="tag">cyber</span><span class="tag">NCSC</span><span class="tag">NIST</span></div>
+  </div>
+
+</div>
+
+
+<!-- ══ DOMAIN 03: CITIZEN SERVICES ══ -->
+<div class="dom-div" id="citizen">
+  <span class="dom-tag">03 // Citizen Service Applications</span>
+  <div class="dom-line"></div>
+</div>
+
+<div class="grid fade">
+
+  <div class="card" data-class="// rfp-active">
+    <div class="card-hd">
+      <span class="card-type">Software · Document Processing</span>
+      <span class="badge rfp">Active US RFP</span>
+    </div>
+    <h3 class="card-title">AI-Powered FOI / FOIA Request Management</h3>
+    <p class="card-body">Freedom of Information requests consume disproportionate staff hours on ingestion, redaction, and response coordination. <strong>We automate the full pipeline — ingestion, classification, redaction, and response drafting</strong> — with secure document handling and compliance-ready audit logs. Live US RFP as of May 2026.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>Automated request ingestion and classification by subject and agency</li>
+        <li>AI-assisted redaction with human review queue for sensitive content</li>
+        <li>Response drafting grounded in approved document corpus</li>
+        <li>Compliance audit trail for every request lifecycle stage</li>
+        <li>Cloud-based deployment with secure document handling</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">US federal (active RFP)<br>UK · Canada</div>
+    </div>
+    <div class="tags"><span class="tag">citizen services</span><span class="tag">documents</span><span class="tag">compliance</span></div>
+  </div>
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Software · Health · Analytics</span>
+      <span class="badge live">Benchmark: Singapore NMC</span>
+    </div>
+    <h3 class="card-title">Precision Medicine & Health Data Integration Platform</h3>
+    <p class="card-body">Population-level health intelligence requires integrating genomic, clinical, and environmental datasets that currently live in incompatible silos. <strong>We build the integration and analytics platform for population-level health analytics, early detection modelling, and targeted treatment routing</strong> — modelled on Singapore's National Precision Medicine Programme.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>Multi-source health data integration (genomic, clinical, environmental)</li>
+        <li>Population-level analytics and cohort segmentation</li>
+        <li>Early detection modelling pipeline with confidence scoring</li>
+        <li>Targeted treatment routing recommendations with provenance</li>
+        <li>Data governance and privacy compliance architecture</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">Singapore (NMC) · UAE<br>Caribbean health ministries</div>
+    </div>
+    <div class="tags"><span class="tag">health</span><span class="tag">precision medicine</span><span class="tag">analytics</span></div>
+  </div>
+
+  <div class="card" data-class="// production">
+    <div class="card-hd">
+      <span class="card-type">Software · Urban · Simulation</span>
+      <span class="badge live">Operational: Abu Dhabi</span>
+    </div>
+    <h3 class="card-title">Predictive Infrastructure & Urban Management AI</h3>
+    <p class="card-body">Traffic, utility grids, ambulance routing, and public safety run on reactive, incident-driven models built for a slower world. <strong>We deploy simulation and predictive models that shift agencies from reactive crisis response to proactive, anticipatory management</strong> — already operational in Abu Dhabi.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>Predictive models for traffic, utilities, ambulance routing, public safety</li>
+        <li>Real-time IoT sensor integration and data ingestion pipeline</li>
+        <li>Simulation environment for policy scenario testing</li>
+        <li>Operations dashboard for command-centre deployment</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">UAE (Abu Dhabi — production)<br>Singapore Smart Nation · UK cities</div>
+    </div>
+    <div class="tags"><span class="tag">urban</span><span class="tag">simulation</span><span class="tag">predictive</span><span class="tag">IoT</span></div>
+  </div>
+
+</div>
+
+
+<!-- ══ DOMAIN 04: GOVERNANCE ══ -->
+<div class="dom-div" id="governance">
+  <span class="dom-tag">04 // AI Governance, Audit & Compliance</span>
+  <div class="dom-line"></div>
+</div>
+
+<div class="grid fade">
+
+  <!-- Featured: XAI -->
+  <div class="card feat" data-class="// legally-required">
+    <div class="feat-l">
+      <div class="card-hd">
+        <span class="card-type">Software + Consulting · Governance</span>
+        <span class="badge req">Legally required Aug 2026</span>
+      </div>
+      <h3 class="card-title" style="font-size:1.45rem;margin-top:0.5rem">Explainable AI & Human-in-the-Loop Audit Framework</h3>
+      <p class="card-body" style="margin-top:0.5rem">The EU AI Act is enforceable from August 2026. Gartner projects mandatory XAI governance in 70% of agencies by 2029. <strong>Every automated decision affecting a citizen must now be traceable, overridable, and auditable by law.</strong> We build the governance layer that makes your AI systems compliant — not as an afterthought, but as architecture.</p>
+      <div class="dlv" style="margin-top:0.75rem">
+        <div class="dlv-lbl">What you receive</div>
+        <ul>
+          <li>Decision traceability engine — every AI output linked to inputs and reasoning path</li>
+          <li>Human override workflows with escalation and full documentation trails</li>
+          <li>Automated audit logs for all citizen-affecting automated decisions</li>
+          <li>Risk tier classification of all agency AI use cases (EU AI Act tiers)</li>
+          <li>Model card templates for every deployed system</li>
+          <li>Compliance gap report vs EU AI Act, NIST AI RMF, Singapore AI Verify, or ISO 42001</li>
+          <li>Remediation roadmap with prioritised, effort-estimated actions</li>
+        </ul>
+      </div>
+      <div class="tco" style="margin-top:0.75rem">
+        <div class="tco-lbl">Regulatory urgency</div>
+        <p>EU AI Act: enforceable August 2026. All agencies deploying high-risk AI systems affecting citizens — benefits decisions, permit approvals, risk scoring — must have compliant oversight architecture <strong>by this date or face enforcement action.</strong></p>
+      </div>
+    </div>
+    <div class="feat-r">
+      <div class="dlv-lbl">Governance framework engagement</div>
+      <table class="ptable" style="margin-top:0.6rem">
+        <tr><td>Discovery &amp; stakeholder interviews (3 days)</td><td>$3,240 – $4,140</td></tr>
+        <tr><td>Framework drafting (5 days)</td><td>$5,400 – $6,900</td></tr>
+        <tr><td>Model cards &amp; HITL protocol design (3 days)</td><td>$3,240 – $4,140</td></tr>
+        <tr><td>Gap report &amp; roadmap (2 days)</td><td>$2,160 – $2,760</td></tr>
+        <tr class="total"><td>Framework design total</td><td>$10,800 – $17,940</td></tr>
+      </table>
+      <div style="margin-top:1.3rem">
+        <div class="dlv-lbl">XAI technical implementation</div>
+        <p style="font-size:0.83rem;color:var(--muted);margin-top:0.4rem;line-height:1.65">The framework engagement scopes the build. XAI technical implementation — audit log system, override workflows, real-time explanation APIs — is a separate phase priced on system complexity. Typically $50K–$200K depending on number of AI systems in scope.</p>
+      </div>
+      <div class="tags" style="margin-top:1.3rem">
+        <span class="tag">XAI</span><span class="tag">HITL</span><span class="tag">EU AI Act</span><span class="tag">audit</span><span class="tag">ISO 42001</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-class="// rfp-active">
+    <div class="card-hd">
+      <span class="card-type">Consulting · Strategy</span>
+      <span class="badge rfp">Active RFPs</span>
+    </div>
+    <h3 class="card-title">AI Strategic Roadmap & Governance Framework</h3>
+    <p class="card-body">Most agency AI programmes fail not because of technology, but because they lack coherent sequencing, governance, and a vendor strategy that protects against lock-in. <strong>We scope, prioritise, and sequence your AI initiatives</strong>, define data governance, model lifecycle management, and sovereign compute strategy — drawing on live benchmarks from UAE, Singapore, and the UK.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>AI use-case inventory prioritised by value and readiness</li>
+        <li>Data governance policy and model lifecycle framework</li>
+        <li>Vendor risk and lock-in mitigation strategy</li>
+        <li>Sovereign compute vs commercial SaaS decision framework</li>
+        <li>Sequenced 18-month AI roadmap with investment estimates</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div><div class="price-note">Florida RFP: Jul 16 · Ontario: Jun 2026</div></div>
+      <div class="markets">US states · Canadian provinces<br>Caribbean · Pacific Island govts</div>
+    </div>
+    <div class="tags"><span class="tag">strategy</span><span class="tag">governance</span><span class="tag">roadmap</span></div>
+  </div>
+
+  <div class="card" data-class="// pre-deploy">
+    <div class="card-hd">
+      <span class="card-type">Software · Evaluation</span>
+      <span class="badge req">Pre-deployment required</span>
+    </div>
+    <h3 class="card-title">LLM Red-Teaming & Safety Evaluation Service</h3>
+    <p class="card-body">Leading government AI programmes require structured adversarial testing before production deployment. <strong>We run structured red-team exercises against your deployed government LLMs using toolkits equivalent to Singapore's Project Moonshot</strong>, delivering benchmarked safety reports against 11 international AI governance principles.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>Structured adversarial test suite: jailbreaking, bias, misinformation, prompt injection</li>
+        <li>Benchmark results against 11 international AI governance principles</li>
+        <li>Singapore AI Verify / UK DSIT / NIST AI RMF alignment report</li>
+        <li>Remediation recommendations with prioritised fixes</li>
+        <li>Signed safety evaluation report suitable for regulatory submission</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">Singapore (AI Verify) · UK DSIT<br>EU regulators · US NIST</div>
+    </div>
+    <div class="tags"><span class="tag">red-teaming</span><span class="tag">evaluation</span><span class="tag">safety</span></div>
+  </div>
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Consulting · Procurement</span>
+      <span class="badge univ">Universal</span>
+    </div>
+    <h3 class="card-title">AI Procurement Advisory & Vendor RFP Design</h3>
+    <p class="card-body">The 2024 RFP template is obsolete in leading programmes. Agencies consistently fail to distinguish agentic AI platforms from sophisticated chatbots — a failure that costs tens of millions in locked-in contracts. <strong>We design structured, capability-tested procurement processes</strong> with TCO models, portability requirements, eval suites, and lock-in risk clauses.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>RFP template engineered to surface real agentic capability</li>
+        <li>TCO model separating licensing from total cost of ownership</li>
+        <li>Lock-in risk identification matrix and exit clause templates</li>
+        <li>Architecture portability and data export requirements</li>
+        <li>Vendor evaluation scorecard and demo evaluation script</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">Universal — all governments<br>beginning AI procurement</div>
+    </div>
+    <div class="tags"><span class="tag">procurement</span><span class="tag">RFP</span><span class="tag">vendor risk</span></div>
+  </div>
+
+</div>
+
+
+<!-- ══ DOMAIN 05: TRAINING ══ -->
+<div class="dom-div" id="training">
+  <span class="dom-tag">05 // Workforce AI Training</span>
+  <div class="dom-line"></div>
+</div>
+
+<div class="grid fade">
+
+  <div class="card" data-class="// fastest-entry">
+    <div class="card-hd">
+      <span class="card-type">Training · Executive</span>
+      <span class="badge univ">Fastest entry point</span>
+    </div>
+    <h3 class="card-title">AI Strategy & Literacy for IT Leadership</h3>
+    <p class="card-body">IT directors and CIOs are making high-stakes AI procurement and governance decisions with frameworks built for a different era. <strong>This 2-day executive workshop gives IT leadership the vocabulary, mental models, and vendor-reading skills</strong> to make sound decisions — and positions your agency as sophisticated in every subsequent vendor negotiation.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Programme — up to 20 participants</div>
+      <ul>
+        <li>Day 1 Frameworks: what agentic AI actually is vs vendor claims; sovereign vs commercial; how to read an AI RFP; risk and governance basics</li>
+        <li>Day 2 Applied: 2026 global benchmarks (UAE, Singapore, UK) translated to your specific pipeline and priorities</li>
+        <li>Deliverables: agency-customised deck, AI readiness scorecard, vendor evaluation cheat sheet, post-workshop gap report</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">$6,480 – $9,660</div><div class="price-note">Prep + delivery + report + travel</div></div>
+      <div class="markets">Universal — highest-leverage<br>engagement for agency entry</div>
+    </div>
+    <div class="tags"><span class="tag">executive</span><span class="tag">C-suite</span><span class="tag">strategy</span></div>
+  </div>
+
+  <div class="card" data-class="// available">
+    <div class="card-hd">
+      <span class="card-type">Training · Technical</span>
+      <span class="badge live">70% repeat margin</span>
+    </div>
+    <h3 class="card-title">AI Engineering Bootcamp for Government Developers</h3>
+    <p class="card-body">Vendor dependency is the long-term AI risk for government. <strong>We build in-house engineering capacity through a 5-day hands-on technical programme</strong> covering LLM integration, RAG pipeline construction, agent orchestration, secure API design, and evaluation methodology. Curriculum built once, re-delivers at ~70% margin on repeat runs.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Programme — up to 12 developers</div>
+      <ul>
+        <li>Module 1: LLM API integration (Python, REST) + prompt engineering and evaluation</li>
+        <li>Module 2: RAG pipeline construction (chunking, embeddings, pgvector/Chroma)</li>
+        <li>Module 3: Agent orchestration basics (tool-use, multi-step workflows)</li>
+        <li>Module 4: Secure API design for government (auth, audit logging, rate limiting)</li>
+        <li>Module 5: Capstone project on agency's own data with assessment rubric per participant</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">$10,800 – $17,940</div><div class="price-note">Curriculum + delivery + lab setup</div></div>
+      <div class="markets">US federal · UK (CDDO)<br>Singapore · Caribbean</div>
+    </div>
+    <div class="tags"><span class="tag">engineering</span><span class="tag">RAG</span><span class="tag">agent dev</span></div>
+  </div>
+
+  <div class="card" data-class="// mandate">
+    <div class="card-hd">
+      <span class="card-type">Training · Workforce</span>
+      <span class="badge rfp">National mandate</span>
+    </div>
+    <h3 class="card-title">AI Bilingual Talent Development Programme</h3>
+    <p class="card-body">Singapore's NAIS 2.0 identifies bilingual talent — staff with both domain expertise and AI capability — as the defining strategic resource. UAE mandates AI training for every federal employee. <strong>This structured curriculum produces domain-proficient staff who can supervise, evaluate, and work alongside AI systems</strong> — targeted at non-technical government professionals.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>Prompt engineering and effective AI tool use for domain professionals</li>
+        <li>Agent oversight and error detection for non-technical staff</li>
+        <li>Data literacy and AI output interpretation training</li>
+        <li>Safe deployment and escalation protocols</li>
+        <li>Role-specific modules: HR, finance, legal, policy, operations</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">Singapore (national mandate)<br>UAE (every federal employee)</div>
+    </div>
+    <div class="tags"><span class="tag">AI literacy</span><span class="tag">reskilling</span><span class="tag">domain+AI</span></div>
+  </div>
+
+  <div class="card" data-class="// eu-required">
+    <div class="card-hd">
+      <span class="card-type">Training · Operations</span>
+      <span class="badge req">EU AI Act required</span>
+    </div>
+    <h3 class="card-title">Agentic AI Oversight & Human-in-the-Loop Operations</h3>
+    <p class="card-body">Deploying agentic AI without training staff to supervise it inverts the risk — you gain automation liability without the productivity benefit. <strong>We equip government staff to supervise, audit, override, and escalate decisions made by autonomous AI systems</strong>, covering HITL mechanics, explainability interpretation, error detection, and escalation protocols.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>HITL operation mechanics — when and how to intervene in AI decisions</li>
+        <li>Explainability output interpretation for non-technical operators</li>
+        <li>Error and anomaly detection in AI-generated recommendations</li>
+        <li>Escalation protocols with documented decision trees</li>
+        <li>Audit log review and compliance documentation procedures</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">UAE (mandatory) · EU AI Act entities<br>UK · US</div>
+    </div>
+    <div class="tags"><span class="tag">HITL</span><span class="tag">agent ops</span><span class="tag">oversight</span></div>
+  </div>
+
+</div>
+
+
+<!-- ══ DOMAIN 06: HIGH-VALUE SECTOR ══ -->
+<div class="dom-div" id="sector">
+  <span class="dom-tag">06 // High-Value Sector Programmes</span>
+  <div class="dom-line"></div>
+</div>
+
+<div class="grid fade">
+
+  <div class="card" data-class="// production">
+    <div class="card-hd">
+      <span class="card-type">Software · Procurement · Finance</span>
+      <span class="badge live">In production: UAE</span>
+    </div>
+    <h3 class="card-title">AI-Native Tendering, Financial Analysis & Regulatory Review</h3>
+    <p class="card-body">Government procurement decisions — tender evaluation, financial due diligence, regulatory compliance review — remain largely manual despite being highly structured and well-suited to AI augmentation. <strong>We deploy an autonomous AI system supporting procurement decisions</strong> at the level already in production use by the UAE's Future Fit Seal programme.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Capabilities delivered</div>
+      <ul>
+        <li>Automated tender evaluation against defined criteria with scoring rationale</li>
+        <li>AI-assisted financial due diligence with anomaly flagging</li>
+        <li>Regulatory compliance review against applicable frameworks</li>
+        <li>Decision audit trail for every recommendation produced</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">UAE (production) · Saudi Arabia (SDAIA)<br>Singapore</div>
+    </div>
+    <div class="tags"><span class="tag">procurement</span><span class="tag">finance</span><span class="tag">regulatory</span></div>
+  </div>
+
+  <div class="card" data-class="// production">
+    <div class="card-hd">
+      <span class="card-type">Software · Logistics · Digital Twin</span>
+      <span class="badge live">Benchmark: Busan 2026</span>
+    </div>
+    <h3 class="card-title">Smart Port Digital Twin & AI Logistics Platform</h3>
+    <p class="card-body">Port operations are among the most data-rich, highest-throughput government-adjacent environments — and among the least optimised. <strong>We build AI-driven digital twins for port operations</strong>, integrating IoT sensor data, blockchain-based documentation, and autonomous routing. Busan Port is the 2026 production benchmark. Trinidad's port infrastructure is a direct regional opportunity.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Capabilities delivered</div>
+      <ul>
+        <li>Real-time port digital twin integrating IoT sensor feeds</li>
+        <li>AI-optimised vessel routing and berth allocation</li>
+        <li>Blockchain-based cargo documentation and provenance tracking</li>
+        <li>Predictive maintenance scheduling across port infrastructure</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div></div>
+      <div class="markets">South Korea (production)<br>Singapore · Caribbean ports</div>
+    </div>
+    <div class="tags"><span class="tag">logistics</span><span class="tag">digital twin</span><span class="tag">IoT</span><span class="tag">blockchain</span></div>
+  </div>
+
+  <div class="card" data-class="// rfp-jun23">
+    <div class="card-hd">
+      <span class="card-type">Software · Health · Clinical AI</span>
+      <span class="badge rfp">RFP closes Jun 23, 2026</span>
+    </div>
+    <h3 class="card-title">AI-Powered Acute Diagnostic & Clinical Decision Support</h3>
+    <p class="card-body">Acute conditions — stroke, sepsis — are time-critical and diagnostically complex, producing outcomes highly sensitive to speed and accuracy of initial assessment. <strong>We deploy AI diagnostic tools with real-time clinical decision support integrated into hospital workflows.</strong> Active Canadian procurement (Saskatchewan) closes June 23, 2026.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">Capabilities delivered</div>
+      <ul>
+        <li>AI diagnostic models for stroke and sepsis acute-onset detection</li>
+        <li>Real-time clinical decision support integrated into EHR/EMR workflows</li>
+        <li>Alert and escalation routing for on-call clinical teams</li>
+        <li>Clinical validation suite and performance benchmarking documentation</li>
+        <li>Compliance documentation for medical device regulatory submission</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">Custom scoped</div><div class="price-note">RFP deadline: Jun 23, 2026</div></div>
+      <div class="markets">Canada (Saskatchewan RFP)<br>UK NHS · Caribbean health</div>
+    </div>
+    <div class="tags"><span class="tag">health</span><span class="tag">clinical AI</span><span class="tag">diagnostics</span></div>
+  </div>
+
+  <div class="card" data-class="// rfp-jul6">
+    <div class="card-hd">
+      <span class="card-type">Software · Infrastructure · HPC</span>
+      <span class="badge rfp">RFP closes Jul 6, 2026</span>
+    </div>
+    <h3 class="card-title">Sovereign HPC & National AI Compute Platform</h3>
+    <p class="card-body">National AI ambitions collide with foreign-owned compute — a strategic vulnerability that Singapore addressed with a $1 billion sovereign R&D compute commitment. <strong>We design and stand up national or ministry-level sovereign HPC infrastructure</strong> for AI workloads. Active Canadian federal RFP (Ontario) closes July 6, 2026.</p>
+    <div class="dlv">
+      <div class="dlv-lbl">What you receive</div>
+      <ul>
+        <li>Workload requirements analysis and hardware sizing specification</li>
+        <li>Full HPC architecture: compute, storage, network, model serving</li>
+        <li>Software stack: inference engine, monitoring, identity, model registry</li>
+        <li>3-year TCO model vs commercial cloud alternative</li>
+        <li>RFQ-ready technical procurement specification</li>
+        <li>Risk register: data residency, model updates, staff capacity</li>
+      </ul>
+    </div>
+    <div class="card-ft">
+      <div><div class="price">$10,800 – $17,940</div><div class="price-note">Design engagement · Build contract: $200K+</div></div>
+      <div class="markets">Canada (Ontario · Jul 6)<br>Singapore · USA · Saudi Arabia</div>
+    </div>
+    <div class="tags"><span class="tag">HPC</span><span class="tag">sovereign compute</span><span class="tag">vLLM</span><span class="tag">Kubernetes</span></div>
+  </div>
+
+</div>
+
+
+<!-- MARKET MAP -->
+<div class="mmap">
+  <div class="mmap-inner">
+    <p class="sec-eye">Global procurement signal</p>
+    <h2 class="sec-title" style="margin-bottom:0.5rem">Where demand is live right now</h2>
+    <p class="sec-sub" style="margin-bottom:0">Active procurement signals from national AI programmes, live RFPs, and regulatory mandates currently in force.</p>
+    <div class="mmap-grid">
+      <div class="mcell">
+        <div class="mreg">Middle East</div>
+        <ul class="mitems">
+          <li><span class="md"></span>UAE — 50% federal services to agentic AI 2028</li>
+          <li><span class="md"></span>UAE — Future Fit Seal in production</li>
+          <li><span class="md a"></span>Saudi Arabia — SDAIA programmes active</li>
+        </ul>
+      </div>
+      <div class="mcell">
+        <div class="mreg">Asia-Pacific</div>
+        <ul class="mitems">
+          <li><span class="md"></span>Singapore — NAIS 2.0 active</li>
+          <li><span class="md"></span>Singapore — National Precision Medicine</li>
+          <li><span class="md"></span>South Korea — Busan Port production</li>
+        </ul>
+      </div>
+      <div class="mcell">
+        <div class="mreg">North America</div>
+        <ul class="mitems">
+          <li><span class="md a"></span>US federal — FOIA RFP active</li>
+          <li><span class="md a"></span>US federal — Cyber RFP Jun 24</li>
+          <li><span class="md a"></span>Canada — Clinical AI Jun 23</li>
+          <li><span class="md a"></span>Ontario — HPC RFP Jul 6</li>
+          <li><span class="md a"></span>Florida — AI Strategy Jul 16</li>
+        </ul>
+      </div>
+      <div class="mcell">
+        <div class="mreg">Europe</div>
+        <ul class="mitems">
+          <li><span class="md a"></span>EU AI Act — enforceable Aug 2026</li>
+          <li><span class="md"></span>UK — GOV.UK AI tools programme</li>
+          <li><span class="md"></span>UK — CDDO dev modernisation</li>
+          <li><span class="md"></span>UK NHS — clinical AI procurement</li>
+        </ul>
+      </div>
+      <div class="mcell">
+        <div class="mreg">Caribbean &amp; Pacific</div>
+        <ul class="mitems">
+          <li><span class="md a"></span>Trinidad — port infrastructure</li>
+          <li><span class="md a"></span>Caribbean health ministries</li>
+          <li><span class="md a"></span>Pacific Island govts — strategy RFPs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- WHY INTELLICA -->
+<div class="section fade">
+  <p class="sec-eye">Why Intellica</p>
+  <h2 class="sec-title">We do not integrate vendors.<br>We make them accountable.</h2>
+  <p class="sec-sub">Systems integrators manage vendors. We design the systems that make vendors accountable — and the architecture that makes them replaceable.</p>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-icon">Formally verified</div>
+      <h3 class="why-title">We don't claim correctness. We prove it.</h3>
+      <p class="why-body">TLA+ model checking, Lean 4 theorem proving, Dafny deductive verification. Machine-checked proofs for the components where correctness is non-negotiable. Regulators can replay them. Auditors can inspect them.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">Post-quantum</div>
+      <h3 class="why-title">Quantum-resistant, in production today.</h3>
+      <p class="why-body">ML-DSA-44, SLH-DSA, ML-KEM-768 deployed in live systems. Hybrid classical/PQC pathways. NIST FIPS 203/204/205. Government systems built today must survive tomorrow's adversarial compute. We make that the default, not an option.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">Vendor-independent</div>
+      <h3 class="why-title">No referral fees. No commercial alignments.</h3>
+      <p class="why-body">We do not resell software, take referral fees, or hold commercial agreements with AI vendors. Every recommendation is determined entirely by your requirements and the best available sovereign alternatives.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">Compliance architecture</div>
+      <h3 class="why-title">Compliance designed in, not retrofitted.</h3>
+      <p class="why-body">DORA, EU AI Act Annex IV, PCI DSS 4.0, CEN/TS 18264:2026. Compliance architecture is embedded from the first diagram, not discovered at audit. This is the only approach that remains defensible under enforcement.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">Immediately buildable</div>
+      <h3 class="why-title">Any competent team can start on day one.</h3>
+      <p class="why-body">Complete ARC42/C4 blueprints, Architecture Decision Records, component contracts, deployment plans. No interpretation required. The architecture is the handover — your team implements, not translates.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">Compressed timelines</div>
+      <h3 class="why-title">18 months of architecture in weeks.</h3>
+      <p class="why-body">We compress 18-month timelines using specification-driven AI meta-orchestration. Proof: a post-quantum compliance engine, a formally verified core banking platform, and a compiled agentic language — all built solo from scratch, in weeks.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- CTA -->
+<div class="cta-sec">
+  <div class="cta-inner">
+    <p class="sec-eye" style="display:inline-block">Start the conversation</p>
+    <h2>Tell us your hardest<br>government AI problem.</h2>
+    <p class="cta-sub">We will send you a complete architecture assessment within 48 hours. No cost for the first review. If it solves your problem — and it will — we discuss what engagement looks like from there.</p>
+    <div class="cta-btns">
+      <a href="mailto:dpramsajan@meeting-mind.com" class="btn-primary">Email Damian directly</a>
+      <a href="https://wa.me/18687195236" class="btn-ghost">WhatsApp →</a>
+      <a href="tel:+18687195236" class="btn-ghost">Call →</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-brand">INTELLICA<span>.</span>AI LLC</div>
+  <ul class="foot-links">
+    <li><a href="https://vericrypt-7qp.pages.dev/dpr">Damian Ramsajan</a></li>
+    <li><a href="mailto:dpramsajan@meeting-mind.com">dpramsajan@meeting-mind.com</a></li>
+    <li><a href="tel:+18687195236">+1 868 719 5236</a></li>
+    <li><a href="https://wa.me/18687195236">WhatsApp</a></li>
+  </ul>
+  <div class="foot-r">Trinidad & Tobago · Remote · 2026</div>
+</footer>
+
+
+<script>
+/* ── HERO GRID ANIMATION ── */
+(function(){
+  const canvas=document.getElementById('grid-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H,cols,rows,dots=[],sweep=0;
+
+  function resize(){
+    W=canvas.width=canvas.offsetWidth;
+    H=canvas.height=canvas.offsetHeight;
+    cols=Math.ceil(W/52)+1;
+    rows=Math.ceil(H/52)+1;
+    dots=[];
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+      dots.push({x:c*52,y:r*52,pulse:Math.random()*Math.PI*2});
+    }
+  }
+
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    sweep=(sweep+0.004)%(Math.PI*2);
+
+    /* grid lines */
+    ctx.strokeStyle='rgba(148,163,210,0.045)';
+    ctx.lineWidth=0.5;
+    for(let c=0;c<cols;c++){
+      ctx.beginPath();ctx.moveTo(c*52,0);ctx.lineTo(c*52,H);ctx.stroke();
+    }
+    for(let r=0;r<rows;r++){
+      ctx.beginPath();ctx.moveTo(0,r*52);ctx.lineTo(W,r*52);ctx.stroke();
+    }
+
+    /* sweep line */
+    const sx=W*0.5+Math.cos(sweep-Math.PI*0.5)*W*0.9;
+    const gradient=ctx.createLinearGradient(sx-160,0,sx+30,0);
+    gradient.addColorStop(0,'rgba(0,200,255,0)');
+    gradient.addColorStop(0.7,'rgba(0,200,255,0.04)');
+    gradient.addColorStop(1,'rgba(0,200,255,0.09)');
+    ctx.fillStyle=gradient;
+    ctx.fillRect(sx-160,0,190,H);
+
+    /* intersection dots */
+    for(let d of dots){
+      const dist=Math.abs(d.x-sx);
+      const base=0.06+0.18*Math.max(0,1-dist/120);
+      d.pulse+=0.015;
+      const alpha=base*(0.7+0.3*Math.sin(d.pulse));
+      ctx.beginPath();
+      ctx.arc(d.x,d.y,1.2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,200,255,${alpha})`;
+      ctx.fill();
+    }
+
+    /* origin pulse */
+    const op=0.15+0.08*Math.sin(t*0.001);
+    ctx.beginPath();
+    ctx.arc(W*0.5,H*0.5,4,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,200,255,${op})`;
+    ctx.fill();
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize',resize);
+  resize();
+  requestAnimationFrame(draw);
+
+  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
+    canvas.style.display='none';
+  }
+})();
+
+/* ── SCROLL FADE ── */
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target)}});
+},{threshold:0.06});
+document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
+</script>
+
+</body>
+</html>
