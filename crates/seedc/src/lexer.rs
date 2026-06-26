@@ -214,11 +214,25 @@ impl<'a> Lexer<'a> {
             '*' => self.check_compound('=', TokenKind::StarEq, TokenKind::Star),
             '%' => self.check_compound('=', TokenKind::PercentEq, TokenKind::Percent),
             '!' => self.check_compound('=', TokenKind::NotEq, TokenKind::Not),
-            '=' => self.check_compound('=', TokenKind::EqEq, TokenKind::Eq),
+
+            // ── FIXED: '=' now correctly produces FatArrow for '=>' ──
+            '=' => {
+                if self.peek() == Some(&'>') {
+                    self.advance();
+                    TokenKind::FatArrow
+                } else if self.peek() == Some(&'=') {
+                    self.advance();
+                    TokenKind::EqEq
+                } else {
+                    TokenKind::Eq
+                }
+            }
+
             '<' => self.check_two('<', '=', TokenKind::Shl, TokenKind::LtEq, TokenKind::Lt),
             '>' => self.check_two('>', '=', TokenKind::Shr, TokenKind::GtEq, TokenKind::Gt),
             '&' => self.check_compound('&', TokenKind::AndAnd, TokenKind::And),
-            // ── The fixed '|' arm ──
+
+            // ── The '|' arm ──
             '|' => {
                 if self.peek() == Some(&'|') {
                     self.advance();
@@ -364,6 +378,33 @@ mod tests {
         assert_eq!(tokens[9].kind, TokenKind::OrOr);
         assert_eq!(tokens[10].kind, TokenKind::PipeGt);
         assert_eq!(tokens[11].kind, TokenKind::PipeGtGt);
+    }
+
+    #[test]
+    fn test_fat_arrow() {
+        let tokens = tokenize("=>").unwrap();
+        assert_eq!(tokens[0].kind, TokenKind::FatArrow);
+    }
+
+    #[test]
+    fn test_eq_vs_fat_arrow() {
+        let tokens = tokenize("= == =>").unwrap();
+        assert_eq!(tokens[0].kind, TokenKind::Eq);
+        assert_eq!(tokens[1].kind, TokenKind::EqEq);
+        assert_eq!(tokens[2].kind, TokenKind::FatArrow);
+    }
+
+    #[test]
+    fn test_discharge_syntax() {
+        let tokens = tokenize("discharge x { 0.90 => { } }").unwrap();
+        assert_eq!(tokens[0].kind, TokenKind::KwDischarge);
+        assert_eq!(tokens[1].kind, TokenKind::Ident);
+        assert_eq!(tokens[2].kind, TokenKind::LBrace);
+        assert_eq!(tokens[3].kind, TokenKind::FloatLiteral);
+        assert_eq!(tokens[4].kind, TokenKind::FatArrow);
+        assert_eq!(tokens[5].kind, TokenKind::LBrace);
+        assert_eq!(tokens[6].kind, TokenKind::RBrace);
+        assert_eq!(tokens[7].kind, TokenKind::RBrace);
     }
 
     #[test]

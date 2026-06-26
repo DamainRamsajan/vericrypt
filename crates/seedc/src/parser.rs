@@ -802,8 +802,14 @@ impl<'a> Parser<'a> {
         let mut stmts = Vec::new();
         let mut last: Option<Expr> = None;
         while !self.at(TokenKind::RBrace) && !self.at(TokenKind::Eof) {
+            let pos_before = self.pos;
             if self.at(TokenKind::Semicolon) {
                 self.advance();
+                continue;
+            }
+            if self.at(TokenKind::KwDischarge) {
+                let e = self.parse_expr()?;
+                stmts.push(Stmt::Expr(e));
                 continue;
             }
             if let Ok(item) = self.parse_top_level_item() {
@@ -821,6 +827,16 @@ impl<'a> Parser<'a> {
                     last = Some(e);
                     break;
                 }
+            }
+            if self.pos == pos_before {
+                return Err(parse_err(
+                    vec![TokenKind::RBrace],
+                    self.peek().unwrap_or(&Token {
+                        kind: TokenKind::Eof,
+                        text: String::new(),
+                        span: SourceSpan::new(0.into(), 0),
+                    }),
+                ));
             }
         }
         self.expect(TokenKind::RBrace)?;
