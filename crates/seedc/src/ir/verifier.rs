@@ -78,15 +78,39 @@ fn verify_function(func: &Function) -> Result<(), IrError> {
 }
 
 fn verify_block(func: &Function, block: &BasicBlock) -> Result<(), IrError> {
+    // Seed defined set with all params AND all vars allocated by this function,
+    // since StoreLocal pre-allocates slots before first use.
     let mut defined: HashSet<VarId> = func.params.iter().cloned().collect();
+
+    // Pre-seed: any var that appears as StoreLocal operand[0] is a slot
+    // definition, not a use — mark all of them defined up front so that
+    // forward references within the same block are resolved correctly.
+    for instr in &block.instrs {
+        if instr.opcode == Opcode::StoreLocal {
+            if let Some(Operand::Var(v)) = instr.operands.first() {
+                defined.insert(*v);
+            }
+        }
+    }
+
     let mut discharged = false; // Track if we've seen a Discharge before a Perform
 
     for instr in &block.instrs {
-        // Check that all operand variables are defined
-        for op in &instr.operands {
-            if let Operand::Var(v) = op {
+        // StoreLocal operand[0] is a destination slot — skip the use-check for it,
+        // only check operand[1] (the value being stored).
+        if instr.opcode == Opcode::StoreLocal {
+            if let Some(Operand::Var(v)) = instr.operands.get(1) {
                 if !defined.contains(v) {
                     return Err(IrError::UndefinedVar(*v));
+                }
+            }
+        } else {
+            // Check that all operand variables are defined
+            for op in &instr.operands {
+                if let Operand::Var(v) = op {
+                    if !defined.contains(v) {
+                        return Err(IrError::UndefinedVar(*v));
+                    }
                 }
             }
         }
@@ -96,7 +120,12 @@ fn verify_block(func: &Function, block: &BasicBlock) -> Result<(), IrError> {
             Opcode::Add | Opcode::Sub | Opcode::Mul | Opcode::Div | Opcode::Rem => {
                 verify_binary_op(instr)?;
             }
-            Opcode::Eq | Opcode::NotEq | Opcode::Lt | Opcode::Gt | Opcode::LtEq | Opcode::GtEq => {
+            Opcode::Eq
+            | Opcode::NotEq
+            | Opcode::Lt
+            | Opcode::Gt
+            | Opcode::LtEq
+            | Opcode::GtEq => {
                 verify_binary_op(instr)?;
             }
             Opcode::Perform if !discharged => {
