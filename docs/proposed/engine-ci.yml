@@ -1,0 +1,31 @@
+# UNTESTED: I cannot run GitHub Actions from here. Create this file on GitHub at
+# .github/workflows/engine-ci.yml  (Add file > Create new file) and watch the first run.
+name: engine-ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: System packages
+        run: sudo apt-get update && sudo apt-get install -y build-essential pkg-config libssl-dev clang
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release -p vericrypt
+      - name: Tests
+        run: |
+          cargo test -p vericrypt --lib engine::
+          cargo test -p vericrypt --test engine_pipeline --test engine_cli
+      - name: Quickstart smoke test
+        run: |
+          ./target/release/vericrypt keygen --out /tmp/k.json
+          ./target/release/vericrypt analyze -i crates/vericrypt/tests/fixtures/pki --out /tmp/out --public-issuers "Acme Public Test CA" --sign-key /tmp/k.json
+          ./target/release/vericrypt verify /tmp/out/report.json --pubkey /tmp/k.pub.json
+      - name: CBOM schema validation
+        run: |
+          pip install jsonschema referencing
+          python3 scripts/validate_cbom.py /tmp/out/cbom.json

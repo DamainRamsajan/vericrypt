@@ -1,0 +1,592 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "alg:Ed25519",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "classicalSecurityLevel": 128,
+          "curve": "Ed25519",
+          "nistQuantumSecurityLevel": 0,
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.3.101.112"
+      },
+      "name": "Ed25519",
+      "properties": [
+        {
+          "name": "vericrypt:quantum-status",
+          "value": "vulnerable"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "alg:RSA-1024",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "classicalSecurityLevel": 80,
+          "nistQuantumSecurityLevel": 0,
+          "parameterSetIdentifier": "1024",
+          "primitive": "unknown"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.1"
+      },
+      "name": "RSA-1024",
+      "properties": [
+        {
+          "name": "vericrypt:quantum-status",
+          "value": "vulnerable"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "alg:RSA-2048",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "classicalSecurityLevel": 112,
+          "nistQuantumSecurityLevel": 0,
+          "parameterSetIdentifier": "2048",
+          "primitive": "unknown"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.1"
+      },
+      "name": "RSA-2048",
+      "properties": [
+        {
+          "name": "vericrypt:quantum-status",
+          "value": "vulnerable"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "alg:RSA-3072",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "classicalSecurityLevel": 128,
+          "nistQuantumSecurityLevel": 0,
+          "parameterSetIdentifier": "3072",
+          "primitive": "unknown"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.1"
+      },
+      "name": "RSA-3072",
+      "properties": [
+        {
+          "name": "vericrypt:quantum-status",
+          "value": "vulnerable"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "alg:Unknown (encrypted)",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "primitive": "unknown"
+        },
+        "assetType": "algorithm"
+      },
+      "name": "Unknown (encrypted)",
+      "properties": [
+        {
+          "name": "vericrypt:quantum-status",
+          "value": "unknown"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "alg:sha1WithRSAEncryption",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.5"
+      },
+      "name": "sha1WithRSAEncryption",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "alg:sha256WithRSAEncryption",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.11"
+      },
+      "name": "sha256WithRSAEncryption",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:cert-2b619e4681a3154e",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:RSA-2048",
+          "size": 2048,
+          "type": "public-key"
+        }
+      },
+      "name": "public key of cert-2b619e4681a3154e",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/web.der; /tmp/t3/certs/web.pem"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "cert:cert-2b619e4681a3154e",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "certificateFormat": "X.509",
+          "fingerprint": {
+            "alg": "SHA-256",
+            "content": "fb321ffbe6b441828c4196b525bf5438fe8092ee34f51e4adee6925f6f9b1532"
+          },
+          "issuerName": "CN=Acme Public Test CA, O=Acme Public",
+          "notValidAfter": "2027-10-21T20:21:04Z",
+          "notValidBefore": "2026-10-21T20:21:04Z",
+          "signatureAlgorithmRef": "alg:sha256WithRSAEncryption",
+          "subjectName": "CN=web.example.com, O=Acme Public",
+          "subjectPublicKeyRef": "key:cert-2b619e4681a3154e"
+        }
+      },
+      "name": "CN=web.example.com, O=Acme Public",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/web.der; /tmp/t3/certs/web.pem"
+        },
+        {
+          "name": "vericrypt:trust-scope",
+          "value": "public"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:cert-64e854a5a267f868",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:RSA-3072",
+          "size": 3072,
+          "type": "public-key"
+        }
+      },
+      "name": "public key of cert-64e854a5a267f868",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/api.pem"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "cert:cert-64e854a5a267f868",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "certificateFormat": "X.509",
+          "fingerprint": {
+            "alg": "SHA-256",
+            "content": "06e1b7f3a2b9c6111d94ff342364af706f64d70227c6871957bc43d5ef36f300"
+          },
+          "issuerName": "CN=Acme Public Test CA, O=Acme Public",
+          "notValidAfter": "2027-01-19T20:21:04Z",
+          "notValidBefore": "2026-10-21T20:21:04Z",
+          "signatureAlgorithmRef": "alg:sha256WithRSAEncryption",
+          "subjectName": "CN=api.example.com, O=Acme Public",
+          "subjectPublicKeyRef": "key:cert-64e854a5a267f868"
+        }
+      },
+      "name": "CN=api.example.com, O=Acme Public",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/api.pem"
+        },
+        {
+          "name": "vericrypt:trust-scope",
+          "value": "public"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:cert-dc99c7e36b8d5831",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:RSA-3072",
+          "size": 3072,
+          "type": "public-key"
+        }
+      },
+      "name": "public key of cert-dc99c7e36b8d5831",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/pubca.pem"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "cert:cert-dc99c7e36b8d5831",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "certificateFormat": "X.509",
+          "fingerprint": {
+            "alg": "SHA-256",
+            "content": "2941e6b547cb065b0dbdc77870a92f0b9192cea4a47eac2954f88566d2bb9492"
+          },
+          "issuerName": "CN=Acme Public Test CA, O=Acme Public",
+          "notValidAfter": "2036-10-18T20:21:04Z",
+          "notValidBefore": "2026-10-21T20:21:04Z",
+          "signatureAlgorithmRef": "alg:sha256WithRSAEncryption",
+          "subjectName": "CN=Acme Public Test CA, O=Acme Public",
+          "subjectPublicKeyRef": "key:cert-dc99c7e36b8d5831"
+        }
+      },
+      "name": "CN=Acme Public Test CA, O=Acme Public",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/pubca.pem"
+        },
+        {
+          "name": "vericrypt:trust-scope",
+          "value": "private"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:cert-e9482d29d262c4b0",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:RSA-1024",
+          "size": 1024,
+          "type": "public-key"
+        }
+      },
+      "name": "public key of cert-e9482d29d262c4b0",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/legacy.pem"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "cert:cert-e9482d29d262c4b0",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "certificateFormat": "X.509",
+          "fingerprint": {
+            "alg": "SHA-256",
+            "content": "100689b91ee401f416e239106f3a31cb57a0a665923b0b7d27ed31ecd0faf45b"
+          },
+          "issuerName": "CN=Acme Public Test CA, O=Acme Public",
+          "notValidAfter": "2026-10-31T20:21:04Z",
+          "notValidBefore": "2026-10-21T20:21:04Z",
+          "signatureAlgorithmRef": "alg:sha1WithRSAEncryption",
+          "subjectName": "CN=legacy.example.com, O=Acme Public",
+          "subjectPublicKeyRef": "key:cert-e9482d29d262c4b0"
+        }
+      },
+      "name": "CN=legacy.example.com, O=Acme Public",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/legacy.pem"
+        },
+        {
+          "name": "vericrypt:trust-scope",
+          "value": "public"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:cert-fac7edea7da5f3c0",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:RSA-2048",
+          "size": 2048,
+          "type": "public-key"
+        }
+      },
+      "name": "public key of cert-fac7edea7da5f3c0",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/long.pem"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "cert:cert-fac7edea7da5f3c0",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "certificateFormat": "X.509",
+          "fingerprint": {
+            "alg": "SHA-256",
+            "content": "045ec581c2e4414d4df2a0c3239577cec4839b0bb1a6ec80a28fcd6c02f2ab4e"
+          },
+          "issuerName": "CN=Acme Public Test CA, O=Acme Public",
+          "notValidAfter": "2040-06-29T20:21:05Z",
+          "notValidBefore": "2026-10-21T20:21:05Z",
+          "signatureAlgorithmRef": "alg:sha256WithRSAEncryption",
+          "subjectName": "CN=long.example.com, O=Acme Public",
+          "subjectPublicKeyRef": "key:cert-fac7edea7da5f3c0"
+        }
+      },
+      "name": "CN=long.example.com, O=Acme Public",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/long.pem"
+        },
+        {
+          "name": "vericrypt:trust-scope",
+          "value": "public"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:privkey-1a7676b6899d55d0",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:RSA-1024",
+          "size": 1024,
+          "type": "private-key"
+        }
+      },
+      "name": "private-key privkey-1a7676b6899d55d0",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/legacy.key"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:privkey-50bedb74402f5ea4",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:Unknown (encrypted)",
+          "type": "private-key"
+        }
+      },
+      "name": "private-key privkey-50bedb74402f5ea4",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/enc.key"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:privkey-55cd80427c7cdd96",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:RSA-3072",
+          "size": 3072,
+          "type": "private-key"
+        }
+      },
+      "name": "private-key privkey-55cd80427c7cdd96",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/api.key"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:privkey-cd46d28a1e1956be",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:Ed25519",
+          "size": 256,
+          "type": "private-key"
+        }
+      },
+      "name": "private-key privkey-cd46d28a1e1956be",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/edkey.pem"
+        }
+      ],
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "key:privkey-e3051942de89ff58",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "algorithmRef": "alg:RSA-2048",
+          "size": 2048,
+          "type": "private-key"
+        }
+      },
+      "name": "private-key privkey-e3051942de89ff58",
+      "properties": [
+        {
+          "name": "vericrypt:locations",
+          "value": "/tmp/t3/certs/web.key; /tmp/t3/certs/web.pem.key"
+        }
+      ],
+      "type": "cryptographic-asset"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "alg:RSA-2048"
+      ],
+      "ref": "key:cert-2b619e4681a3154e"
+    },
+    {
+      "dependsOn": [
+        "key:cert-2b619e4681a3154e",
+        "alg:sha256WithRSAEncryption"
+      ],
+      "ref": "cert:cert-2b619e4681a3154e"
+    },
+    {
+      "dependsOn": [
+        "alg:RSA-3072"
+      ],
+      "ref": "key:cert-64e854a5a267f868"
+    },
+    {
+      "dependsOn": [
+        "key:cert-64e854a5a267f868",
+        "alg:sha256WithRSAEncryption"
+      ],
+      "ref": "cert:cert-64e854a5a267f868"
+    },
+    {
+      "dependsOn": [
+        "alg:RSA-3072"
+      ],
+      "ref": "key:cert-dc99c7e36b8d5831"
+    },
+    {
+      "dependsOn": [
+        "key:cert-dc99c7e36b8d5831",
+        "alg:sha256WithRSAEncryption"
+      ],
+      "ref": "cert:cert-dc99c7e36b8d5831"
+    },
+    {
+      "dependsOn": [
+        "alg:RSA-1024"
+      ],
+      "ref": "key:cert-e9482d29d262c4b0"
+    },
+    {
+      "dependsOn": [
+        "key:cert-e9482d29d262c4b0",
+        "alg:sha1WithRSAEncryption"
+      ],
+      "ref": "cert:cert-e9482d29d262c4b0"
+    },
+    {
+      "dependsOn": [
+        "alg:RSA-2048"
+      ],
+      "ref": "key:cert-fac7edea7da5f3c0"
+    },
+    {
+      "dependsOn": [
+        "key:cert-fac7edea7da5f3c0",
+        "alg:sha256WithRSAEncryption"
+      ],
+      "ref": "cert:cert-fac7edea7da5f3c0"
+    },
+    {
+      "dependsOn": [
+        "alg:RSA-1024"
+      ],
+      "ref": "key:privkey-1a7676b6899d55d0"
+    },
+    {
+      "dependsOn": [
+        "alg:Unknown (encrypted)"
+      ],
+      "ref": "key:privkey-50bedb74402f5ea4"
+    },
+    {
+      "dependsOn": [
+        "alg:RSA-3072"
+      ],
+      "ref": "key:privkey-55cd80427c7cdd96"
+    },
+    {
+      "dependsOn": [
+        "alg:Ed25519"
+      ],
+      "ref": "key:privkey-cd46d28a1e1956be"
+    },
+    {
+      "dependsOn": [
+        "alg:RSA-2048"
+      ],
+      "ref": "key:privkey-e3051942de89ff58"
+    }
+  ],
+  "metadata": {
+    "properties": [
+      {
+        "name": "vericrypt:merkle-root",
+        "value": "9660cc573e2657944a52260fca56b7ec3ee396970764a36eb67a5a412cadb377"
+      }
+    ],
+    "timestamp": "2026-10-22T02:34:33Z",
+    "tools": {
+      "components": [
+        {
+          "name": "vericrypt",
+          "type": "application",
+          "version": "0.1.0"
+        }
+      ]
+    }
+  },
+  "serialNumber": "urn:uuid:9660cc57-3e26-4794-8a52-260fca56b7ec",
+  "specVersion": "1.7",
+  "version": 1
+}

@@ -4,6 +4,7 @@ pub mod cli;
 pub mod compliance;
 pub mod confidence;
 pub mod crypto;
+pub mod engine;
 pub mod errors;
 pub mod evidence;
 pub mod exposure;

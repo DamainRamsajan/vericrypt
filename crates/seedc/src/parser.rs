@@ -121,7 +121,6 @@ impl<'a> Parser<'a> {
         Ok(Program {
             items,
             span: self.span_from(start),
-            span: self.span_from(start),
         })
     }
 

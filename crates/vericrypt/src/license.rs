@@ -129,3 +129,11 @@ fn get_license_dir() -> Result<PathBuf, VeriCryptError> {
         });
     Ok(base.join("license"))
 }
+/// Token persisted by `activate`, if any. Used by feature gating, which re-verifies the token
+/// signature on every use instead of trusting the expiry written to disk.
+pub fn stored_token() -> Option<String> {
+    let dir = get_license_dir().ok()?;
+    let data = fs::read_to_string(dir.join("license.json")).ok()?;
+    let v: serde_json::Value = serde_json::from_str(&data).ok()?;
+    v["token"].as_str().map(|s| s.to_string())
+}
