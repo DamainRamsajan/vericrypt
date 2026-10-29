@@ -10,8 +10,10 @@ pub mod discover;
 pub mod lifecycle;
 pub mod merkle;
 pub mod model;
+pub mod observe;
 pub mod policy;
 pub mod report_html;
+pub mod store;
 
 use chrono::{DateTime, SecondsFormat, Utc};
 use clap::Args;
@@ -56,6 +58,49 @@ pub struct AnalyzeArgs {
     #[arg(long, default_value_t = 14)]
     pub crqc_years: u32,
     /// Evaluate as of this RFC 3339 time instead of now (makes reports reproducible)
+    #[arg(long)]
+    pub as_of: Option<String>,
+    /// Exit with code 3 if any finding is at or above this severity (info|low|medium|high|critical)
+    #[arg(long)]
+    pub fail_on: Option<String>,
+    /// Skip the HTML report
+    #[arg(long)]
+    pub no_html: bool,
+    /// Save what the scan saw into this store directory, so it can be re-judged later with `reevaluate`
+    #[arg(long)]
+    pub store: Option<String>,
+}
+
+#[derive(Debug, Args)]
+pub struct ReevaluateArgs {
+    /// Store directory that holds the saved scan
+    #[arg(long)]
+    pub store: String,
+    /// Scan id to re-judge (printed by `analyze --store`; also the file name in <store>/scans)
+    #[arg(long)]
+    pub scan: String,
+    /// Output directory
+    #[arg(long, default_value = "./vericrypt-out")]
+    pub out: String,
+    /// Key file from `vericrypt keygen`; signs the report with SLH-DSA (FIPS 205)
+    #[arg(long)]
+    pub sign_key: Option<String>,
+    /// Issuer substrings that are publicly trusted CAs (comma separated)
+    #[arg(long, value_delimiter = ',')]
+    pub public_issuers: Vec<String>,
+    /// Issuer substrings that are private/internal CAs (comma separated)
+    #[arg(long, value_delimiter = ',')]
+    pub private_issuers: Vec<String>,
+    /// Mosca X: years the protected data must stay confidential
+    #[arg(long, default_value_t = 10)]
+    pub shelf_life_years: u32,
+    /// Mosca Y: years your migration will take
+    #[arg(long, default_value_t = 5)]
+    pub migration_years: u32,
+    /// Mosca Z: assumed years until a cryptographically relevant quantum computer (an assumption, not a prediction)
+    #[arg(long, default_value_t = 14)]
+    pub crqc_years: u32,
+    /// Judge as of this RFC 3339 time instead of now
     #[arg(long)]
     pub as_of: Option<String>,
     /// Exit with code 3 if any finding is at or above this severity (info|low|medium|high|critical)
@@ -242,19 +287,43 @@ pub fn limitations() -> Vec<String> {
     ]
 }
 
-pub fn run_pipeline(inp: &Inputs, now: DateTime<Utc>) -> Body {
+/// Step 1: look at the world and record what was seen. Reads files and the network; makes no judgement.
+pub fn observe(inp: &Inputs, observed_at: DateTime<Utc>) -> observe::ObservationSet {
+    let started_at = observed_at.to_rfc3339_opts(SecondsFormat::Secs, true);
+    let version = env!("CARGO_PKG_VERSION").to_string();
+    let scan_id = observe::scan_id_for(&started_at, &inp.dirs, &inp.tls, &version);
     let mut d = discover::Discovery::new();
+    d.observed_at = started_at.clone();
+    d.scan_id = scan_id.clone();
+    d.tool_version = version;
     for dir in &inp.dirs {
         d.scan_dir(Path::new(dir));
     }
     for t in &inp.tls {
         d.probe_tls(t, Duration::from_secs(8));
     }
-    let mut assets: Vec<Asset> = d.assets.into_values().collect();
-    policy::apply_scope(&mut assets, &inp.params.public_issuers, &inp.params.private_issuers);
+    observe::ObservationSet {
+        format: observe::OBSERVATIONS_FORMAT.to_string(),
+        scan_id,
+        started_at,
+        targets: observe::ScanTargets { dirs: inp.dirs.clone(), tls: inp.tls.clone() },
+        observations: d.observations,
+        coverage: d.coverage,
+    }
+}
+
+/// Step 2: judge the observations. Pure: reads no files and no clock. The same observations,
+/// parameters and `now` always give the same body and Merkle root.
+pub fn evaluate(set: &observe::ObservationSet, params: &Params, now: DateTime<Utc>) -> Body {
+    let mut merged: BTreeMap<String, Asset> = BTreeMap::new();
+    for o in &set.observations {
+        discover::merge_asset(&mut merged, o.attributes.clone());
+    }
+    let mut assets: Vec<Asset> = merged.into_values().collect();
+    policy::apply_scope(&mut assets, &params.public_issuers, &params.private_issuers);
     let findings = policy::evaluate(&assets, now);
     let forecast = lifecycle::build(&assets, now);
-    let summary = summarize(&assets, &findings, &inp.params);
+    let summary = summarize(&assets, &findings, params);
 
     let av: Vec<Value> = assets.iter().map(|a| serde_json::to_value(a).unwrap()).collect();
     let fv: Vec<Value> = findings.iter().map(|f| serde_json::to_value(f).unwrap()).collect();
@@ -262,17 +331,22 @@ pub fn run_pipeline(inp: &Inputs, now: DateTime<Utc>) -> Body {
     Body {
         format: BODY_FORMAT.to_string(),
         tool: ToolInfo { name: "vericrypt".into(), version: env!("CARGO_PKG_VERSION").to_string() },
-        generated_at: inp.params.as_of.clone(),
-        parameters: inp.params.clone(),
-        coverage: d.coverage,
+        generated_at: params.as_of.clone(),
+        parameters: params.clone(),
+        coverage: set.coverage.clone(),
         summary,
         forecast,
-        assumptions: assumptions(&inp.params),
+        assumptions: assumptions(params),
         limitations: limitations(),
         assets,
         findings,
         merkle_root: root,
     }
+}
+
+pub fn run_pipeline(inp: &Inputs, now: DateTime<Utc>) -> Body {
+    let set = observe(inp, now);
+    evaluate(&set, &inp.params, now)
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -352,11 +426,44 @@ pub fn run_analyze(args: AnalyzeArgs) -> CliResult {
             private_issuers: args.private_issuers.clone(),
         },
     };
-    let body = run_pipeline(&inp, now);
+    let set = observe(&inp, Utc::now());
+    if let Some(dir) = &args.store {
+        let id = store::write_scan(dir, &set).map_err(err(2))?;
+        println!("Saved scan {} in {}", id, dir);
+    }
+    let body = evaluate(&set, &inp.params, now);
+    emit(body, &args.out, args.sign_key.as_deref(), args.no_html, fail_on)
+}
+
+/// Re-judge a saved scan: same observations, new as-of time and/or parameters.
+pub fn run_reevaluate(args: ReevaluateArgs) -> CliResult {
+    let fail_on = match &args.fail_on {
+        Some(s) => Some(Severity::parse(s).ok_or((2, format!("unknown severity '{}'", s)))?),
+        None => None,
+    };
+    let now = match &args.as_of {
+        Some(s) => DateTime::parse_from_rfc3339(s).map_err(err(2))?.with_timezone(&Utc),
+        None => Utc::now(),
+    };
+    let set = store::read_scan(&args.store, &args.scan).map_err(err(2))?;
+    let params = Params {
+        as_of: now.to_rfc3339_opts(SecondsFormat::Secs, true),
+        shelf_life_years: args.shelf_life_years,
+        migration_years: args.migration_years,
+        crqc_years: args.crqc_years,
+        public_issuers: args.public_issuers.clone(),
+        private_issuers: args.private_issuers.clone(),
+    };
+    println!("Re-judging saved scan {} (observed {}) as of {}", set.scan_id, set.started_at, params.as_of);
+    let body = evaluate(&set, &params, now);
+    emit(body, &args.out, args.sign_key.as_deref(), args.no_html, fail_on)
+}
+
+fn emit(body: Body, out: &str, sign_key: Option<&str>, no_html: bool, fail_on: Option<Severity>) -> CliResult {
     let body_v = serde_json::to_value(&body).map_err(err(1))?;
     let body_bytes = canonical(&body_v);
 
-    let attestation = match &args.sign_key {
+    let attestation = match sign_key {
         Some(path) => {
             require_license("Signed attestation")?;
             let kf = load_keyfile(path)?;
@@ -366,15 +473,15 @@ pub fn run_analyze(args: AnalyzeArgs) -> CliResult {
     };
     let report = json!({"format": REPORT_FORMAT, "body": body_v, "attestation": attestation});
 
-    std::fs::create_dir_all(&args.out).map_err(err(2))?;
-    let rp = format!("{}/report.json", args.out);
+    std::fs::create_dir_all(&out).map_err(err(2))?;
+    let rp = format!("{}/report.json", out);
     std::fs::write(&rp, serde_json::to_string_pretty(&report).unwrap()).map_err(err(2))?;
-    let cp = format!("{}/cbom.json", args.out);
+    let cp = format!("{}/cbom.json", out);
     std::fs::write(&cp, serde_json::to_string_pretty(&cbom::build(&body)).unwrap()).map_err(err(2))?;
     let mut html_path = None;
-    if !args.no_html {
+    if !no_html {
         require_license("HTML report")?;
-        let hp = format!("{}/report.html", args.out);
+        let hp = format!("{}/report.html", out);
         std::fs::write(&hp, report_html::render(&body, attestation.as_ref())).map_err(err(2))?;
         html_path = Some(hp);
     }
@@ -395,6 +502,7 @@ pub fn run_analyze(args: AnalyzeArgs) -> CliResult {
     }
     Ok(())
 }
+
 
 pub fn print_summary(b: &Body, att: Option<&attest::Attestation>) {
     let s = &b.summary;

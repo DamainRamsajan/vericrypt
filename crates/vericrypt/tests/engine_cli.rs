@@ -2,7 +2,7 @@
 //! unsigned handling, CI gating, drift diff and CBOM structure.
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
-use vericrypt::engine::{self, AnalyzeArgs, DiffArgs, KeygenArgs, VerifyArgs};
+use vericrypt::engine::{self, AnalyzeArgs, DiffArgs, KeygenArgs, ReevaluateArgs, VerifyArgs};
 
 const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/pki");
 const AS_OF: &str = "2026-11-01T00:00:00Z";
@@ -21,6 +21,7 @@ fn analyze(input: &Path, out: &Path, sign_key: Option<&Path>, fail_on: Option<&s
         as_of: Some(AS_OF.into()),
         fail_on: fail_on.map(|s| s.to_string()),
         no_html: true,
+        store: None,
     })
 }
 
@@ -136,5 +137,108 @@ fn cbom_is_structurally_consistent() {
                 }
             }
         }
+    }
+}
+
+// ---- saved scans: analyze --store, then reevaluate ----
+
+fn analyze_into_store(store: &Path, out: &Path) -> String {
+    engine::run_analyze(AnalyzeArgs {
+        inputs: vec![FIXTURES.to_string()],
+        tls: vec![],
+        out: out.display().to_string(),
+        sign_key: None,
+        public_issuers: vec!["Acme Public Test CA".into()],
+        private_issuers: vec![],
+        shelf_life_years: 10,
+        migration_years: 5,
+        crqc_years: 14,
+        as_of: Some(AS_OF.into()),
+        fail_on: None,
+        no_html: true,
+        store: Some(store.display().to_string()),
+    })
+    .unwrap();
+    let mut ids: Vec<String> = std::fs::read_dir(store.join("scans"))
+        .unwrap()
+        .map(|e| e.unwrap().path().file_stem().unwrap().to_string_lossy().to_string())
+        .collect();
+    assert_eq!(ids.len(), 1);
+    ids.remove(0)
+}
+
+fn reevaluate(store: &Path, scan: &str, out: &Path, as_of: &str) -> engine::CliResult {
+    engine::run_reevaluate(ReevaluateArgs {
+        store: store.display().to_string(),
+        scan: scan.to_string(),
+        out: out.display().to_string(),
+        sign_key: None,
+        public_issuers: vec!["Acme Public Test CA".into()],
+        private_issuers: vec![],
+        shelf_life_years: 10,
+        migration_years: 5,
+        crqc_years: 14,
+        as_of: Some(as_of.into()),
+        fail_on: None,
+        no_html: true,
+    })
+}
+
+fn body_of(out: &Path) -> serde_json::Value {
+    let v: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
+    v["body"].clone()
+}
+
+fn count_rule(body: &serde_json::Value, rule: &str) -> usize {
+    body["findings"].as_array().unwrap().iter().filter(|f| f["rule_id"] == rule).count()
+}
+
+#[test]
+fn saved_scan_re_evaluates_to_the_same_report_root() {
+    let d = tempfile::tempdir().unwrap();
+    let store = d.path().join("store");
+    let first = d.path().join("first");
+    let again = d.path().join("again");
+    let id = analyze_into_store(&store, &first);
+    reevaluate(&store, &id, &again, AS_OF).unwrap();
+    assert_eq!(body_of(&first)["merkle_root"], body_of(&again)["merkle_root"]);
+}
+
+#[test]
+fn re_evaluating_a_saved_scan_later_changes_findings_not_assets() {
+    let d = tempfile::tempdir().unwrap();
+    let store = d.path().join("store");
+    let first = d.path().join("first");
+    let later = d.path().join("later");
+    let id = analyze_into_store(&store, &first);
+    reevaluate(&store, &id, &later, "2040-01-01T00:00:00Z").unwrap();
+    let (a, b) = (body_of(&first), body_of(&later));
+    assert_eq!(a["assets"].as_array().unwrap().len(), b["assets"].as_array().unwrap().len());
+    assert_ne!(a["merkle_root"], b["merkle_root"]);
+    assert!(count_rule(&b, "HYG-EXPIRED") > count_rule(&a, "HYG-EXPIRED"));
+}
+
+#[test]
+fn a_changed_batch_file_is_refused() {
+    let d = tempfile::tempdir().unwrap();
+    let store = d.path().join("store");
+    let id = analyze_into_store(&store, &d.path().join("first"));
+    // find the one batch file and change a byte
+    let mut batch = None;
+    for y in std::fs::read_dir(store.join("obs")).unwrap() {
+        for m in std::fs::read_dir(y.unwrap().path()).unwrap() {
+            for f in std::fs::read_dir(m.unwrap().path()).unwrap() {
+                batch = Some(f.unwrap().path());
+            }
+        }
+    }
+    let batch = batch.expect("a batch file was written");
+    let mut bytes = std::fs::read(&batch).unwrap();
+    bytes[10] = bytes[10].wrapping_add(1);
+    std::fs::write(&batch, bytes).unwrap();
+    let r = reevaluate(&store, &id, &d.path().join("out"), AS_OF);
+    match r {
+        Err((2, msg)) => assert!(msg.contains("hash no longer matches"), "unexpected message: {}", msg),
+        other => panic!("expected exit 2 for a changed batch, got {:?}", other.map(|_| ())),
     }
 }

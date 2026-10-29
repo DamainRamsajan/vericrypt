@@ -9,7 +9,8 @@ resolver = "2"
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-license = "UNLICENSED"
+license-file = "LICENSE"
+publish = false
 repository = "https://github.com/intellica-ai-llc/vericrypt"
 
 [workspace.dependencies]

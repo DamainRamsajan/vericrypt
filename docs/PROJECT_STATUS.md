@@ -18,14 +18,14 @@
 2. No revocation checking, no chain building, no PKCS#12/JKS, no SSH, no code scanning.
 3. Signing key stored as a plaintext JSON file (mode 0600). Encrypted keys / PKCS#11 are planned.
 4. `slh-dsa` crate is unaudited; `signature` is pinned to a pre-release (`2.3.0-pre.4`).
-5. Legacy v1 `scan` command still present (deprecated warning only); old README and data-room statements overstate it.
+5. Legacy v1 `scan` command removed from the command line on 28 Oct 2026; its library code and 6 old test files remain (all 6 fail to compile: they set a field `load_bytecode` that `ScanArgs` no longer has). Old data-room statements may still overstate it.
 6. `native-tls` and `static mut` licence state are technical debt.
-7. Repository declares `UNLICENSED` while public.
-8. Tracked junk in the repo: `target/` (3 files), `.wrangler/cache` (Cloudflare account files), `tatus`, 10 `batch_*.sh` scripts.
+7. Licence decided 28 Oct 2026: proprietary, all rights reserved (see `LICENSE`). The repository is still public, which does not match that choice until it is made private.
+8. ~~Tracked junk in the repo~~ Fixed 28 Oct 2026: the 10 `batch_*.sh` scripts were removed (`target/`, `.wrangler/` and `tatus` were already untracked).
 9. Performance only measured on tiny fixtures; macOS, Windows and ARM untested.
 
 ## 3. Decisions still owed
-1. **Licence and edition model** (recommended: open-core — permissive core and verifier; commercial packs, connectors, hub).
+1. ~~Licence and edition model~~ Decided 28 Oct 2026: fully proprietary (option (a) in v5 §0.3), because the product is sold and is not open source. Still to do: a lawyer-drafted customer licence agreement, make the repository private, and decide how the free verifier is distributed.
 2. The eight v5 decisions in `docs/architecture/ARCHITECTURE_V5_arc42.md` §0.3.
 3. How to connect GitHub (or keep uploading manually): see `docs/architecture/GITHUB_CONNECT_AND_PUSH_GUIDE.md`.
 
@@ -67,5 +67,5 @@ Quality scenarios Q-1…Q-4, Q-8, Q-10, Q-11, Q-15 pass · three real inventorie
 
 ## 5. Next actions (in order)
 1. Upload this bundle and merge the pull request (v2 + docs + tests + claims registry).
-2. Answer the pending decisions (licence first).
+2. Answer the pending decisions (licence is decided; seven v5 decisions remain).
 3. Start W1 and W8 (foundation and hygiene), then W3 and W4 in parallel.

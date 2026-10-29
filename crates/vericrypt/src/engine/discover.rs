@@ -3,6 +3,7 @@
 //! always states what it did NOT look at.
 use super::classify::{self, classify_key, curve_from_scalar_len};
 use super::model::*;
+use super::observe::{Observation, SensorInfo};
 use chrono::{DateTime, TimeZone, Utc};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
@@ -36,30 +37,64 @@ fn iso(ts: i64) -> String {
     Utc.timestamp_opt(ts, 0).single().unwrap_or_else(Utc::now).format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }
 
+/// Merge one observed asset into a map keyed by asset id. A repeat sighting of the same asset adds
+/// its location (kept sorted); it never changes the asset itself. Shared by scanning and by `evaluate`
+/// so both produce the same inventory.
+pub fn merge_asset(map: &mut BTreeMap<String, Asset>, a: Asset) {
+    match map.get_mut(&a.id) {
+        Some(existing) => {
+            for l in a.locations {
+                if !existing.locations.contains(&l) {
+                    existing.locations.push(l);
+                    existing.locations.sort();
+                }
+            }
+        }
+        None => {
+            map.insert(a.id.clone(), a);
+        }
+    }
+}
+
 pub struct Discovery {
     pub assets: BTreeMap<String, Asset>,
     pub coverage: Coverage,
+    /// Every sighting, in the order made, before duplicates are merged.
+    pub observations: Vec<Observation>,
+    /// RFC 3339 time stamped on each observation.
+    pub observed_at: String,
+    pub scan_id: String,
+    pub tool_version: String,
 }
 
 impl Discovery {
     pub fn new() -> Self {
-        Discovery { assets: BTreeMap::new(), coverage: Coverage::default() }
+        Discovery { assets: BTreeMap::new(), coverage: Coverage::default(), observations: Vec::new(), observed_at: String::new(), scan_id: String::new(), tool_version: String::new() }
     }
 
     fn add(&mut self, a: Asset) {
-        match self.assets.get_mut(&a.id) {
-            Some(existing) => {
-                for l in a.locations {
-                    if !existing.locations.contains(&l) {
-                        existing.locations.push(l);
-                        existing.locations.sort();
-                    }
-                }
-            }
-            None => {
-                self.assets.insert(a.id.clone(), a);
-            }
-        }
+        let target = a.locations.first().cloned().unwrap_or_default();
+        let (sensor_id, kind, vantage, method) = if target.starts_with("tls://") {
+            ("tls-leaf", "network", "network", "tls-leaf-probe")
+        } else {
+            ("files", "file", "host", "file-parse")
+        };
+        let mut o = Observation {
+            obs_id: String::new(),
+            sensor: SensorInfo { id: sensor_id.to_string(), version: self.tool_version.clone(), kind: kind.to_string() },
+            vantage: vantage.to_string(),
+            method: method.to_string(),
+            target,
+            observed_at: self.observed_at.clone(),
+            subject: a.id.clone(),
+            attributes: a.clone(),
+            confidence: 100,
+            raw_ref: Some(format!("sha256:{}", a.sha256)),
+            scan_id: self.scan_id.clone(),
+        };
+        o.obs_id = o.compute_id();
+        self.observations.push(o);
+        merge_asset(&mut self.assets, a);
     }
 
     pub fn scan_dir(&mut self, root: &Path) {

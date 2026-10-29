@@ -7,7 +7,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 #[derive(Parser)]
 #[command(name = "vericrypt")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
-#[command(about = "Scan cryptographic inventory and produce signed .pqc compliance reports")]
+#[command(about = "Cryptographic inventory, post-quantum findings and offline-verifiable evidence")]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -15,12 +15,12 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Scan cryptographic inventory and produce a .pqc report
-    Scan(ScanArgs),
     /// Activate a license key for signed report generation
     Activate(ActivateArgs),
     /// v2 engine: analyse an inventory and write report.json, cbom.json and report.html
     Analyze(crate::engine::AnalyzeArgs),
+    /// Re-judge a scan saved with `analyze --store`, at another date or with other parameters
+    Reevaluate(crate::engine::ReevaluateArgs),
     /// Generate a post-quantum (SLH-DSA, FIPS 205) report-signing key pair
     Keygen(crate::engine::KeygenArgs),
     /// Verify a report's Merkle commitment and post-quantum signature, offline
@@ -33,6 +33,8 @@ pub enum Commands {
     VerifyProof(crate::engine::VerifyProofArgs),
 }
 
+/// Legacy v1 scan arguments. No longer reachable from the command line (the `scan` command was
+/// removed); kept only so the legacy library code and its old tests still compile until they are deleted.
 #[derive(Debug, clap::Args)]
 pub struct ScanArgs {
     /// Directory containing certificates to scan

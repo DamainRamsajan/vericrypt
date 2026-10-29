@@ -81,3 +81,53 @@ fn canonical_json_ignores_key_order() {
     let b: serde_json::Value = serde_json::from_str(r#"{"a":[{"x":1,"y":2}],"b":1}"#).unwrap();
     assert_eq!(engine::canonical(&a), engine::canonical(&b));
 }
+
+fn fixture_inputs() -> Inputs {
+    Inputs {
+        dirs: vec![concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/pki").to_string()],
+        tls: vec![],
+        params: Params {
+            as_of: "2026-11-01T00:00:00Z".into(),
+            shelf_life_years: 10,
+            migration_years: 5,
+            crqc_years: 14,
+            public_issuers: vec!["Acme Public Test CA".into()],
+            private_issuers: vec![],
+        },
+    }
+}
+
+#[test]
+fn saved_observations_re_evaluate_to_the_identical_root() {
+    let now = Utc.with_ymd_and_hms(2026, 11, 1, 0, 0, 0).unwrap();
+    let inp = fixture_inputs();
+    let direct = engine::run_pipeline(&inp, now);
+    let set = engine::observe(&inp, now);
+    let json = serde_json::to_string(&set).unwrap();
+    let back: engine::observe::ObservationSet = serde_json::from_str(&json).unwrap();
+    let again = engine::evaluate(&back, &inp.params, now);
+    assert_eq!(direct.merkle_root, again.merkle_root);
+    assert_eq!(direct.assets.len(), again.assets.len());
+    assert_eq!(direct.findings.len(), again.findings.len());
+    assert!(set.observations.iter().all(|o| {
+        o.sensor.id == "files" && o.vantage == "host" && o.method == "file-parse" && o.confidence == 100 && !o.observed_at.is_empty() && o.scan_id == set.scan_id
+    }));
+    let ids: std::collections::HashSet<_> = set.observations.iter().map(|o| o.obs_id.clone()).collect();
+    assert_eq!(ids.len(), set.observations.len()); // every sighting has its own id
+    assert!(set.observations.iter().all(|o| o.obs_id == o.compute_id())); // and the id is the hash of the record
+}
+
+#[test]
+fn re_evaluating_saved_observations_at_a_later_date_changes_findings_not_facts() {
+    let now = Utc.with_ymd_and_hms(2026, 11, 1, 0, 0, 0).unwrap();
+    let inp = fixture_inputs();
+    let set = engine::observe(&inp, now);
+    let early = engine::evaluate(&set, &inp.params, now);
+    let later = Utc.with_ymd_and_hms(2040, 1, 1, 0, 0, 0).unwrap();
+    let mut p2 = inp.params.clone();
+    p2.as_of = "2040-01-01T00:00:00Z".into();
+    let late = engine::evaluate(&set, &p2, later);
+    assert_eq!(early.assets.len(), late.assets.len()); // same facts
+    assert_ne!(early.merkle_root, late.merkle_root); // different judgement
+    assert!(has(&late, "HYG-EXPIRED") > has(&early, "HYG-EXPIRED"));
+}

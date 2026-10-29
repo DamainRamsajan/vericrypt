@@ -1,5 +1,3 @@
-# UNTESTED: I cannot run GitHub Actions from here. Create this file on GitHub at
-# .github/workflows/engine-ci.yml  (Add file > Create new file) and watch the first run.
 name: engine-ci
 on:
   pull_request:
@@ -20,6 +18,8 @@ jobs:
         run: |
           cargo test -p vericrypt --lib engine::
           cargo test -p vericrypt --test engine_pipeline --test engine_cli
+      - name: Claims check
+        run: scripts/check_claims.sh target/release/vericrypt
       - name: Quickstart smoke test
         run: |
           ./target/release/vericrypt keygen --out /tmp/k.json

@@ -1,0 +1,18 @@
+VeriCrypt
+Copyright (c) 2026 Intellica AI Inc. All rights reserved.
+
+This software, its source code and its documentation are proprietary to Intellica AI Inc.
+("Intellica"). No licence or other right is granted to use, copy, modify, merge, publish,
+distribute, sublicense, sell, reverse engineer or create derivative works of this software,
+in source or binary form, except under a written licence agreement signed by Intellica, or as
+expressly stated in a licence that accompanies a specific release.
+
+Viewing or forking this repository on GitHub is permitted only to the extent GitHub's Terms of
+Service provide. It does not grant any licence to the software.
+
+Third-party components used by this software are licensed to Intellica under their own licences;
+see THIRD_PARTY_NOTICES.md. Nothing in this file limits the rights those licences give you in
+those components.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. Terms for
+paying customers are set out in their licence agreement with Intellica.

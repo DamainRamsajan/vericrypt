@@ -14,15 +14,12 @@ fn main() -> Result<(), i32> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Scan(args) => vericrypt::cli::run_scan(args).map_err(|e| {
-            tracing::error!(error = %e, "Scan failed");
-            1
-        }),
         Commands::Activate(args) => vericrypt::cli::run_activate(args).map_err(|e| {
             tracing::error!(error = %e, "License activation failed");
             2
         }),
         Commands::Analyze(a) => engine_exit(vericrypt::engine::run_analyze(a)),
+        Commands::Reevaluate(a) => engine_exit(vericrypt::engine::run_reevaluate(a)),
         Commands::Keygen(a) => engine_exit(vericrypt::engine::run_keygen(a)),
         Commands::Verify(a) => engine_exit(vericrypt::engine::run_verify(a)),
         Commands::Diff(a) => engine_exit(vericrypt::engine::run_diff(a)),

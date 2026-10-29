@@ -26,9 +26,6 @@ jobs:
           cd target/release
           sha256sum vericrypt > vericrypt.sha256
           sha256sum vericrypt-verify > vericrypt-verify.sha256
-      - name: Self-CBOM
-        run: |
-          ./target/release/vericrypt scan --cert-dir crates/vericrypt --output target/release/self-cbom 2>/dev/null || echo "Self-CBOM generated"
       - name: Upload vericrypt
         uses: actions/upload-artifact@v4
         with:

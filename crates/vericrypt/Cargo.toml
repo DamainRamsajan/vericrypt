@@ -3,7 +3,8 @@ name = "vericrypt"
 version = "0.1.0"
 edition = "2021"
 description = "Post-quantum cryptographic compliance engine — single air-gapped binary"
-license = "UNLICENSED"
+license-file = "../../LICENSE"
+publish = false
 repository = "https://github.com/intellica-ai-llc/vericrypt"
 
 [[bin]]
