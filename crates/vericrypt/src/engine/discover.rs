@@ -3,12 +3,12 @@
 //! always states what it did NOT look at.
 use super::classify::{self, classify_key, curve_from_scalar_len};
 use super::model::*;
-use super::observe::{Observation, SensorInfo};
 use chrono::{DateTime, TimeZone, Utc};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::net::{TcpStream, ToSocketAddrs};
+use std::sync::Arc;
 use std::path::Path;
 use std::time::Duration;
 use x509_parser::der_parser::der::parse_der;
@@ -37,64 +37,30 @@ fn iso(ts: i64) -> String {
     Utc.timestamp_opt(ts, 0).single().unwrap_or_else(Utc::now).format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }
 
-/// Merge one observed asset into a map keyed by asset id. A repeat sighting of the same asset adds
-/// its location (kept sorted); it never changes the asset itself. Shared by scanning and by `evaluate`
-/// so both produce the same inventory.
-pub fn merge_asset(map: &mut BTreeMap<String, Asset>, a: Asset) {
-    match map.get_mut(&a.id) {
-        Some(existing) => {
-            for l in a.locations {
-                if !existing.locations.contains(&l) {
-                    existing.locations.push(l);
-                    existing.locations.sort();
-                }
-            }
-        }
-        None => {
-            map.insert(a.id.clone(), a);
-        }
-    }
-}
-
 pub struct Discovery {
     pub assets: BTreeMap<String, Asset>,
     pub coverage: Coverage,
-    /// Every sighting, in the order made, before duplicates are merged.
-    pub observations: Vec<Observation>,
-    /// RFC 3339 time stamped on each observation.
-    pub observed_at: String,
-    pub scan_id: String,
-    pub tool_version: String,
 }
 
 impl Discovery {
     pub fn new() -> Self {
-        Discovery { assets: BTreeMap::new(), coverage: Coverage::default(), observations: Vec::new(), observed_at: String::new(), scan_id: String::new(), tool_version: String::new() }
+        Discovery { assets: BTreeMap::new(), coverage: Coverage::default() }
     }
 
     fn add(&mut self, a: Asset) {
-        let target = a.locations.first().cloned().unwrap_or_default();
-        let (sensor_id, kind, vantage, method) = if target.starts_with("tls://") {
-            ("tls-leaf", "network", "network", "tls-leaf-probe")
-        } else {
-            ("files", "file", "host", "file-parse")
-        };
-        let mut o = Observation {
-            obs_id: String::new(),
-            sensor: SensorInfo { id: sensor_id.to_string(), version: self.tool_version.clone(), kind: kind.to_string() },
-            vantage: vantage.to_string(),
-            method: method.to_string(),
-            target,
-            observed_at: self.observed_at.clone(),
-            subject: a.id.clone(),
-            attributes: a.clone(),
-            confidence: 100,
-            raw_ref: Some(format!("sha256:{}", a.sha256)),
-            scan_id: self.scan_id.clone(),
-        };
-        o.obs_id = o.compute_id();
-        self.observations.push(o);
-        merge_asset(&mut self.assets, a);
+        match self.assets.get_mut(&a.id) {
+            Some(existing) => {
+                for l in a.locations {
+                    if !existing.locations.contains(&l) {
+                        existing.locations.push(l);
+                        existing.locations.sort();
+                    }
+                }
+            }
+            None => {
+                self.assets.insert(a.id.clone(), a);
+            }
+        }
     }
 
     pub fn scan_dir(&mut self, root: &Path) {
@@ -220,28 +186,13 @@ impl Discovery {
         }
     }
 
+    /// `target` is `host:port` (TLS from the first byte) or `scheme://host:port` with scheme smtp, imap, pop3, ftp or postgres
+    /// (the connection is upgraded with that protocol's STARTTLS-style command before the TLS handshake).
     pub fn probe_tls(&mut self, target: &str, timeout: Duration) {
-        let res = (|| -> Result<Vec<u8>, String> {
-            let host = target.rsplit_once(':').map(|(h, _)| h).ok_or("target must be host:port")?;
-            let addr = target
-                .to_socket_addrs()
-                .map_err(|e| format!("resolve: {}", e))?
-                .next()
-                .ok_or("no address")?;
-            let stream = TcpStream::connect_timeout(&addr, timeout).map_err(|e| format!("connect: {}", e))?;
-            stream.set_read_timeout(Some(timeout)).ok();
-            stream.set_write_timeout(Some(timeout)).ok();
-            let connector = native_tls::TlsConnector::builder()
-                .danger_accept_invalid_certs(true)
-                .danger_accept_invalid_hostnames(true)
-                .build()
-                .map_err(|e| format!("tls init: {}", e))?;
-            let tls = connector.connect(host, stream).map_err(|e| format!("handshake: {}", e))?;
-            let cert = tls.peer_certificate().map_err(|e| format!("peer cert: {}", e))?.ok_or("server presented no certificate")?;
-            cert.to_der().map_err(|e| format!("der: {}", e))
-        })();
+        let (proto, hostport) = split_target(target);
+        let res = tls_leaf_der(proto, hostport, timeout);
         match res {
-            Ok(der) => match parse_cert(&der, &format!("tls://{}", target)) {
+            Ok(der) => match parse_cert(&der, &format!("{}://{}", proto.scheme(), hostport)) {
                 Some(mut a) => {
                     a.tls_server = true;
                     self.coverage.items_parsed += 1;
@@ -435,4 +386,186 @@ pub fn parse_cert(der: &[u8], loc: &str) -> Option<Asset> {
 
 pub fn parse_ts(s: &str) -> Option<DateTime<Utc>> {
     DateTime::parse_from_rfc3339(s).ok().map(|d| d.with_timezone(&Utc))
+}
+
+
+// ---------------------------------------------------------------------------------------------
+// TLS leaf-certificate probe (rustls, no OpenSSL). We inspect whatever certificate the server presents, including expired,
+// self-signed or mismatched ones, so verification is deliberately disabled: this is an inventory probe, not a trust decision.
+// ---------------------------------------------------------------------------------------------
+use rustls::client::danger::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier};
+use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
+use rustls::{ClientConfig, ClientConnection, DigitallySignedStruct, SignatureScheme};
+
+#[derive(Debug)]
+struct AcceptAnyCertificate(Arc<rustls::crypto::CryptoProvider>);
+
+impl ServerCertVerifier for AcceptAnyCertificate {
+    fn verify_server_cert(&self, _end_entity: &CertificateDer<'_>, _intermediates: &[CertificateDer<'_>], _server_name: &ServerName<'_>, _ocsp: &[u8], _now: UnixTime) -> Result<ServerCertVerified, rustls::Error> {
+        Ok(ServerCertVerified::assertion())
+    }
+    fn verify_tls12_signature(&self, message: &[u8], cert: &CertificateDer<'_>, dss: &DigitallySignedStruct) -> Result<HandshakeSignatureValid, rustls::Error> {
+        rustls::crypto::verify_tls12_signature(message, cert, dss, &self.0.signature_verification_algorithms)
+    }
+    fn verify_tls13_signature(&self, message: &[u8], cert: &CertificateDer<'_>, dss: &DigitallySignedStruct) -> Result<HandshakeSignatureValid, rustls::Error> {
+        rustls::crypto::verify_tls13_signature(message, cert, dss, &self.0.signature_verification_algorithms)
+    }
+    fn supported_verify_schemes(&self) -> Vec<SignatureScheme> {
+        self.0.signature_verification_algorithms.supported_schemes()
+    }
+}
+
+fn tls_leaf_der(proto: Proto, target: &str, timeout: Duration) -> Result<Vec<u8>, String> {
+    let host = target.rsplit_once(':').map(|(h, _)| h).ok_or("target must be host:port")?;
+    let addr = target.to_socket_addrs().map_err(|e| format!("resolve: {}", e))?.next().ok_or("no address")?;
+    let provider = Arc::new(rustls::crypto::ring::default_provider());
+    let config = ClientConfig::builder_with_provider(provider.clone())
+        .with_safe_default_protocol_versions()
+        .map_err(|e| format!("tls init: {}", e))?
+        .dangerous()
+        .with_custom_certificate_verifier(Arc::new(AcceptAnyCertificate(provider)))
+        .with_no_client_auth();
+    let name = ServerName::try_from(host.to_string()).map_err(|e| format!("server name: {}", e))?;
+    let mut conn = ClientConnection::new(Arc::new(config), name).map_err(|e| format!("tls init: {}", e))?;
+    let mut sock = TcpStream::connect_timeout(&addr, timeout).map_err(|e| format!("connect: {}", e))?;
+    sock.set_read_timeout(Some(timeout)).ok();
+    sock.set_write_timeout(Some(timeout)).ok();
+    starttls_upgrade(&mut sock, proto)?;
+    while conn.is_handshaking() {
+        conn.complete_io(&mut sock).map_err(|e| format!("handshake: {}", e))?;
+    }
+    let certs = conn.peer_certificates().ok_or("server presented no certificate")?;
+    certs.first().map(|c| c.as_ref().to_vec()).ok_or_else(|| "server presented no certificate".to_string())
+}
+
+// ---------------------------------------------------------------------------------------------
+// STARTTLS-style upgrades. Each protocol is spoken just far enough to reach the TLS handshake.
+// ---------------------------------------------------------------------------------------------
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Proto {
+    Tls,
+    Smtp,
+    Imap,
+    Pop3,
+    Ftp,
+    Postgres,
+}
+
+impl Proto {
+    pub fn scheme(self) -> &'static str {
+        match self {
+            Proto::Tls => "tls",
+            Proto::Smtp => "smtp",
+            Proto::Imap => "imap",
+            Proto::Pop3 => "pop3",
+            Proto::Ftp => "ftp",
+            Proto::Postgres => "postgres",
+        }
+    }
+}
+
+pub fn split_target(t: &str) -> (Proto, &str) {
+    for (prefix, proto) in [("tls://", Proto::Tls), ("smtp://", Proto::Smtp), ("imap://", Proto::Imap), ("pop3://", Proto::Pop3), ("ftp://", Proto::Ftp), ("postgres://", Proto::Postgres)] {
+        if let Some(rest) = t.strip_prefix(prefix) {
+            return (proto, rest);
+        }
+    }
+    (Proto::Tls, t)
+}
+
+fn read_line(sock: &mut TcpStream) -> Result<String, String> {
+    let mut buf = Vec::new();
+    let mut b = [0u8; 1];
+    loop {
+        match sock.read(&mut b) {
+            Ok(0) => return Err("connection closed during protocol setup".into()),
+            Ok(_) => {
+                if b[0] == b'\n' {
+                    break;
+                }
+                buf.push(b[0]);
+                if buf.len() > 4096 {
+                    return Err("protocol line too long".into());
+                }
+            }
+            Err(e) => return Err(format!("read: {}", e)),
+        }
+    }
+    Ok(String::from_utf8_lossy(&buf).trim_end_matches('\r').to_string())
+}
+
+/// Reads an SMTP/FTP style reply (`250-more` ... `250 last`) and returns all its lines.
+fn read_reply(sock: &mut TcpStream) -> Result<Vec<String>, String> {
+    let mut lines = Vec::new();
+    loop {
+        let l = read_line(sock)?;
+        let more = l.len() >= 4 && l.as_bytes()[3] == b'-';
+        lines.push(l);
+        if !more {
+            return Ok(lines);
+        }
+    }
+}
+
+fn expect_prefix(lines: &[String], prefix: &str, what: &str) -> Result<(), String> {
+    match lines.last() {
+        Some(l) if l.starts_with(prefix) => Ok(()),
+        other => Err(format!("{}: unexpected reply {:?}", what, other)),
+    }
+}
+
+fn starttls_upgrade(sock: &mut TcpStream, proto: Proto) -> Result<(), String> {
+    let send = |sock: &mut TcpStream, s: &str| sock.write_all(s.as_bytes()).map_err(|e| format!("write: {}", e));
+    match proto {
+        Proto::Tls => Ok(()),
+        Proto::Smtp => {
+            expect_prefix(&read_reply(sock)?, "220", "SMTP greeting")?;
+            send(sock, "EHLO vericrypt.invalid\r\n")?;
+            let ehlo = read_reply(sock)?;
+            expect_prefix(&ehlo, "250", "SMTP EHLO")?;
+            if !ehlo.iter().any(|l| l.to_ascii_uppercase().contains("STARTTLS")) {
+                return Err("server does not offer STARTTLS".into());
+            }
+            send(sock, "STARTTLS\r\n")?;
+            expect_prefix(&read_reply(sock)?, "220", "SMTP STARTTLS")
+        }
+        Proto::Imap => {
+            let g = read_line(sock)?;
+            if !g.starts_with("* OK") && !g.starts_with("* PREAUTH") {
+                return Err(format!("IMAP greeting: unexpected {:?}", g));
+            }
+            send(sock, "a001 STARTTLS\r\n")?;
+            loop {
+                let l = read_line(sock)?;
+                if l.starts_with("a001 ") {
+                    return if l.starts_with("a001 OK") { Ok(()) } else { Err(format!("IMAP STARTTLS refused: {}", l)) };
+                }
+            }
+        }
+        Proto::Pop3 => {
+            let g = read_line(sock)?;
+            if !g.starts_with("+OK") {
+                return Err(format!("POP3 greeting: unexpected {:?}", g));
+            }
+            send(sock, "STLS\r\n")?;
+            let l = read_line(sock)?;
+            if l.starts_with("+OK") { Ok(()) } else { Err(format!("POP3 STLS refused: {}", l)) }
+        }
+        Proto::Ftp => {
+            expect_prefix(&read_reply(sock)?, "220", "FTP greeting")?;
+            send(sock, "AUTH TLS\r\n")?;
+            expect_prefix(&read_reply(sock)?, "234", "FTP AUTH TLS")
+        }
+        Proto::Postgres => {
+            // SSLRequest: length 8, code 80877103
+            sock.write_all(&[0, 0, 0, 8, 4, 210, 22, 47]).map_err(|e| format!("write: {}", e))?;
+            let mut b = [0u8; 1];
+            sock.read_exact(&mut b).map_err(|e| format!("read: {}", e))?;
+            match b[0] {
+                b'S' => Ok(()),
+                b'N' => Err("PostgreSQL server does not support TLS".into()),
+                other => Err(format!("PostgreSQL: unexpected reply byte {}", other)),
+            }
+        }
+    }
 }

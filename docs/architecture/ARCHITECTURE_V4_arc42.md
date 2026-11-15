@@ -1,5 +1,7 @@
 # VeriCrypt v4 — arc42 Architecture (DRAFT for joint review)
 
+> **Amended 1 Nov 2026:** see *Amendment 1* in `ARCHITECTURE_V5_arc42.md` (IR 8547 is now final, licence decided, pilot track, new decisions). Where they conflict, the amendment wins.
+
 Status: **DRAFT. No v4 code exists.** This document is complete on its own and **supersedes the v3 addendum**. It rests on two companion documents: `COMPETITIVE_ANALYSIS_v4.md` (market, threats, moats) and `USERS_AND_USE_CASES_v4.md` (personas, requirements R-xx, use cases UC-xx).
 Research cut-off: 22 Oct 2026. Evidence quality is rated in §14.
 
@@ -349,7 +351,7 @@ Priority class (start now / plan / monitor) from thresholds in `scoring-weights`
 | R-1 | `slh-dsa` unaudited | Hybrid signing; second implementation in tests; follow audits |
 | R-2 | `signature` pre-release pin | Pin; track upstream; move when stable |
 | R-3 | PQ-TLS probing errors or server quirks (e.g. group-selection behaviour) | Per-group probing, oracle tests, documented quirks |
-| R-4 | Draft standards and national orders change (IR 8547 draft; FIPS 206/HQC drafts; June 2026 US orders unread) | Pack status and `last_verified`; reports cite pack versions |
+| R-4 | Draft standards and national orders change (FIPS 206 and HQC are still drafts; NIST IR 8547 became FINAL on 27 Oct 2026; US order 14412 and OMB M-26-15 rest on secondary sources) | Pack status and `last_verified`; reports cite pack versions |
 | R-5 | Control mappings from advisory sources | Assessor review before claims (validation step 4) |
 | R-6 | GRC API/plan changes | Isolated adapters; non-fatal failures |
 | R-7 | Public source weakens gating | Value in packs, integrations, support (OP-8) |

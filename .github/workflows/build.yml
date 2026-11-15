@@ -3,12 +3,16 @@ name: VeriCrypt Build
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -18,31 +22,72 @@ jobs:
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
-          key: ${{ runner.os }}-cargo-v7-${{ hashFiles('**/Cargo.lock') }}
-      - name: Build binary
-        run: cargo build --release -p vericrypt
-      - name: Generate SHA256 checksums
+          key: ${{ runner.os }}-cargo-v8-${{ hashFiles('**/Cargo.lock') }}
+      - name: System packages
+        run: sudo apt-get update && sudo apt-get install -y build-essential
+      - name: Tests
+        run: cargo test -p vericrypt
+      - name: Claims registry (every claim has a test)
+        run: python3 scripts/check_claims.py
+      - name: SBOM is valid CycloneDX
         run: |
-          cd target/release
-          sha256sum vericrypt > vericrypt.sha256
-          sha256sum vericrypt-verify > vericrypt-verify.sha256
-      - name: Upload vericrypt
+          pip install jsonschema referencing
+          python3 scripts/make_sbom.py > /tmp/sbom.json
+          python3 scripts/validate_cbom.py /tmp/sbom.json
+          python3 scripts/make_self_cbom.py > /tmp/self.cbom.json
+          python3 scripts/validate_cbom.py /tmp/self.cbom.json
+      - name: Licence flow end to end
+        run: bash scripts/verify_licence_e2e.sh
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: ${{ runner.os }}-cargo-v8-${{ hashFiles('**/Cargo.lock') }}
+      - name: System packages
+        run: sudo apt-get update && sudo apt-get install -y build-essential
+      - name: Build licence-gated release binary
+        run: cargo build --release -p vericrypt --features license-gate --bin vericrypt
+      - name: Self-check on the bundled sample certificates
+        run: |
+          ./target/release/vericrypt analyze -i crates/vericrypt/tests/fixtures/pki --out target/release/sample-report --no-html --public-issuers "Acme Public Test CA"
+          pip install jsonschema referencing
+          python3 scripts/validate_cbom.py target/release/sample-report/cbom.json
+      - name: SBOM and checksums
+        run: |
+          python3 scripts/make_sbom.py > target/release/vericrypt.sbom.cdx.json
+          python3 scripts/make_self_cbom.py > target/release/vericrypt.cbom.cdx.json
+          cd target/release && sha256sum vericrypt vericrypt.sbom.cdx.json vericrypt.cbom.cdx.json > SHA256SUMS
+      - name: Build provenance attestation (UNTESTED; check the action's current major version)
+        continue-on-error: true
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: target/release/vericrypt
+      - name: Upload release files
         uses: actions/upload-artifact@v4
         with:
-          name: vericrypt-x86_64
+          name: vericrypt-x86_64-linux
           path: |
             target/release/vericrypt
-            target/release/vericrypt.sha256
-      - name: Upload vericrypt-verify
-        uses: actions/upload-artifact@v4
-        with:
-          name: vericrypt-verify-x86_64
-          path: |
-            target/release/vericrypt-verify
-            target/release/vericrypt-verify.sha256
+            target/release/vericrypt.sbom.cdx.json
+            target/release/vericrypt.cbom.cdx.json
+            target/release/SHA256SUMS
 
   cross-compile:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -62,25 +107,17 @@ jobs:
             ~/.cargo/git/db
           key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Install musl tools
-        run: sudo apt-get update && sudo apt-get install -y musl-tools 
-      - name: Build release
-        run: cargo build --release --target ${{ matrix.target }} -p vericrypt
-      - name: Generate SHA256 checksums
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Build static licence-gated release
+        run: cargo build --release --target ${{ matrix.target }} -p vericrypt --features license-gate --bin vericrypt
+      - name: Checksums
         run: |
           cd target/${{ matrix.target }}/release
-          sha256sum vericrypt > vericrypt.sha256
-          sha256sum vericrypt-verify > vericrypt-verify.sha256
-      - name: Upload vericrypt
+          sha256sum vericrypt > SHA256SUMS
+      - name: Upload static binary
         uses: actions/upload-artifact@v4
         with:
           name: vericrypt-${{ matrix.target }}
           path: |
             target/${{ matrix.target }}/release/vericrypt
-            target/${{ matrix.target }}/release/vericrypt.sha256
-      - name: Upload vericrypt-verify
-        uses: actions/upload-artifact@v4
-        with:
-          name: vericrypt-verify-${{ matrix.target }}
-          path: |
-            target/${{ matrix.target }}/release/vericrypt-verify
-            target/${{ matrix.target }}/release/vericrypt-verify.sha256
+            target/${{ matrix.target }}/release/SHA256SUMS

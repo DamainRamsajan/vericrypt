@@ -6,7 +6,7 @@ Three steps: **get the tools → build → try it.** About 15 minutes the first 
 
 | You need | Ubuntu / Debian / WSL2 | macOS |
 |---|---|---|
-| C compiler, pkg-config, OpenSSL headers, git, unzip | `sudo apt update && sudo apt install -y build-essential pkg-config libssl-dev clang git curl unzip` | `xcode-select --install` then `brew install openssl pkg-config` |
+| C compiler, git, unzip (OpenSSL is no longer needed) | `sudo apt update && sudo apt install -y build-essential git curl unzip` | `xcode-select --install` |
 | Rust (current stable) | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` then open a new terminal | same command |
 
 Check: `cargo --version` prints a version (I tested 1.91). Windows: use **WSL2 with Ubuntu** and follow the Ubuntu column; native Windows is untested.
@@ -67,10 +67,9 @@ Output files in `out/`:
 ## Run the tests (optional, ~1-2 minutes after the build)
 
 ```bash
-cargo test -p vericrypt --lib engine::
-cargo test -p vericrypt --test engine_pipeline --test engine_cli
+cargo test -p vericrypt
 ```
-Expect 19 passing tests. `python3 scripts/validate_cbom.py out/cbom.json` also checks the CBOM against the official CycloneDX schema (needs `pip install jsonschema referencing`).
+Expect 36 passing tests. `python3 scripts/validate_cbom.py out/cbom.json` also checks the CBOM against the official CycloneDX schema (needs `pip install jsonschema referencing`).
 
 ## Use it on your own systems
 
@@ -98,7 +97,6 @@ Exit codes: `0` ok · `1` verification failed · `2` bad input · `3` findings a
 | Symptom | Fix |
 |---|---|
 | `linker 'cc' not found` | install the build tools (Step 0) |
-| `Could not find directory of OpenSSL installation` | install `libssl-dev` + `pkg-config` (Linux) or `export OPENSSL_DIR=$(brew --prefix openssl)` (macOS) |
 | Compile errors mentioning `signature` or `slh_dsa` | you ran `cargo update`; restore `Cargo.lock` from the zip/patch |
 | Rust version errors | `rustup update stable` |
 | `git apply` fails | you are not on the original commit; use Route A |

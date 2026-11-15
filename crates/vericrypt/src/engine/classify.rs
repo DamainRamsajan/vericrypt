@@ -1,5 +1,5 @@
 //! Algorithm registry: OID -> family, classical strength, quantum status, NIST PQC level,
-//! and the NIST IR 8547 (initial public draft, Nov 2024) transition dates.
+//! and the NIST IR 8547 (final, 27 Oct 2026) transition dates.
 use super::model::{Family, QuantumStatus};
 
 pub struct KeyInfo {
@@ -192,15 +192,13 @@ pub fn signature_algorithm(oid: &str) -> (String, bool) {
     (n.to_string(), weak)
 }
 
-/// NIST IR 8547 ipd transition years for a quantum-vulnerable algorithm.
-/// Returns (deprecated_after, disallowed_after). 112-bit-or-lower strength is deprecated after 2030;
-/// every quantum-vulnerable public-key algorithm is disallowed after 2035 (draft).
-pub fn ir8547(classical_bits: Option<u32>) -> (Option<i32>, i32) {
-    let dep = match classical_bits {
-        Some(b) if b <= 112 => Some(2030),
-        _ => None,
-    };
-    (dep, 2035)
+/// NIST IR 8547 transition years for a quantum-vulnerable public-key algorithm.
+/// FINAL report, published 27 Oct 2026 (it replaced the Nov 2024 initial public draft): **every** quantum-vulnerable
+/// public-key algorithm is deprecated after 2030 and disallowed after 2035, at every security strength.
+/// (The draft only deprecated the 112-bit strengths after 2030 and left stronger parameter sets with a 2035 disallow date.)
+/// The parameter is kept so callers need no change; it no longer affects the result.
+pub fn ir8547(_classical_bits: Option<u32>) -> (Option<i32>, i32) {
+    (Some(2030), 2035)
 }
 
 pub fn replacement(family: Family, kind_is_key_agreement: bool) -> &'static str {
@@ -240,8 +238,9 @@ mod tests {
         assert_eq!(k.nist_level, Some(3));
     }
     #[test]
-    fn ir8547_dates() {
+    fn ir8547_final_deprecates_every_strength_after_2030() {
         assert_eq!(ir8547(Some(112)), (Some(2030), 2035));
-        assert_eq!(ir8547(Some(128)), (None, 2035));
+        assert_eq!(ir8547(Some(128)), (Some(2030), 2035));
+        assert_eq!(ir8547(None), (Some(2030), 2035));
     }
 }

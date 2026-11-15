@@ -1,71 +1,37 @@
-# VeriCrypt — Project status (23 Oct 2026)
+# VeriCrypt: Project status (2 Nov 2026)
 
 ## 1. Where we are
-
 | Area | State | Evidence |
 |---|---|---|
-| v2 evidence engine (code) | **Built and tested** | 19 automated tests pass (7 unit, 6 pipeline, 6 CLI); clean release build from the source zip; quickstart run end-to-end |
-| Signing and verification | Real SLH-DSA-SHAKE-128f signatures; key pinning; unsigned reports fail; tamper detection | `CLAIMS.md` section A |
-| CBOM | CycloneDX 1.7, validated against the official schema | `scripts/validate_cbom.py` |
-| Install guide | Verified on a clean copy | `docs/INSTALL_V2.md` |
-| Architecture | v3 addendum (superseded), **v4 arc42** (approved), **v5 arc42** (draft, 8 decisions pending) | `docs/architecture/` |
-| Research | Competitive analysis, users and use cases, v5 value map | `docs/architecture/` |
-| Code for v4/v5 | **Not started** (by agreement: finalise architecture first) | — |
-| Public repository | **Not updated yet.** GitHub push from chat is blocked (no connector on this account); this bundle is the manual route | — |
+| Evidence engine | Built and tested | 36 automated tests pass with a plain `cargo test -p vericrypt` |
+| Rules | Follow the **final** NIST IR 8547 (27 Oct 2026) | `CLAIMS.md` section A |
+| Signing, verification, pinning, Merkle proofs, drift diff, CBOM 1.7 | Tested | `CLAIMS.md` section A |
+| Risk-decision register (waivers) | New, tested | `docs/examples/waivers.example.json` |
+| Live TLS probing incl. STARTTLS (SMTP, IMAP, PostgreSQL) | New, tested against local servers | `tests/engine_tls.rs` |
+| Portability | Legacy v1 code deleted; OpenSSL and the ASL build step removed; binary links only to the C library | `ldd` check (debug build) |
+| Pilot licence flow | Fixed and tested end to end | `scripts/verify_licence_e2e.sh` |
+| Release assurance | `sign-file` / `verify-file`, SBOM, product CBOM, release packager | local trial; CI step untested |
+| Licence | Proprietary, all rights reserved (repo stays public for now) | `LICENSE` |
+| Architecture | arc42 v4 (approved) and v5 with Amendments 1 and 2 | `docs/architecture/` |
+| Research | Rounds 1 to 3, founder-view plan | `docs/architecture/RESEARCH_ROUND_*.md`, `FOUNDER_VIEW.md` |
+| Public repo | Updates are delivered as one cumulative zip (no push connector on this account) | `UPLOAD_STEPS.txt` |
 
-## 2. Known issues in v2 (honest list)
-1. TLS probe returns the leaf certificate only (no protocol/cipher/group enumeration, no chain, no OCSP).
-2. No revocation checking, no chain building, no PKCS#12/JKS, no SSH, no code scanning.
-3. Signing key stored as a plaintext JSON file (mode 0600). Encrypted keys / PKCS#11 are planned.
-4. `slh-dsa` crate is unaudited; `signature` is pinned to a pre-release (`2.3.0-pre.4`).
-5. Legacy v1 `scan` command removed from the command line on 28 Oct 2026; its library code and 6 old test files remain (all 6 fail to compile: they set a field `load_bytecode` that `ScanArgs` no longer has). Old data-room statements may still overstate it.
-6. `native-tls` and `static mut` licence state are technical debt.
-7. Licence decided 28 Oct 2026: proprietary, all rights reserved (see `LICENSE`). The repository is still public, which does not match that choice until it is made private.
-8. ~~Tracked junk in the repo~~ Fixed 28 Oct 2026: the 10 `batch_*.sh` scripts were removed (`target/`, `.wrangler/` and `tatus` were already untracked).
-9. Performance only measured on tiny fixtures; macOS, Windows and ARM untested.
+## 2. Known issues and limits
+1. The TLS probe reads certificates only: no protocol-version, cipher-suite or post-quantum-group enumeration. It cannot tell whether a server supports hybrid key exchange.
+2. STARTTLS for POP3 and FTP is implemented but untested; no MySQL.
+3. No revocation or chain checks, no PKCS#12/JKS, no SSH, no code scanning.
+4. The static musl build and a Windows build are **not verified**.
+5. `max_assets` is not enforced; licences cannot be revoked remotely.
+6. Signing key is a plaintext JSON file (mode 0600); the `slh-dsa` crate is unaudited; `signature` is pinned to a pre-release.
+7. The Supabase licence function was tested in Node, not Deno.
+8. CI workflow rewritten but not yet run on GitHub; the provenance step is untested.
+9. Performance measured only on 3,000 synthetic certificates (about 0.5 to 1.2 s on one core); the release binary needs glibc 2.34 or newer, so RHEL 8 and Ubuntu 20.04 need the static build.
+10. Product-name check and legal review of `LICENSE` not done.
 
-## 3. Decisions still owed
-1. ~~Licence and edition model~~ Decided 28 Oct 2026: fully proprietary (option (a) in v5 §0.3), because the product is sold and is not open source. Still to do: a lawyer-drafted customer licence agreement, make the repository private, and decide how the free verifier is distributed.
-2. The eight v5 decisions in `docs/architecture/ARCHITECTURE_V5_arc42.md` §0.3.
-3. How to connect GitHub (or keep uploading manually): see `docs/architecture/GITHUB_CONNECT_AND_PUSH_GUIDE.md`.
+## 3. Pilot target
+Trinidad and Tobago regulated institutions: the Central Bank's cybersecurity Self-Assessment Return is due every **31 March** (next: 31 March 2027). See `FOUNDER_VIEW.md`.
 
-## 4. What is left until launch
-
-"Launch" here means **v4.0 "Trustworthy core"** is publicly released. Effort sizes are my rough estimates (S ≈ 1–3 days, M ≈ 1–2 weeks, L ≈ 2–4 weeks of focused work), not measurements.
-
-### 4.1 Build workstreams (v4.0)
-| # | Workstream | Size | Notes |
-|---|---|---|---|
-| W1 | Observation store + pure evaluator refactor (time-travel) | M | Foundation for everything else |
-| W2 | Packs engine: algorithm registry (with lifecycle status), jurisdiction and framework-mapping packs | L | Content-heavy; needs sources checked |
-| W3 | Deep TLS sensor (rustls with explicit groups/versions + raw ClientHello; edge-vs-origin; replace native-tls) | L | Biggest functional gap; oracle tests against OpenSSL 3.5, Go, rustls |
-| W4 | Evidence layer v4 (DSSE/in-toto, hybrid Ed25519 + SLH-DSA, hash-chain, optional RFC 3161) | M | |
-| W5 | Minimal verifier crate + spec + test vectors | M | Independent trust path |
-| W6 | Evidence packs (PCI DSS 4.0.1, ISO 27001 A.8.24, DORA RTS, NIST IR 8547, CA/B, CBTT) | M | Needs assessor review |
-| W7 | Static dashboard v1, expiry alerts, SARIF | M | |
-| W8 | Claims registry in CI; remove legacy `scan`; hygiene (junk files, README) | S–M | |
-| W9 | Quality: corpus and differential tests, fuzzing, performance measurements | M | |
-| W10 | Packaging: release binaries, reproducible build, signed releases, docs | M | |
-
-Rough total: about 8–16 weeks of focused solo work. This is an estimate; it depends on your hours and on external people (assessors, interviewees).
-
-### 4.2 Validation (runs in parallel; depends on other people)
-- 12 user interviews (compliance leads, PKI engineers, auditors, vendor-risk, insurer/broker, M&A counsel).
-- Three real (consented, anonymised) inventories run through the tool.
-- An assessor reviews the PCI/ISO/DORA mappings.
-- A non-technical auditor verifies a report unaided.
-
-### 4.3 Commercial and legal readiness (not started)
-- Licence decision; terms of use; privacy statement; vulnerability-disclosure policy and `security.txt`.
-- **Product-name check (trademark and domain) not done.**
-- Support channel; issue templates; release process.
-- Data-room and README alignment with `CLAIMS.md`.
-- Later: SOC 2 / ISO 27001 plan (buyers may ask a vendor for it).
-
-### 4.4 Launch gate (all must be true)
-Quality scenarios Q-1…Q-4, Q-8, Q-10, Q-11, Q-15 pass · three real inventories processed · an auditor verifies unaided · licence decided · every public claim is in `CLAIMS.md` sections A or B · fuzzing run without crashes · release is reproducible and signed.
-
-## 5. Next actions (in order)
-1. Upload this bundle and merge the pull request (v2 + docs + tests + claims registry).
-2. Answer the pending decisions (licence is decided; seven v5 decisions remain).
-3. Start W1 and W8 (foundation and hygiene), then W3 and W4 in parallel.
+## 4. Next actions
+1. Apply the update in the Codespace; run `cargo test -p vericrypt`, `python3 scripts/check_claims.py`, `bash scripts/verify_licence_e2e.sh`; push; check the first GitHub Actions run.
+2. Verify the static build; add Windows.
+3. Deep TLS slice (versions, ciphers, hybrid groups) and the Central Bank evidence pack.

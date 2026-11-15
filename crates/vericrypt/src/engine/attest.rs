@@ -6,6 +6,8 @@ use slh_dsa::{Shake128f, Signature, SigningKey, VerifyingKey};
 
 pub const ALG: &str = "SLH-DSA-SHAKE-128f (FIPS 205)";
 pub const CONTEXT: &[u8] = b"vericrypt-report-v2";
+/// Domain separation for detached file signatures (release binaries etc.), so a file signature can never be replayed as a report signature.
+pub const FILE_CONTEXT: &[u8] = b"vericrypt-file-v1";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KeyFile {
@@ -42,6 +44,10 @@ pub fn keygen() -> KeyFile {
 }
 
 pub fn sign(message: &[u8], key: &KeyFile) -> Result<Attestation, String> {
+    sign_with_context(message, key, CONTEXT)
+}
+
+pub fn sign_with_context(message: &[u8], key: &KeyFile, ctx: &[u8]) -> Result<Attestation, String> {
     if key.alg != ALG {
         return Err(format!("key algorithm {} is not supported (expected {})", key.alg, ALG));
     }
@@ -49,12 +55,12 @@ pub fn sign(message: &[u8], key: &KeyFile) -> Result<Attestation, String> {
     let sk = SigningKey::<Shake128f>::try_from(sk_bytes.as_slice()).map_err(|_| "secret key has the wrong length".to_string())?;
     let mut rnd = [0u8; 16];
     rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut rnd);
-    let sig = sk.try_sign_with_context(message, CONTEXT, Some(&rnd)).map_err(|_| "signing failed".to_string())?;
+    let sig = sk.try_sign_with_context(message, ctx, Some(&rnd)).map_err(|_| "signing failed".to_string())?;
     let sig_bytes: Vec<u8> = Vec::from(&sig);
     let pk = hex::decode(&key.public_key).map_err(|e| format!("public key: {}", e))?;
     Ok(Attestation {
         alg: ALG.to_string(),
-        context: String::from_utf8_lossy(CONTEXT).to_string(),
+        context: String::from_utf8_lossy(ctx).to_string(),
         key_id: key_id(&pk),
         public_key: key.public_key.clone(),
         signature: hex::encode(sig_bytes),
@@ -62,10 +68,14 @@ pub fn sign(message: &[u8], key: &KeyFile) -> Result<Attestation, String> {
 }
 
 pub fn verify(message: &[u8], att: &Attestation) -> Result<(), String> {
+    verify_with_context(message, att, CONTEXT)
+}
+
+pub fn verify_with_context(message: &[u8], att: &Attestation, ctx: &[u8]) -> Result<(), String> {
     if att.alg != ALG {
         return Err(format!("unsupported attestation algorithm {}", att.alg));
     }
-    if att.context.as_bytes() != CONTEXT {
+    if att.context.as_bytes() != ctx {
         return Err("unexpected signing context".into());
     }
     let pk = hex::decode(&att.public_key).map_err(|e| format!("public key: {}", e))?;
@@ -75,5 +85,5 @@ pub fn verify(message: &[u8], att: &Attestation) -> Result<(), String> {
     let vk = VerifyingKey::<Shake128f>::try_from(pk.as_slice()).map_err(|_| "public key has the wrong length".to_string())?;
     let sig_bytes = hex::decode(&att.signature).map_err(|e| format!("signature: {}", e))?;
     let sig = Signature::<Shake128f>::try_from(sig_bytes.as_slice()).map_err(|_| "signature has the wrong length".to_string())?;
-    vk.try_verify_with_context(message, CONTEXT, &sig).map_err(|_| "signature does not verify".to_string())
+    vk.try_verify_with_context(message, ctx, &sig).map_err(|_| "signature does not verify".to_string())
 }

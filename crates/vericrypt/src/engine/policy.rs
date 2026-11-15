@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 
 const DORA7: &str = "Commission Delegated Regulation (EU) 2024/1774 (DORA RTS), Art. 7";
 const DORA6: &str = "Commission Delegated Regulation (EU) 2024/1774 (DORA RTS), Art. 6";
-const IR8547: &str = "NIST IR 8547 (initial public draft, Nov 2024)";
+const IR8547: &str = "NIST IR 8547 (final, 27 Oct 2026; replaced the Nov 2024 draft)";
 const CABF: &str = "CA/Browser Forum TLS Baseline Requirements (maximum validity schedule)";
 
 fn ev(a: &Asset, extra: &[(&str, String)]) -> BTreeMap<String, String> {
@@ -47,6 +47,7 @@ fn mk(rule: &str, pack: &str, sev: Severity, a: &Asset, title: &str, detail: Str
         remediation: fix.to_string(),
         references: refs.iter().map(|s| s.to_string()).collect(),
         evidence: ev(a, extra),
+        accepted_risk: None,
     }
 }
 
@@ -69,6 +70,7 @@ pub fn apply_scope(assets: &mut [Asset], public: &[String], private: &[String]) 
 pub fn evaluate(assets: &[Asset], now: DateTime<Utc>) -> Vec<Finding> {
     let mut out = Vec::new();
     let y2035_end = Utc.with_ymd_and_hms(2035, 12, 31, 23, 59, 59).unwrap();
+    let y2030_end = Utc.with_ymd_and_hms(2030, 12, 31, 23, 59, 59).unwrap();
     for a in assets {
         // ---------- hygiene ----------
         if a.kind == AssetKind::Certificate {
@@ -140,22 +142,25 @@ pub fn evaluate(assets: &[Asset], now: DateTime<Utc>) -> Vec<Finding> {
         match a.quantum_status {
             QuantumStatus::Vulnerable => {
                 let (dep, dis) = ir8547(a.classical_bits);
-                let (sev, tl) = if dep.is_some() {
-                    (Severity::High, format!("deprecated after {} and disallowed after {}", dep.unwrap(), dis))
-                } else {
-                    (Severity::Medium, format!("disallowed after {}", dis))
-                };
+                // Final IR 8547: every strength is deprecated after 2030. Weaker parameter sets stay the more urgent.
+                let sev = if a.classical_bits.map_or(false, |b| b <= 112) { Severity::High } else { Severity::Medium };
+                let tl = format!("deprecated after {} and disallowed after {}", dep.unwrap_or(2030), dis);
                 let agree = a.family == Family::Dh;
                 out.push(mk("PQC-IR8547", "pqc", sev, a, "Quantum-vulnerable public-key algorithm",
-                    format!("{} can be broken by a large quantum computer. Under the NIST IR 8547 draft timeline it is {}.", a.algorithm, tl),
+                    format!("{} can be broken by a large quantum computer. Under the final NIST IR 8547 it is {}. Deprecated means still usable, but the owner must examine the risk and record a decision (see waivers).", a.algorithm, tl),
                     classify::replacement(a.family, agree),
                     &[IR8547, DORA6], &[("ir8547_disallow_after", dis.to_string())]));
                 if a.kind == AssetKind::Certificate {
                     if let Some(na) = a.not_after.as_deref().and_then(parse_ts) {
                         if na > y2035_end {
                             out.push(mk("PQC-OUTLIVES-2035", "pqc", Severity::High, a, "Certificate outlives the 2035 disallow date",
-                                "The certificate stays valid after the date NIST proposes to disallow its algorithm.".to_string(),
+                                "The certificate stays valid after the date NIST disallows its algorithm.".to_string(),
                                 "Shorten the lifetime or reissue with a post-quantum or hybrid algorithm before 2035.",
+                                &[IR8547], &[]));
+                        } else if na > y2030_end {
+                            out.push(mk("PQC-OUTLIVES-2030", "pqc", Severity::Low, a, "Certificate outlives the 2030 deprecation date",
+                                "The certificate stays valid after 2030, when NIST deprecates its algorithm (deprecated means discouraged, still permitted with risk acceptance).".to_string(),
+                                "Plan to replace it before it expires, or document the risk acceptance.",
                                 &[IR8547], &[]));
                         }
                     }
@@ -183,4 +188,53 @@ pub fn evaluate(assets: &[Asset], now: DateTime<Utc>) -> Vec<Finding> {
 // Helper to keep the match above exhaustive without emitting anything for private-CA certificates.
 fn continue_private() -> (Severity, &'static str) {
     (Severity::Info, "")
+}
+
+/// Apply documented risk decisions. Accepted findings stay in the report (marked `accepted_risk`); expired waivers re-open
+/// the finding and add a governance finding so the lapse is visible; waivers that match nothing are reported as `unmatched`.
+pub fn apply_waivers(findings: &mut Vec<Finding>, waivers: &[Waiver], now: DateTime<Utc>) -> Vec<WaiverRecord> {
+    let mut records = Vec::new();
+    let mut governance: Vec<Finding> = Vec::new();
+    for w in waivers {
+        let matches = |f: &Finding| f.rule_id == w.rule_id && (w.asset_id == "*" || f.asset_id == w.asset_id);
+        let matched = findings.iter().filter(|f| matches(f)).count() as u64;
+        let expires = parse_ts(&w.expires);
+        let status = match expires {
+            None => "invalid",
+            Some(e) if e <= now => "expired",
+            Some(_) if matched == 0 => "unmatched",
+            Some(_) => "active",
+        };
+        if status == "active" {
+            for f in findings.iter_mut() {
+                if f.rule_id == w.rule_id && (w.asset_id == "*" || f.asset_id == w.asset_id) && f.accepted_risk.is_none() {
+                    f.accepted_risk = Some(w.clone());
+                }
+            }
+        }
+        if status == "expired" {
+            let asset = if w.asset_id == "*" { "all".to_string() } else { w.asset_id.clone() };
+            let mut evid = BTreeMap::new();
+            evid.insert("waived_rule".to_string(), w.rule_id.clone());
+            evid.insert("owner".to_string(), w.owner.clone());
+            evid.insert("expired_on".to_string(), w.expires.clone());
+            governance.push(Finding {
+                id: format!("GOV-WAIVER-EXPIRED:{}:{}", w.rule_id, asset),
+                rule_id: "GOV-WAIVER-EXPIRED".to_string(),
+                pack: "governance".to_string(),
+                severity: Severity::Medium,
+                asset_id: asset,
+                title: "Risk decision has expired".to_string(),
+                detail: format!("The accepted-risk decision for {} (owner {}) expired on {}. The finding is open again.", w.rule_id, w.owner, w.expires),
+                remediation: "Fix the finding, or review the decision and record a new waiver with a new expiry.".to_string(),
+                references: vec![],
+                evidence: evid,
+                accepted_risk: None,
+            });
+        }
+        records.push(WaiverRecord { waiver: w.clone(), status: status.to_string(), matched_findings: matched });
+    }
+    findings.extend(governance);
+    findings.sort_by(|x, y| y.severity.cmp(&x.severity).then(x.rule_id.cmp(&y.rule_id)).then(x.asset_id.cmp(&y.asset_id)));
+    records
 }

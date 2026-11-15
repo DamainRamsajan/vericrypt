@@ -79,10 +79,24 @@ pub fn render(b: &Body, att: Option<&Attestation>) -> String {
         h.push_str("<div class=\"wrap\"><table><tr><th>Severity</th><th>Finding</th><th>Asset</th><th>Why / fix</th></tr>");
         for f in actionable {
             let refs = if f.references.is_empty() { String::new() } else { format!("<br><small>Refs: {}</small>", esc(&f.references.join("; "))) };
+            let accepted = match &f.accepted_risk {
+                Some(w) => format!("<br><b>Accepted risk</b> until {} (owner {}): {}", esc(&w.expires), esc(&w.owner), esc(&w.reason)),
+                None => String::new(),
+            };
             h.push_str(&format!(
-                "<tr><td>{}</td><td><b>{}</b><br><code>{}</code></td><td><code>{}</code></td><td>{}<br><i>Fix:</i> {}{}</td></tr>",
-                tag(f.severity), esc(&f.title), esc(&f.rule_id), esc(&f.asset_id), esc(&f.detail), esc(&f.remediation), refs
+                "<tr><td>{}</td><td><b>{}</b><br><code>{}</code></td><td><code>{}</code></td><td>{}<br><i>Fix:</i> {}{}{}</td></tr>",
+                tag(f.severity), esc(&f.title), esc(&f.rule_id), esc(&f.asset_id), esc(&f.detail), esc(&f.remediation), refs, accepted
             ));
+        }
+        h.push_str("</table></div>");
+    }
+
+    // risk decisions
+    if !b.waivers.is_empty() {
+        h.push_str("<h2>Risk decisions (waivers)</h2><p>Each decision below is part of the signed report. A decision never hides a finding; once it expires the finding is open again.</p><div class=\"wrap\"><table><tr><th>Rule</th><th>Asset</th><th>Owner</th><th>Reason</th><th>Expires</th><th>Status</th></tr>");
+        for r in &b.waivers {
+            h.push_str(&format!("<tr><td><code>{}</code></td><td><code>{}</code></td><td>{}</td><td>{}</td><td>{}</td><td>{} ({} finding(s))</td></tr>",
+                esc(&r.waiver.rule_id), esc(&r.waiver.asset_id), esc(&r.waiver.owner), esc(&r.waiver.reason), esc(&r.waiver.expires), esc(&r.status), r.matched_findings));
         }
         h.push_str("</table></div>");
     }

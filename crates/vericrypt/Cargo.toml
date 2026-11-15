@@ -2,24 +2,22 @@
 name = "vericrypt"
 version = "0.1.0"
 edition = "2021"
-description = "Post-quantum cryptographic compliance engine — single air-gapped binary"
-license-file = "../../LICENSE"
-publish = false
+description = "Cryptographic inventory, post-quantum exposure findings and offline-verifiable evidence"
+license = "UNLICENSED"
 repository = "https://github.com/intellica-ai-llc/vericrypt"
 
 [[bin]]
 name = "vericrypt"
 path = "src/main.rs"
 
+# Licence issuing tool: for the vendor only. Never ship this binary to customers.
 [[bin]]
-name = "vericrypt-verify"
-path = "src/verify_main.rs"
+name = "vericrypt-license"
+path = "src/bin/vericrypt_license.rs"
+required-features = ["issuer"]
 
 [dependencies]
-seedc = { path = "../seedc" }
-seedvm = { path = "../seedvm" }
 clap = { workspace = true }
-tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
@@ -32,37 +30,17 @@ tracing-subscriber = { workspace = true }
 rand = { workspace = true }
 x509-parser = { workspace = true }
 rustls-pemfile = { workspace = true }
-native-tls = { workspace = true }
-der = { workspace = true }
-petgraph = { workspace = true }
 walkdir = { workspace = true }
-csv = { workspace = true }
-ipnet = { workspace = true }
-hostname = { workspace = true }
 dirs = { workspace = true }
-zstd = { workspace = true }
-pqcrypto-sphincsplus = { workspace = true }
-pqcrypto-traits = { workspace = true }
-cyclonedx-bom = { workspace = true }
 tempfile = { workspace = true }
 pasetors = "0.7.8"
+ed25519-compact = { version = "2", optional = true }
 slh-dsa = "0.1.0"
 sha2 = "0.10"
+# TLS probe: rustls with the `ring` provider (no OpenSSL, so one self-contained binary)
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 
 [features]
 default = []
 license-gate = []
-
-[dev-dependencies]
-criterion = { workspace = true }
-
-[[bench]]
-name = "scan_benchmarks"
-harness = false
-
-
-[build-dependencies]
-seedc = { path = "../seedc" }
-
-[target.'cfg(target_env = "musl")'.dependencies]
-openssl = { version = "0.10", features = ["vendored"] }
+issuer = ["dep:ed25519-compact"]

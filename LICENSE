@@ -1,18 +1,19 @@
-VeriCrypt
+VeriCrypt Proprietary Licence: All Rights Reserved
+
 Copyright (c) 2026 Intellica AI Inc. All rights reserved.
 
-This software, its source code and its documentation are proprietary to Intellica AI Inc.
-("Intellica"). No licence or other right is granted to use, copy, modify, merge, publish,
-distribute, sublicense, sell, reverse engineer or create derivative works of this software,
-in source or binary form, except under a written licence agreement signed by Intellica, or as
-expressly stated in a licence that accompanies a specific release.
+This repository is visible to the public so that it can be reviewed. Visibility is not a licence.
 
-Viewing or forking this repository on GitHub is permitted only to the extent GitHub's Terms of
-Service provide. It does not grant any licence to the software.
+No right is granted to use, copy, modify, merge, publish, distribute, sublicense, sell, host as a service, or create derivative works
+of this software or its source code, in whole or in part, except under a written licence agreement with Intellica AI Inc. or under
+the evaluation terms that accompany a licence key issued to you by Intellica AI Inc. Such evaluation use is limited to the organisation
+named in the key, for the period the key is valid, for internal evaluation only.
 
-Third-party components used by this software are licensed to Intellica under their own licences;
-see THIRD_PARTY_NOTICES.md. Nothing in this file limits the rights those licences give you in
-those components.
+Third-party components included in or required by this software remain under their own licences (see the software bill of materials
+shipped with each release).
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. Terms for
-paying customers are set out in their licence agreement with Intellica.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+Contact for licensing: dpramsajan@meeting-mind.com

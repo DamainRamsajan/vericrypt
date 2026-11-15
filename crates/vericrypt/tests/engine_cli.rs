@@ -2,13 +2,18 @@
 //! unsigned handling, CI gating, drift diff and CBOM structure.
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
-use vericrypt::engine::{self, AnalyzeArgs, DiffArgs, KeygenArgs, ReevaluateArgs, VerifyArgs};
+use vericrypt::engine::{self, AnalyzeArgs, DiffArgs, KeygenArgs, SignFileArgs, VerifyArgs, VerifyFileArgs};
 
 const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/pki");
-const AS_OF: &str = "2026-11-01T00:00:00Z";
+const AS_OF: &str = "2026-11-02T00:00:00Z";
 
 fn analyze(input: &Path, out: &Path, sign_key: Option<&Path>, fail_on: Option<&str>) -> engine::CliResult {
+    analyze_with(input, out, sign_key, fail_on, None)
+}
+
+fn analyze_with(input: &Path, out: &Path, sign_key: Option<&Path>, fail_on: Option<&str>, waivers: Option<&Path>) -> engine::CliResult {
     engine::run_analyze(AnalyzeArgs {
+        waivers: waivers.map(|p| p.display().to_string()),
         inputs: vec![input.display().to_string()],
         tls: vec![],
         out: out.display().to_string(),
@@ -21,7 +26,6 @@ fn analyze(input: &Path, out: &Path, sign_key: Option<&Path>, fail_on: Option<&s
         as_of: Some(AS_OF.into()),
         fail_on: fail_on.map(|s| s.to_string()),
         no_html: true,
-        store: None,
     })
 }
 
@@ -140,105 +144,94 @@ fn cbom_is_structurally_consistent() {
     }
 }
 
-// ---- saved scans: analyze --store, then reevaluate ----
+#[test]
+fn file_signatures_roundtrip_pin_and_detect_changes() {
+    let d = tempfile::tempdir().unwrap();
+    let (k1, p1) = keygen(d.path(), "k1");
+    let (_, p2) = keygen(d.path(), "k2");
+    let bin = d.path().join("vericrypt-release.bin");
+    std::fs::write(&bin, vec![7u8; 4096]).unwrap();
+    let sig = d.path().join("release.sig.json");
+    engine::run_sign_file(SignFileArgs { path: bin.display().to_string(), key: k1.display().to_string(), out: Some(sig.display().to_string()) }).unwrap();
+    let check = |pubkey: Option<&Path>| {
+        engine::run_verify_file(VerifyFileArgs {
+            path: bin.display().to_string(),
+            sig: Some(sig.display().to_string()),
+            pubkey: pubkey.map(|p| p.display().to_string()),
+            key_id: None,
+        })
+    };
+    assert_eq!(code(check(Some(&p1))), 0, "right key");
+    assert_eq!(code(check(Some(&p2))), 1, "wrong pinned key");
+    // change one byte of the file
+    let mut data = std::fs::read(&bin).unwrap();
+    data[100] ^= 1;
+    std::fs::write(&bin, &data).unwrap();
+    assert_eq!(code(check(Some(&p1))), 1, "modified file");
+    // restore the file but edit the signature file's claimed hash
+    data[100] ^= 1;
+    std::fs::write(&bin, &data).unwrap();
+    assert_eq!(code(check(Some(&p1))), 0);
+    let mut doc: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(&sig).unwrap()).unwrap();
+    doc["size"] = serde_json::json!(1);
+    std::fs::write(&sig, serde_json::to_string(&doc).unwrap()).unwrap();
+    assert_eq!(code(check(Some(&p1))), 1, "edited signature file");
+}
 
-fn analyze_into_store(store: &Path, out: &Path) -> String {
-    engine::run_analyze(AnalyzeArgs {
-        inputs: vec![FIXTURES.to_string()],
-        tls: vec![],
-        out: out.display().to_string(),
-        sign_key: None,
-        public_issuers: vec!["Acme Public Test CA".into()],
-        private_issuers: vec![],
-        shelf_life_years: 10,
-        migration_years: 5,
-        crqc_years: 14,
-        as_of: Some(AS_OF.into()),
-        fail_on: None,
-        no_html: true,
-        store: Some(store.display().to_string()),
-    })
+fn waiver_file(dir: &Path, name: &str, expires: &str) -> PathBuf {
+    let p = dir.join(name);
+    std::fs::write(
+        &p,
+        serde_json::json!([{
+            "rule_id": "HYG-WEAK-KEY", "asset_id": "*", "owner": "Head of PKI", "reason": "legacy partner endpoint, decommission scheduled",
+            "expires": expires, "approved_by": "CISO", "reference": "CHG-1042"
+        }])
+        .to_string(),
+    )
     .unwrap();
-    let mut ids: Vec<String> = std::fs::read_dir(store.join("scans"))
-        .unwrap()
-        .map(|e| e.unwrap().path().file_stem().unwrap().to_string_lossy().to_string())
-        .collect();
-    assert_eq!(ids.len(), 1);
-    ids.remove(0)
-}
-
-fn reevaluate(store: &Path, scan: &str, out: &Path, as_of: &str) -> engine::CliResult {
-    engine::run_reevaluate(ReevaluateArgs {
-        store: store.display().to_string(),
-        scan: scan.to_string(),
-        out: out.display().to_string(),
-        sign_key: None,
-        public_issuers: vec!["Acme Public Test CA".into()],
-        private_issuers: vec![],
-        shelf_life_years: 10,
-        migration_years: 5,
-        crqc_years: 14,
-        as_of: Some(as_of.into()),
-        fail_on: None,
-        no_html: true,
-    })
-}
-
-fn body_of(out: &Path) -> serde_json::Value {
-    let v: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
-    v["body"].clone()
-}
-
-fn count_rule(body: &serde_json::Value, rule: &str) -> usize {
-    body["findings"].as_array().unwrap().iter().filter(|f| f["rule_id"] == rule).count()
+    p
 }
 
 #[test]
-fn saved_scan_re_evaluates_to_the_same_report_root() {
+fn active_waiver_accepts_the_finding_without_hiding_it() {
     let d = tempfile::tempdir().unwrap();
-    let store = d.path().join("store");
-    let first = d.path().join("first");
-    let again = d.path().join("again");
-    let id = analyze_into_store(&store, &first);
-    reevaluate(&store, &id, &again, AS_OF).unwrap();
-    assert_eq!(body_of(&first)["merkle_root"], body_of(&again)["merkle_root"]);
+    let w = waiver_file(d.path(), "w.json", "2027-12-31T00:00:00Z");
+    let out = d.path().join("out");
+    // the only critical finding in the fixtures is the RSA-1024 weak key: with a waiver the CI gate passes ...
+    assert_eq!(code(analyze_with(Path::new(FIXTURES), &out, None, Some("critical"), Some(&w))), 0);
+    // ... but the finding is still in the report, marked as accepted, and the decision is recorded
+    let r: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
+    let f = r["body"]["findings"].as_array().unwrap().iter().find(|f| f["rule_id"] == "HYG-WEAK-KEY").expect("finding still present");
+    assert_eq!(f["accepted_risk"]["owner"], "Head of PKI");
+    assert_eq!(r["body"]["summary"]["accepted_risk"], 1);
+    assert_eq!(r["body"]["summary"]["findings_by_severity"]["critical"], 0, "open critical count excludes accepted findings");
+    assert_eq!(r["body"]["waivers"][0]["status"], "active");
 }
 
 #[test]
-fn re_evaluating_a_saved_scan_later_changes_findings_not_assets() {
+fn expired_waiver_reopens_the_finding_and_is_reported() {
     let d = tempfile::tempdir().unwrap();
-    let store = d.path().join("store");
-    let first = d.path().join("first");
-    let later = d.path().join("later");
-    let id = analyze_into_store(&store, &first);
-    reevaluate(&store, &id, &later, "2040-01-01T00:00:00Z").unwrap();
-    let (a, b) = (body_of(&first), body_of(&later));
-    assert_eq!(a["assets"].as_array().unwrap().len(), b["assets"].as_array().unwrap().len());
-    assert_ne!(a["merkle_root"], b["merkle_root"]);
-    assert!(count_rule(&b, "HYG-EXPIRED") > count_rule(&a, "HYG-EXPIRED"));
+    let w = waiver_file(d.path(), "w.json", "2026-01-01T00:00:00Z"); // already expired at the pinned as-of date
+    let out = d.path().join("out");
+    assert_eq!(code(analyze_with(Path::new(FIXTURES), &out, None, Some("critical"), Some(&w))), 3, "expired waiver must not pass the gate");
+    let r: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
+    assert!(r["body"]["findings"].as_array().unwrap().iter().any(|f| f["rule_id"] == "GOV-WAIVER-EXPIRED"));
+    assert_eq!(r["body"]["waivers"][0]["status"], "expired");
 }
 
 #[test]
-fn a_changed_batch_file_is_refused() {
+fn waivers_are_part_of_the_signed_report() {
     let d = tempfile::tempdir().unwrap();
-    let store = d.path().join("store");
-    let id = analyze_into_store(&store, &d.path().join("first"));
-    // find the one batch file and change a byte
-    let mut batch = None;
-    for y in std::fs::read_dir(store.join("obs")).unwrap() {
-        for m in std::fs::read_dir(y.unwrap().path()).unwrap() {
-            for f in std::fs::read_dir(m.unwrap().path()).unwrap() {
-                batch = Some(f.unwrap().path());
-            }
-        }
-    }
-    let batch = batch.expect("a batch file was written");
-    let mut bytes = std::fs::read(&batch).unwrap();
-    bytes[10] = bytes[10].wrapping_add(1);
-    std::fs::write(&batch, bytes).unwrap();
-    let r = reevaluate(&store, &id, &d.path().join("out"), AS_OF);
-    match r {
-        Err((2, msg)) => assert!(msg.contains("hash no longer matches"), "unexpected message: {}", msg),
-        other => panic!("expected exit 2 for a changed batch, got {:?}", other.map(|_| ())),
-    }
+    let (key, pubkey) = keygen(d.path(), "k1");
+    let w = waiver_file(d.path(), "w.json", "2027-12-31T00:00:00Z");
+    let out = d.path().join("out");
+    analyze_with(Path::new(FIXTURES), &out, Some(&key), None, Some(&w)).unwrap();
+    let report = out.join("report.json");
+    assert_eq!(code(verify(&report, Some(&pubkey), false)), 0);
+    // quietly removing the waiver record from the signed report must be detected
+    let mut v: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(&report).unwrap()).unwrap();
+    v["body"]["waivers"] = serde_json::json!([]);
+    let bad = d.path().join("bad.json");
+    std::fs::write(&bad, serde_json::to_string(&v).unwrap()).unwrap();
+    assert_eq!(code(verify(&bad, Some(&pubkey), false)), 1);
 }

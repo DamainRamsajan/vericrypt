@@ -2,9 +2,10 @@
 
 Cryptographic inventory, post-quantum exposure findings and **offline-verifiable evidence**.
 
-VeriCrypt scans certificates and keys in files (and can probe the leaf certificate of a live TLS endpoint), classifies them, applies policy rules (hygiene, CA/Browser Forum lifetimes, NIST IR 8547 draft post-quantum transition), forecasts certificate-renewal burden, and writes a signed report plus a CycloneDX 1.7 cryptographic bill of materials (CBOM). A report can be verified offline with the signer's public key.
+VeriCrypt scans certificates and keys (files and live TLS endpoints), classifies them, applies policy rules (hygiene, CA/Browser Forum lifetimes, the final NIST IR 8547 transition dates), forecasts certificate-renewal burden, and writes a signed report plus a CycloneDX 1.7 cryptographic bill of materials. Anyone can verify the report offline.
 
-> Status: **v2 evidence engine.** `CLAIMS.md` lists exactly what is tested and what is not implemented. Anything not listed there is not claimed here.
+> **Status: pilot stage.** `CLAIMS.md` lists exactly what is tested, what was checked by hand, and what is **not** implemented.
+> **Licence: proprietary, all rights reserved** (see `LICENSE`). Evaluation licence keys are issued to pilot customers.
 
 ## Quick start
 ```bash
@@ -14,22 +15,23 @@ cargo build --release -p vericrypt
     --public-issuers "Acme Public Test CA" --sign-key my-key.json
 ./target/release/vericrypt verify out/report.json --pubkey my-key.pub.json
 ```
-Full instructions: `docs/INSTALL_V2.md`.
+Full instructions: `docs/INSTALL_V2.md`. Pilot licences and release packaging: `docs/PILOT_LICENCE_GUIDE.md`.
 
 ## What it does today
-- Classifies RSA, EC, Ed25519 and ML-DSA keys (RSA-2048 is 112-bit classical security and quantum-vulnerable).
-- Findings: weak keys, SHA-1 signatures, plaintext private keys, over-long certificate lifetimes, certificates that outlive 2035, quantum-vulnerable algorithms.
-- Reports are signed with SLH-DSA-SHAKE-128f (the FIPS 205 algorithm). A Merkle root commits to every asset and finding. Verification can pin the signer's key. An unsigned report fails verification unless you pass `--allow-unsigned`.
-- The same inputs, as-of time and parameters give the same Merkle root.
-- `analyze --store <dir>` saves what a scan saw. `reevaluate --store <dir> --scan <id>` re-judges that saved scan at another date or with other parameters. A saved batch that has been changed is refused.
-- `diff` compares two reports and can fail a CI job on new findings (exit code 3). `prove` and `verify-proof` give and check a Merkle inclusion proof for one asset or finding.
+- Parses PEM/DER certificates and PKCS#1/PKCS#8/SEC1/SPKI keys; records everything it skipped and why.
+- Classifies RSA, EC, Ed25519/X25519, DSA, DH and NIST post-quantum algorithms.
+- Findings: expiry, weak keys, SHA-1/MD5 signatures, plaintext private keys, over-long certificate lifetimes, quantum-vulnerable algorithms (deprecated after 2030, disallowed after 2035 per the final NIST IR 8547).
+- Reports signed with SLH-DSA-SHAKE-128f (a FIPS 205 algorithm); Merkle commitment over every asset and finding; verification pins the signer; unsigned reports fail.
+- `diff` between two scans with CI exit codes; `prove` / `verify-proof` for Merkle inclusion.
+- `sign-file` / `verify-file`: sign and verify any file (for example a release binary) with the same post-quantum key.
+- Live probing: reads the certificate a TLS server presents, including through STARTTLS for SMTP, IMAP and PostgreSQL.
+- Risk-decision register (waivers): accept a finding with an owner, a reason and an expiry. The finding stays visible, expired decisions re-open it, and the decisions are part of the signed report.
+- Release files for customers: signed binary, software bill of materials and a cryptographic bill of materials of the binary itself. One self-contained binary: no OpenSSL.
 
 ## What it does not do yet
-Deep TLS analysis (protocol versions, ciphers, key-exchange groups, including post-quantum groups), revocation and certificate-chain checks, Java/PKCS#12 keystores, SSH, code scanning, dashboards, connectors, hardware attestation. It is **not** a compliance certification, and it makes no formal-proof claims. Only tiny test inputs have been run, so performance at scale is unknown. The legacy v1 `scan` command has been removed.
+Deep TLS analysis (protocol versions, cipher suites, post-quantum key-exchange groups), STARTTLS for POP3 and FTP (implemented, untested), MySQL, revocation and chain checks, keystores, SSH, code scanning, dashboards, connectors. It is **not** a compliance certification.
 
 ## Documentation
-- `CLAIMS.md`: the claims registry
-- `docs/PROJECT_STATUS.md`: status and roadmap
-- `docs/architecture/`: arc42 architecture (v4 approved, v5 draft), competitive analysis, users and use cases
-
-Licence: proprietary. Copyright (c) 2026 Intellica AI Inc. All rights reserved. See `LICENSE`. Third-party components: `THIRD_PARTY_NOTICES.md`.
+- `docs/architecture/` — arc42 architecture, competitive analysis, users and use cases, research rounds
+- `docs/PROJECT_STATUS.md` — status and roadmap
+- `CLAIMS.md` — claims registry (CI checks it)

@@ -10,10 +10,8 @@ pub mod discover;
 pub mod lifecycle;
 pub mod merkle;
 pub mod model;
-pub mod observe;
 pub mod policy;
 pub mod report_html;
-pub mod store;
 
 use chrono::{DateTime, SecondsFormat, Utc};
 use clap::Args;
@@ -66,49 +64,9 @@ pub struct AnalyzeArgs {
     /// Skip the HTML report
     #[arg(long)]
     pub no_html: bool,
-    /// Save what the scan saw into this store directory, so it can be re-judged later with `reevaluate`
+    /// JSON file of documented risk decisions (waivers): who accepted which finding, why, and until when
     #[arg(long)]
-    pub store: Option<String>,
-}
-
-#[derive(Debug, Args)]
-pub struct ReevaluateArgs {
-    /// Store directory that holds the saved scan
-    #[arg(long)]
-    pub store: String,
-    /// Scan id to re-judge (printed by `analyze --store`; also the file name in <store>/scans)
-    #[arg(long)]
-    pub scan: String,
-    /// Output directory
-    #[arg(long, default_value = "./vericrypt-out")]
-    pub out: String,
-    /// Key file from `vericrypt keygen`; signs the report with SLH-DSA (FIPS 205)
-    #[arg(long)]
-    pub sign_key: Option<String>,
-    /// Issuer substrings that are publicly trusted CAs (comma separated)
-    #[arg(long, value_delimiter = ',')]
-    pub public_issuers: Vec<String>,
-    /// Issuer substrings that are private/internal CAs (comma separated)
-    #[arg(long, value_delimiter = ',')]
-    pub private_issuers: Vec<String>,
-    /// Mosca X: years the protected data must stay confidential
-    #[arg(long, default_value_t = 10)]
-    pub shelf_life_years: u32,
-    /// Mosca Y: years your migration will take
-    #[arg(long, default_value_t = 5)]
-    pub migration_years: u32,
-    /// Mosca Z: assumed years until a cryptographically relevant quantum computer (an assumption, not a prediction)
-    #[arg(long, default_value_t = 14)]
-    pub crqc_years: u32,
-    /// Judge as of this RFC 3339 time instead of now
-    #[arg(long)]
-    pub as_of: Option<String>,
-    /// Exit with code 3 if any finding is at or above this severity (info|low|medium|high|critical)
-    #[arg(long)]
-    pub fail_on: Option<String>,
-    /// Skip the HTML report
-    #[arg(long)]
-    pub no_html: bool,
+    pub waivers: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -149,6 +107,33 @@ pub struct VerifyProofArgs {
     /// Expected Merkle root (hex); take it from a signed report you trust
     #[arg(long)]
     pub root: String,
+}
+
+#[derive(Debug, Args)]
+pub struct SignFileArgs {
+    /// File to sign (for example a release binary)
+    pub path: String,
+    /// Key file from `vericrypt keygen`
+    #[arg(long)]
+    pub key: String,
+    /// Where to write the signature (default: <path>.sig.json)
+    #[arg(long)]
+    pub out: Option<String>,
+}
+
+#[derive(Debug, Args)]
+pub struct VerifyFileArgs {
+    /// File to check
+    pub path: String,
+    /// Signature file (default: <path>.sig.json)
+    #[arg(long)]
+    pub sig: Option<String>,
+    /// Trusted public key file (.pub.json); pins who signed the file
+    #[arg(long)]
+    pub pubkey: Option<String>,
+    /// Trusted key id (alternative to --pubkey)
+    #[arg(long)]
+    pub key_id: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -231,6 +216,7 @@ pub struct Inputs {
     pub dirs: Vec<String>,
     pub tls: Vec<String>,
     pub params: Params,
+    pub waivers: Vec<Waiver>,
 }
 
 fn summarize(assets: &[Asset], findings: &[Finding], p: &Params) -> Summary {
@@ -238,7 +224,7 @@ fn summarize(assets: &[Asset], findings: &[Finding], p: &Params) -> Summary {
     for s in ["critical", "high", "medium", "low", "info"] {
         by.insert(s.to_string(), 0);
     }
-    for f in findings {
+    for f in findings.iter().filter(|f| f.accepted_risk.is_none()) {
         *by.entry(f.severity.label().to_string()).or_insert(0) += 1;
     }
     let count = |k: AssetKind| assets.iter().filter(|a| a.kind == k).count() as u64;
@@ -253,6 +239,7 @@ fn summarize(assets: &[Asset], findings: &[Finding], p: &Params) -> Summary {
         quantum_resistant: assets.iter().filter(|a| a.quantum_status == QuantumStatus::Resistant).count() as u64,
         unknown_algorithm: assets.iter().filter(|a| a.quantum_status == QuantumStatus::Unknown).count() as u64,
         findings_by_severity: by,
+        accepted_risk: findings.iter().filter(|f| f.accepted_risk.is_some()).count() as u64,
         mosca: Mosca {
             shelf_life_years: p.shelf_life_years,
             migration_years: p.migration_years,
@@ -272,7 +259,7 @@ pub fn assumptions(p: &Params) -> Vec<String> {
     vec![
         format!("All date arithmetic uses the as-of time {}.", p.as_of),
         "Quantum status is decided by algorithm family (Shor's algorithm breaks RSA, finite-field DH/DSA and elliptic-curve schemes). The only timing assumption is the Mosca check, which uses the horizon you supplied; the default is an assumption, not a prediction.".to_string(),
-        "NIST IR 8547 is an initial public draft (Nov 2024); its dates may change before final publication.".to_string(),
+        "Transition dates follow NIST IR 8547 as finalised on 27 Oct 2026: every quantum-vulnerable public-key algorithm is deprecated after 2030 and disallowed after 2035. These dates apply to NIST standards and US federal use; other jurisdictions set their own.".to_string(),
         "CA/Browser Forum lifetime caps (398 -> 200 -> 100 -> 47 days) bind publicly trusted TLS certificates only. Scope is taken from the issuers you declare; undeclared issuers are reported as 'applies only if publicly trusted'.".to_string(),
     ]
 }
@@ -287,43 +274,20 @@ pub fn limitations() -> Vec<String> {
     ]
 }
 
-/// Step 1: look at the world and record what was seen. Reads files and the network; makes no judgement.
-pub fn observe(inp: &Inputs, observed_at: DateTime<Utc>) -> observe::ObservationSet {
-    let started_at = observed_at.to_rfc3339_opts(SecondsFormat::Secs, true);
-    let version = env!("CARGO_PKG_VERSION").to_string();
-    let scan_id = observe::scan_id_for(&started_at, &inp.dirs, &inp.tls, &version);
+pub fn run_pipeline(inp: &Inputs, now: DateTime<Utc>) -> Body {
     let mut d = discover::Discovery::new();
-    d.observed_at = started_at.clone();
-    d.scan_id = scan_id.clone();
-    d.tool_version = version;
     for dir in &inp.dirs {
         d.scan_dir(Path::new(dir));
     }
     for t in &inp.tls {
         d.probe_tls(t, Duration::from_secs(8));
     }
-    observe::ObservationSet {
-        format: observe::OBSERVATIONS_FORMAT.to_string(),
-        scan_id,
-        started_at,
-        targets: observe::ScanTargets { dirs: inp.dirs.clone(), tls: inp.tls.clone() },
-        observations: d.observations,
-        coverage: d.coverage,
-    }
-}
-
-/// Step 2: judge the observations. Pure: reads no files and no clock. The same observations,
-/// parameters and `now` always give the same body and Merkle root.
-pub fn evaluate(set: &observe::ObservationSet, params: &Params, now: DateTime<Utc>) -> Body {
-    let mut merged: BTreeMap<String, Asset> = BTreeMap::new();
-    for o in &set.observations {
-        discover::merge_asset(&mut merged, o.attributes.clone());
-    }
-    let mut assets: Vec<Asset> = merged.into_values().collect();
-    policy::apply_scope(&mut assets, &params.public_issuers, &params.private_issuers);
-    let findings = policy::evaluate(&assets, now);
+    let mut assets: Vec<Asset> = d.assets.into_values().collect();
+    policy::apply_scope(&mut assets, &inp.params.public_issuers, &inp.params.private_issuers);
+    let mut findings = policy::evaluate(&assets, now);
+    let waiver_records = policy::apply_waivers(&mut findings, &inp.waivers, now);
     let forecast = lifecycle::build(&assets, now);
-    let summary = summarize(&assets, &findings, params);
+    let summary = summarize(&assets, &findings, &inp.params);
 
     let av: Vec<Value> = assets.iter().map(|a| serde_json::to_value(a).unwrap()).collect();
     let fv: Vec<Value> = findings.iter().map(|f| serde_json::to_value(f).unwrap()).collect();
@@ -331,22 +295,18 @@ pub fn evaluate(set: &observe::ObservationSet, params: &Params, now: DateTime<Ut
     Body {
         format: BODY_FORMAT.to_string(),
         tool: ToolInfo { name: "vericrypt".into(), version: env!("CARGO_PKG_VERSION").to_string() },
-        generated_at: params.as_of.clone(),
-        parameters: params.clone(),
-        coverage: set.coverage.clone(),
+        generated_at: inp.params.as_of.clone(),
+        parameters: inp.params.clone(),
+        coverage: d.coverage,
         summary,
         forecast,
-        assumptions: assumptions(params),
+        assumptions: assumptions(&inp.params),
         limitations: limitations(),
         assets,
         findings,
+        waivers: waiver_records,
         merkle_root: root,
     }
-}
-
-pub fn run_pipeline(inp: &Inputs, now: DateTime<Utc>) -> Body {
-    let set = observe(inp, now);
-    evaluate(&set, &inp.params, now)
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -414,7 +374,15 @@ pub fn run_analyze(args: AnalyzeArgs) -> CliResult {
         None => Utc::now(),
     };
     let as_of = now.to_rfc3339_opts(SecondsFormat::Secs, true);
+    let waivers: Vec<Waiver> = match &args.waivers {
+        Some(path) => {
+            let text = std::fs::read_to_string(path).map_err(err(2))?;
+            serde_json::from_str(&text).map_err(|e| (2, format!("{}: not a valid waivers file ({})", path, e)))?
+        }
+        None => vec![],
+    };
     let inp = Inputs {
+        waivers,
         dirs: args.inputs.clone(),
         tls: args.tls.clone(),
         params: Params {
@@ -426,44 +394,11 @@ pub fn run_analyze(args: AnalyzeArgs) -> CliResult {
             private_issuers: args.private_issuers.clone(),
         },
     };
-    let set = observe(&inp, Utc::now());
-    if let Some(dir) = &args.store {
-        let id = store::write_scan(dir, &set).map_err(err(2))?;
-        println!("Saved scan {} in {}", id, dir);
-    }
-    let body = evaluate(&set, &inp.params, now);
-    emit(body, &args.out, args.sign_key.as_deref(), args.no_html, fail_on)
-}
-
-/// Re-judge a saved scan: same observations, new as-of time and/or parameters.
-pub fn run_reevaluate(args: ReevaluateArgs) -> CliResult {
-    let fail_on = match &args.fail_on {
-        Some(s) => Some(Severity::parse(s).ok_or((2, format!("unknown severity '{}'", s)))?),
-        None => None,
-    };
-    let now = match &args.as_of {
-        Some(s) => DateTime::parse_from_rfc3339(s).map_err(err(2))?.with_timezone(&Utc),
-        None => Utc::now(),
-    };
-    let set = store::read_scan(&args.store, &args.scan).map_err(err(2))?;
-    let params = Params {
-        as_of: now.to_rfc3339_opts(SecondsFormat::Secs, true),
-        shelf_life_years: args.shelf_life_years,
-        migration_years: args.migration_years,
-        crqc_years: args.crqc_years,
-        public_issuers: args.public_issuers.clone(),
-        private_issuers: args.private_issuers.clone(),
-    };
-    println!("Re-judging saved scan {} (observed {}) as of {}", set.scan_id, set.started_at, params.as_of);
-    let body = evaluate(&set, &params, now);
-    emit(body, &args.out, args.sign_key.as_deref(), args.no_html, fail_on)
-}
-
-fn emit(body: Body, out: &str, sign_key: Option<&str>, no_html: bool, fail_on: Option<Severity>) -> CliResult {
+    let body = run_pipeline(&inp, now);
     let body_v = serde_json::to_value(&body).map_err(err(1))?;
     let body_bytes = canonical(&body_v);
 
-    let attestation = match sign_key {
+    let attestation = match &args.sign_key {
         Some(path) => {
             require_license("Signed attestation")?;
             let kf = load_keyfile(path)?;
@@ -473,15 +408,15 @@ fn emit(body: Body, out: &str, sign_key: Option<&str>, no_html: bool, fail_on: O
     };
     let report = json!({"format": REPORT_FORMAT, "body": body_v, "attestation": attestation});
 
-    std::fs::create_dir_all(&out).map_err(err(2))?;
-    let rp = format!("{}/report.json", out);
+    std::fs::create_dir_all(&args.out).map_err(err(2))?;
+    let rp = format!("{}/report.json", args.out);
     std::fs::write(&rp, serde_json::to_string_pretty(&report).unwrap()).map_err(err(2))?;
-    let cp = format!("{}/cbom.json", out);
+    let cp = format!("{}/cbom.json", args.out);
     std::fs::write(&cp, serde_json::to_string_pretty(&cbom::build(&body)).unwrap()).map_err(err(2))?;
     let mut html_path = None;
-    if !no_html {
+    if !args.no_html {
         require_license("HTML report")?;
-        let hp = format!("{}/report.html", out);
+        let hp = format!("{}/report.html", args.out);
         std::fs::write(&hp, report_html::render(&body, attestation.as_ref())).map_err(err(2))?;
         html_path = Some(hp);
     }
@@ -493,7 +428,7 @@ fn emit(body: Body, out: &str, sign_key: Option<&str>, no_html: bool, fail_on: O
         println!("Wrote {}", h);
     }
     if let Some(th) = fail_on {
-        let worst = body.findings.iter().map(|f| f.severity).max();
+        let worst = body.findings.iter().filter(|f| f.accepted_risk.is_none()).map(|f| f.severity).max();
         if let Some(w) = worst {
             if w >= th {
                 return Err((3, format!("findings at or above '{}' present (worst: {})", th.label(), w.label())));
@@ -503,7 +438,6 @@ fn emit(body: Body, out: &str, sign_key: Option<&str>, no_html: bool, fail_on: O
     Ok(())
 }
 
-
 pub fn print_summary(b: &Body, att: Option<&attest::Attestation>) {
     let s = &b.summary;
     println!("VeriCrypt {} — evidence report (as of {})", b.tool.version, b.generated_at);
@@ -511,7 +445,14 @@ pub fn print_summary(b: &Body, att: Option<&attest::Attestation>) {
     println!("Assets: {} ({} certificates, {} private keys, {} public keys)", s.total_assets, s.certificates, s.private_keys, s.public_keys);
     println!("Quantum-vulnerable: {}   Post-quantum: {}   Unknown: {}", s.quantum_vulnerable, s.quantum_resistant, s.unknown_algorithm);
     let c = |k: &str| s.findings_by_severity.get(k).copied().unwrap_or(0);
-    println!("Findings: {} critical, {} high, {} medium, {} low, {} info", c("critical"), c("high"), c("medium"), c("low"), c("info"));
+    println!("Open findings: {} critical, {} high, {} medium, {} low, {} info", c("critical"), c("high"), c("medium"), c("low"), c("info"));
+    if s.accepted_risk > 0 {
+        println!("Accepted-risk findings (documented waivers, still shown in the report): {}", s.accepted_risk);
+    }
+    let expired = b.waivers.iter().filter(|w| w.status == "expired").count();
+    if expired > 0 {
+        println!("EXPIRED risk decisions: {} (their findings are open again)", expired);
+    }
     println!("Mosca check (X+Y vs Z): {}+{} = {} vs {} -> {}", s.mosca.shelf_life_years, s.mosca.migration_years, s.mosca.sum_years, s.mosca.crqc_years, if s.mosca.at_risk { "AT RISK" } else { "within horizon" });
     println!("TLS certificates in lifetime-rule scope: {}", b.forecast.in_scope_certificates);
     if b.forecast.in_scope_certificates > 0 {
@@ -524,7 +465,7 @@ pub fn print_summary(b: &Body, att: Option<&attest::Attestation>) {
         Some(a) => println!("Attestation: {} signed, key id {}", a.alg, a.key_id),
         None => println!("Attestation: UNSIGNED (use --sign-key to sign)"),
     }
-    let top: Vec<&Finding> = b.findings.iter().filter(|f| f.severity >= Severity::High).take(8).collect();
+    let top: Vec<&Finding> = b.findings.iter().filter(|f| f.severity >= Severity::High && f.accepted_risk.is_none()).take(8).collect();
     if !top.is_empty() {
         println!("\nTop findings:");
         for f in top {
@@ -652,4 +593,88 @@ pub fn run_verify_proof(args: VerifyProofArgs) -> CliResult {
 pub fn run_diff(args: DiffArgs) -> CliResult {
     require_license("Drift diff")?;
     diff::run(args)
+}
+
+// ---------------------------------------------------------------------------------------------
+// detached file signatures (release binaries, SBOMs, manifests)
+// ---------------------------------------------------------------------------------------------
+
+const FILESIG_FORMAT: &str = "vericrypt-filesig/1";
+
+fn sha256_hex(bytes: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    let mut h = Sha256::new();
+    h.update(bytes);
+    hex::encode(h.finalize())
+}
+
+/// The exact bytes that are signed. Rebuilt from the signature file's fields at verification time, never trusted as stored.
+fn filesig_manifest(name: &str, sha256: &str, size: u64) -> Vec<u8> {
+    format!("{}\nname:{}\nsha256:{}\nsize:{}\n", FILESIG_FORMAT, name, sha256, size).into_bytes()
+}
+
+pub fn run_sign_file(args: SignFileArgs) -> CliResult {
+    let data = std::fs::read(&args.path).map_err(err(2))?;
+    let name = Path::new(&args.path).file_name().and_then(|n| n.to_str()).unwrap_or("file").to_string();
+    let sha = sha256_hex(&data);
+    let size = data.len() as u64;
+    let kf = load_keyfile(&args.key)?;
+    let att = attest::sign_with_context(&filesig_manifest(&name, &sha, size), &kf, attest::FILE_CONTEXT).map_err(err(1))?;
+    let doc = json!({"format": FILESIG_FORMAT, "name": name, "sha256": sha, "size": size, "attestation": att});
+    let out = args.out.clone().unwrap_or_else(|| format!("{}.sig.json", args.path));
+    std::fs::write(&out, serde_json::to_string_pretty(&doc).unwrap()).map_err(err(2))?;
+    println!("Signed {} (sha256 {}), key id {}", name, sha, att.key_id);
+    println!("Signature written to {}", out);
+    Ok(())
+}
+
+pub fn run_verify_file(args: VerifyFileArgs) -> CliResult {
+    let sig_path = args.sig.clone().unwrap_or_else(|| format!("{}.sig.json", args.path));
+    let doc: Value = serde_json::from_str(&std::fs::read_to_string(&sig_path).map_err(err(2))?).map_err(err(2))?;
+    if doc["format"] != FILESIG_FORMAT {
+        return Err((2, format!("{} is not a {} file", sig_path, FILESIG_FORMAT)));
+    }
+    let data = std::fs::read(&args.path).map_err(err(2))?;
+    let (sha, size) = (sha256_hex(&data), data.len() as u64);
+    let mut ok = true;
+    if doc["sha256"].as_str() == Some(sha.as_str()) && doc["size"].as_u64() == Some(size) {
+        println!("[PASS] File matches the signed SHA-256 ({}) and size ({} bytes)", sha, size);
+    } else {
+        println!("[FAIL] File does not match the signature file: it was changed, or this is a different file");
+        ok = false;
+    }
+    let att: attest::Attestation = serde_json::from_value(doc["attestation"].clone()).map_err(err(2))?;
+    let name = doc["name"].as_str().unwrap_or("");
+    let claimed_sha = doc["sha256"].as_str().unwrap_or("");
+    let claimed_size = doc["size"].as_u64().unwrap_or(0);
+    match attest::verify_with_context(&filesig_manifest(name, claimed_sha, claimed_size), &att, attest::FILE_CONTEXT) {
+        Ok(()) => println!("[PASS] {} signature is valid (key id {})", att.alg, att.key_id),
+        Err(e) => {
+            println!("[FAIL] Signature check failed: {}", e);
+            ok = false;
+        }
+    }
+    let pinned = if let Some(id) = &args.key_id {
+        Some(id.clone())
+    } else if let Some(p) = &args.pubkey {
+        let v: Value = serde_json::from_str(&std::fs::read_to_string(p).map_err(err(2))?).map_err(err(2))?;
+        let pk = v["public_key"].as_str().ok_or((2, "no public_key in key file".to_string()))?;
+        Some(attest::key_id(&hex::decode(pk).map_err(err(2))?))
+    } else {
+        None
+    };
+    match pinned {
+        Some(k) if k == att.key_id => println!("[PASS] Signing key matches the trusted key you supplied"),
+        Some(k) => {
+            println!("[FAIL] Signed by key {}, not the trusted key {}", att.key_id, k);
+            ok = false;
+        }
+        None => println!("[WARN] No trusted key supplied: this proves the file matches its signature, not who signed it. Pin the vendor key with --pubkey or --key-id."),
+    }
+    if ok {
+        println!("\nRESULT: VERIFIED");
+        Ok(())
+    } else {
+        Err((1, "RESULT: NOT VERIFIED".into()))
+    }
 }

@@ -9,6 +9,45 @@ Status: **DRAFT. No v4 or v5 code exists yet.** v5 **extends** `ARCHITECTURE_V4_
 
 ---
 
+## Amendment 2: 2 Nov 2026 (newest; wins over Amendment 1 and the text below)
+
+**Research round 3 closed most open questions** (`RESEARCH_ROUND_3.md`): EO 14412 and OMB M-26-15 are corroborated by several sources; the US order requires government guidance on the **minimum elements of a CBOM (about March 2027)**; **RFC 10024 made the hybrid TLS groups final** (August 2026); the Trinidad and Tobago Self-Assessment Return is due **every 31 March** (primary source), the next on **31 March 2027**.
+
+**Built:** legacy v1 code deleted (about 1,300 lines) and with it OpenSSL and the ASL build step; the binary needs only the C library. TLS probe now uses rustls. STARTTLS probing for SMTP, IMAP and PostgreSQL (POP3 and FTP implemented, untested). **Waivers** (documented risk decisions). Product CBOM for the binary. All with tests (36 pass).
+
+**Delivery rule:** until you tell me you have uploaded, every zip is cumulative against GitHub commit `95aa48f`, so the latest zip is the only one to upload. Once you confirm an upload, that state becomes the new base.
+
+**Pilot target (decided in principle):** Trinidad and Tobago regulated institutions, aiming to give them evidence for the 31 March 2027 return.
+
+**Pilot-ready checklist changes:** OpenSSL requirement removed; STARTTLS covered for mail and PostgreSQL; risk-decision register present; product CBOM present. Still open: static musl build verified, Windows build, first real inventory, pilot paperwork, product-name check, legal review of LICENSE, deep TLS (versions, ciphers, hybrid groups).
+
+## Amendment 1 — 1 Nov 2026 (this section wins where it conflicts with text further down)
+
+**What changed in the world (research round 2; details and source quality in `RESEARCH_ROUND_2.md`)**
+- **NIST IR 8547 became final on 27 Oct 2026.** Every quantum-vulnerable public-key algorithm is deprecated after 2030 and disallowed after 2035, at every strength. The v2 rule code assumed the 2024 draft and had to be changed.
+- **IBM launched a Quantum Safe suite (27 Oct):** Cryptography Manager (discovery, posture, migration tracking), Explorer (code scanning and CBOM) and a PQ Proxy for legacy-to-PQ traffic. An analyst commenting on it says the cryptographic inventory will never be complete, which supports our evidence-and-coverage position.
+- **DuoKey offers free live probing** of post-quantum key exchange, covering STARTTLS and databases, with CycloneDX 1.7 output. A free competitor now overlaps our TLS and CBOM work.
+- US executive order 14412 (June 2026) and OMB memo M-26-15 (agency PQC plans due 22 Oct 2026), and a German federal migration guideline (12 Oct 2026, end-2030 for high-risk systems), are reported by secondary sources only. Primary texts are unread.
+
+**What changed in the project**
+- **Licence decided (28 Oct): proprietary, all rights reserved.** The repository stays public for now (your decision). The open-core recommendation in §0.3 item 6 is withdrawn.
+- **Goal: a binary with a licence key for pilot customers, working without bugs.** The licence system was found broken three ways (public key never embedded, generator produced a non-standard token format, hash check could never match). All fixed and tested.
+- **Legacy `scan` removed from the CLI; v1 tests parked** in `tests/legacy_v1/` so a plain `cargo test -p vericrypt` now runs and passes (31 tests).
+- **New:** `sign-file` / `verify-file`, SBOM generator, release packager, claims checker in CI, README and LICENSE aligned with `CLAIMS.md`.
+- **Stance: functionality over process.** Code ships first. Architecture changes are recorded as dated amendments (this section), not new document versions, until the structure itself changes (ADR-44).
+
+**Pilot-ready checklist**
+| Item | State |
+|---|---|
+| Licence keys activate end to end; expired, forged and other-key refused | Done, tested |
+| Release signed with our own SLH-DSA key, SBOM and checksums, offline verification by the customer | Done, tested |
+| README, LICENSE and CLAIMS agree; CI checks claims | Done (CI itself not yet run on GitHub) |
+| Static (musl) binary that runs without OpenSSL 3 | Not verified |
+| First real customer inventory run through the tool | Not done |
+| Pilot agreement, NDA, privacy and security-contact documents | Not done |
+| Product-name and trademark check; legal review of LICENSE | Not done |
+| Windows and macOS builds (banks often run Windows) | Not decided |
+
 ## 0. Review sheet
 
 ### 0.1 Locked from v4 (you said yes)
@@ -31,7 +70,7 @@ v4 *knows, decides and proves*. v5 closes the loop so the same system can also *
 3. **First v5 slice after v4.0.** "Fix-lite and Share-lite": recipes, preflight, coverage split, trust page, JWKS/DNSSEC sensors, value ledger, policy kit, cost-planner skeleton. *Recommendation: yes.*
 4. **Cost planner ships with empty coefficients.** I found no trustworthy public unit-cost benchmarks, so users enter their own. *Recommendation: yes.*
 5. **Wording of trust pages and attestations.** They state *observed posture at a time under stated coverage*, never "certified" or "quantum-safe". *Recommendation: yes.*
-6. **Licence and editions (still owed from v4).** You said yes to deciding before v4.0 ships, but the actual choice is still open. Options: (a) fully proprietary; (b) source-available; (c) **open-core**: permissive licence for the core and the verifier, commercial packs, connectors and hub. *Recommendation: (c).* Verification must stay free so evidence stays independently checkable.
+6. **Licence: DECIDED 28 Oct 2026.** Proprietary, all rights reserved; repository stays public for now. See Amendment 1.
 7. **Hub.** Design the file and API contracts now; build the server only after real demand. *Recommendation: yes.*
 8. **VeriChain anchoring.** Optionally publish report roots to a transparency log (VeriChain could be one backend). Never required; verification stays offline. *Your call.*
 
@@ -232,6 +271,17 @@ An attestation is a signed, **scoped** statement: what was assessed, when, by wh
 | ADR-35 | Policy-as-code kit using the existing pack mechanism | Cheap, high value | New DSL |
 | ADR-36 | Connector contract and framework; hub contracts frozen, server deferred | Ecosystem fit without a server | Build hub now |
 | ADR-37 | Optional public anchoring of report roots; never required | Non-repudiation option, VeriChain-compatible | Mandatory anchoring |
+| ADR-38 | Licence model: pre-issued, signed PASETO v4.public token bound to organisation, expiry and a feature list; verified offline against an embedded public key; no activation server and no hardware binding in pilots; revocation list and version ceiling deferred | Fits offline and air-gapped buyers; hardware binding is the usual alternative but brittle when machines change | Activation server; machine-fingerprint binding |
+| ADR-39 | Release assurance: each release ships SHA256SUMS, a CycloneDX SBOM and detached SLH-DSA signatures (`sign-file`); customers verify offline (`verify-file`); CI build-provenance attestation is an optional extra | What bank third-party reviews ask of software vendors; reuses our own evidence stack | Unsigned binaries |
+| ADR-40 | Regulatory dates live in data packs, not code; a minimal `jurisdiction` pack format moves into v4.0 slice 1 | NIST IR 8547 became final on 27 Oct 2026 and rule code had to change | Hard-coded dates |
+| ADR-41 | Deep TLS sensor also covers STARTTLS (SMTP, IMAP, POP3, FTP) and common database protocols | A free competitor probe already covers them | TLS-only |
+| ADR-42 | Position as the evidence layer next to suite vendors; treat PQ gateways (IBM Proxy and similar) as remediation targets, not something we build | IBM launched Cryptography Manager, Explorer and Proxy on 27 Oct 2026 | Build a gateway |
+| ADR-43 | Claims registry enforced in CI (`scripts/check_claims.py`) | Already caught a stale claim during this round | Manual review |
+| ADR-44 | Documentation policy: code first; arc42 changes recorded as dated amendments until the structure changes | Stated preference: functionality over process | New document version each round |
+| ADR-45 | Waivers are a risk-decision register: each has an owner, reason and expiry; findings stay visible and marked accepted; an expired waiver re-opens the finding and raises a governance finding; waivers are committed into the signed report | From 2031 NIST IR 8547 expects a recorded risk decision for every deprecated use; auditors will ask for it | Config-file ignore lists; silently suppressing findings |
+| ADR-46 | Standard release set: signed binary, SHA256SUMS, SBOM (CycloneDX 1.6) and a product CBOM (CycloneDX 1.7), all with detached SLH-DSA signatures | Bank vendor reviews and the coming US CBOM guidance | Binary only |
+| ADR-47 | One dependency-light binary: no OpenSSL (rustls with ring), no ASL build step, legacy v1 code removed | Portability for customer machines; smaller attack surface; faster builds | Keep legacy modules "for later" |
+| ADR-48 | First pilot segment: Trinidad and Tobago regulated institutions, evidence for the 31 March 2027 return | Primary-source deadline, home market | Broad launch |
 
 ---
 
@@ -249,6 +299,11 @@ An attestation is a signed, **scoped** statement: what was assessed, when, by wh
 | Q-25 | Planner | all outputs labelled UNCALIBRATED until coefficients entered | to build |
 | Q-26 | Honest wording | no shared artefact contains "certified" or "quantum-safe" unless a control result says so | to build |
 | Q-27 | Radar | impact analysis of a new pack over 12 months of scans < 5 min | to measure |
+| Q-28 | Licence | genuine key activates; expired, other-key and forged licences refused | demonstrated (`scripts/verify_licence_e2e.sh`) |
+| Q-29 | Release verification | a customer verifies binary and SBOM offline | demonstrated (file-signature test) |
+| Q-30 | Static build | musl binary runs on a host without OpenSSL 3 | to build and test |
+| Q-31 | Pack-driven dates | changing a deprecation date needs no code change | to build |
+| Q-32 | STARTTLS probe | correct against local SMTP and IMAP servers | to build |
 
 ---
 
@@ -267,6 +322,14 @@ An attestation is a signed, **scoped** statement: what was assessed, when, by wh
 | R-28 | Trust pages leak topology | Redaction profiles; scoped claims; review before publish |
 | R-29 | Horizon radar errors propagate into packs | Human sign-off; pack status and `last_verified` |
 | R-30 | Ecosystem support matrix goes stale | Dated recipes; radar; verify versions before publishing |
+| R-31 | Licence design flaws (generator and verifier could never agree) | Fixed; end-to-end script runs in CI |
+| R-32 | Regulation moves faster than releases (IR 8547 changed within a week) | ADR-40 data packs; horizon radar |
+| R-33 | Public repository with a proprietary licence: source is visible, enforcement rests on licence terms | Counsel review; revisit a private repo or a split (private core) later; current decision recorded as public |
+| R-34 | Suite vendors (IBM and others) bundle inventory, posture and proxy | Be the neutral evidence layer; integrate |
+| R-35 | EO 14412 and OMB M-26-15 are corroborated by several sources; the German guideline and the primary texts remain unread | Read primary texts next round (partly resolved in Amendment 2) |
+| R-36 | LICENSE is a plain-language draft not reviewed by counsel; entity name "Intellica AI Inc." differs from the GitHub organisation name | Confirm the legal entity; legal review |
+| R-37 | Pilot return deadline (31 March 2027) is five months away and the CBTT guideline text has not been mapped to our evidence | Map the 20 requirements next; start pilot conversations now |
+| R-38 | Remediation recipes could repeat wrong language defaults (a source conflict was found) | Cite primary release notes only |
 
 ---
 
@@ -282,6 +345,13 @@ An attestation is a signed, **scoped** statement: what was assessed, when, by wh
 | **v5.4 Hub (only if demanded)** | Ingest, history, registry | Demand evidence |
 
 ---
+
+### 12.1 Pilot track (runs ahead of the v4.0 build order)
+1. Static musl build verified on a machine without OpenSSL 3.
+2. Run one real, consented customer inventory; fix whatever it exposes.
+3. Pilot paperwork (agreement, NDA, privacy and security-contact documents) and the product-name check.
+4. Deep TLS slice first (versions, cipher suites, post-quantum groups, STARTTLS), because banks will ask the PQ-readiness question immediately.
+5. Pack format for regulatory dates (ADR-40) so the next rule change needs no release.
 
 ## 13. Traceability (v5 requirements)
 | Requirement | Decisions |

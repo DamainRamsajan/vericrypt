@@ -107,6 +107,37 @@ pub struct Asset {
     pub encrypted: bool,
 }
 
+fn star() -> String {
+    "*".to_string()
+}
+
+/// A documented risk decision: "we accept this finding, here is who, why, and until when".
+/// Waivers never hide a finding. The finding stays in the report, marked as accepted, and an expired waiver re-opens it.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Waiver {
+    pub rule_id: String,
+    /// An asset id, or "*" for every asset the rule fired on.
+    #[serde(default = "star")]
+    pub asset_id: String,
+    pub owner: String,
+    pub reason: String,
+    /// RFC 3339 expiry. After it, the finding is open again.
+    pub expires: String,
+    #[serde(default)]
+    pub approved_by: Option<String>,
+    /// Ticket or change reference (optional).
+    #[serde(default)]
+    pub reference: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WaiverRecord {
+    pub waiver: Waiver,
+    /// active | expired | invalid | unmatched
+    pub status: String,
+    pub matched_findings: u64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Finding {
     pub id: String,
@@ -119,6 +150,9 @@ pub struct Finding {
     pub remediation: String,
     pub references: Vec<String>,
     pub evidence: BTreeMap<String, String>,
+    /// Set when an active waiver accepts this finding. The finding stays visible.
+    #[serde(default)]
+    pub accepted_risk: Option<Waiver>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -171,7 +205,9 @@ pub struct Summary {
     pub quantum_vulnerable: u64,
     pub quantum_resistant: u64,
     pub unknown_algorithm: u64,
+    /// Open findings only (findings accepted by an active waiver are counted in `accepted_risk`).
     pub findings_by_severity: BTreeMap<String, u64>,
+    pub accepted_risk: u64,
     pub mosca: Mosca,
 }
 
@@ -222,5 +258,7 @@ pub struct Body {
     pub limitations: Vec<String>,
     pub assets: Vec<Asset>,
     pub findings: Vec<Finding>,
+    #[serde(default)]
+    pub waivers: Vec<WaiverRecord>,
     pub merkle_root: String,
 }

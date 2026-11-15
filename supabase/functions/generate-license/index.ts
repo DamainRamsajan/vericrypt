@@ -1,6 +1,7 @@
 // deploy: 1780839046
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
+import { signPasetoV4Public } from "./paseto.ts";
 
 export default {
   fetch: withSupabase({
@@ -47,51 +48,21 @@ export default {
       org: organization,
       email,
       tier,
-      binary_hash: binaryHash,
       max_assets,
-      features: tier === "D" ? ["tee_attestation", "verichain_sth", "custom_axioms", "white_label_verifier"] :
-                tier === "C" ? ["tee_attestation", "verichain_sth", "custom_axioms"] :
-                tier === "B" ? ["tee_attestation", "verichain_sth"] : [],
+      // Only features that exist and are gated in the binary today. Do not add "tee_attestation", "verichain_sth",
+      // "custom_axioms" or "white_label_verifier" until they are implemented and listed in CLAIMS.md.
+      features: ["signed_reports", "html_report", "drift_diff"],
       iat: now.toISOString(),
+      nbf: now.toISOString(), // the verifier requires iat, nbf and exp to be present
       exp: expires.toISOString(),
     };
 
-    // Generate PASETO v4.public token
-    const privateKeyHex = Deno.env.get("PASETO_PRIVATE_KEY")!;
-    const privateKeyBytes = new Uint8Array(
-      privateKeyHex.match(/.{1,2}/g)!.map(b => parseInt(b, 16))
-    );
-
-    // Manual PASETO v4.public signing (Ed25519)
-    const header = { alg: "v4.public", typ: "JWT" };
-    const payload = claims;
-    const footer = "";
-
-    const h = btoa(JSON.stringify(header)).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
-    const p = btoa(JSON.stringify(payload)).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
-    const f = btoa(footer).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
-
-    const m = `${h}.${p}.${f}`;
-
-    // Sign with Ed25519 using Web Crypto
-    const key = await crypto.subtle.importKey(
-      "raw",
-      privateKeyBytes.slice(0, 32),
-      { name: "Ed25519" },
-      false,
-      ["sign"]
-    );
-
-    const signature = await crypto.subtle.sign(
-      "Ed25519",
-      key,
-      new TextEncoder().encode(m)
-    );
-
-    const sigB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
-      .replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
-
-    const token = `v4.public.${h}.${p}.${sigB64}.${f}`;
+    // Generate a standards-compliant PASETO v4.public token (see paseto.ts)
+    const privateKeyHex = Deno.env.get("PASETO_PRIVATE_KEY");
+    if (!privateKeyHex) {
+      return Response.json({ error: "Server is missing PASETO_PRIVATE_KEY." }, { status: 500 });
+    }
+    const token = await signPasetoV4Public(privateKeyHex, claims);
 
     // Store license
     const { error: licenseError } = await ctx.supabaseAdmin
@@ -99,8 +70,7 @@ export default {
       .insert({
         customer_id: customer.id,
         license_key: token,
-        binary_hash: binaryHash,
-        issued_at: now.toISOString(),
+          issued_at: now.toISOString(),
         expires_at: expires.toISOString(),
         max_assets,
         features: claims.features,

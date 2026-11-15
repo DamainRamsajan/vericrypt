@@ -57,7 +57,7 @@ pub fn run(args: DiffArgs) -> CliResult {
     }
 
     if let Some(t) = threshold {
-        if let Some(worst) = new_f.iter().map(|f| sev(f)).max() {
+        if let Some(worst) = new_f.iter().filter(|f| f["accepted_risk"].is_null()).map(|f| sev(f)).max() {
             if worst >= t {
                 return Err((3, format!("new findings at or above '{}' (worst: {})", t.label(), worst.label())));
             }

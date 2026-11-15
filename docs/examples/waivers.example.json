@@ -1,0 +1,18 @@
+[
+  {
+    "rule_id": "PQC-IR8547",
+    "asset_id": "*",
+    "owner": "Head of PKI",
+    "reason": "RSA-2048 certificates on internal systems; migration planned with the 2029 certificate refresh",
+    "expires": "2027-12-31T00:00:00Z",
+    "approved_by": "CISO",
+    "reference": "CHG-1042"
+  },
+  {
+    "rule_id": "HYG-PRIVKEY-PLAINTEXT",
+    "asset_id": "privkey-0123456789abcdef",
+    "owner": "Platform team",
+    "reason": "Key sits on an offline lab machine; rotation scheduled",
+    "expires": "2027-03-31T00:00:00Z"
+  }
+]
