@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://agentseed.meeting-mind.com/sitemap.xml

@@ -1,0 +1,19 @@
+{
+  "id": "intellica",
+  "name": "Intellica",
+  "tagline": "Systems you can verify without trusting us.",
+  "accent": "#00C8FF",
+  "status": "",
+  "version": "",
+  "repo": "https://github.com/intellica-ai-llc/intellica",
+  "tabs": [],
+  "contact": "dpramsajan@meeting-mind.com",
+  "description": "Intellica builds systems whose results you can check yourself: VeriChain, VeriCrypt, Sovereign ERP, OMC and AgentSeed.",
+  "nav": [
+    {
+      "label": "Training",
+      "href": "/training/"
+    }
+  ],
+  "whatsapp": "18687195236"
+}

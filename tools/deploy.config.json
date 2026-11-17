@@ -1,0 +1,9 @@
+{
+  "note": "Cloudflare Pages project names. A name becomes <name>.pages.dev and must be unique across Cloudflare. Change here if one is taken.",
+  "home":          { "dir": "site",                         "project": "intellica-web" },
+  "verichain":     { "dir": "products/verichain/site",      "project": "intellica-verichain" },
+  "vericrypt":     { "dir": "products/vericrypt/site",      "project": "intellica-vericrypt" },
+  "erp":           { "dir": "products/sovereign-erp/site",  "project": "intellica-erp" },
+  "omc":           { "dir": "products/omc/site",            "project": "intellica-omc" },
+  "agentseed":     { "dir": "products/agentseed/site",      "project": "intellica-agentseed" }
+}

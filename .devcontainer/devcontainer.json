@@ -1,0 +1,7 @@
+{
+  "name": "IntellicaWeb",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "forwardPorts": [8080, 8081, 8082, 8083, 8084],
+  "portsAttributes": { "8080": { "label": "home" } },
+  "postCreateCommand": "npm run setup && npm run verify"
+}

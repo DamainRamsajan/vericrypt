@@ -1,32 +1,10 @@
-# Rust
-/target/
-**/*.rs.bk
-*.pdb
-
-# Build artifacts
-*.pqc
-*.cbom.json
-.build-manifests/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS
+node_modules/
 .DS_Store
-Thumbs.db
-
-# Environment (secrets)
-.env
-admin_api_key.txt
-paseto_private_key.txt
-
-# VeriCrypt
-my-key.json
-*-key.json
-vericrypt-out/
+*.zip
+.course-key
+!site/training/arc42/example/*.zip
 out/
-.wrangler/
-**/.wrangler/
+
+# Rust build output
+/target/
+**/target/

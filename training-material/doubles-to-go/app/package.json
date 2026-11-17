@@ -1,0 +1,16 @@
+{
+  "name": "doubles-to-go",
+  "version": "0.1.0",
+  "description": "A small working version of the Doubles-to-Go architecture, built to match docs/arc42.md",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --no-warnings src/main.js",
+    "test": "node --no-warnings --test \"test/*.test.js\"",
+    "simulate": "node --no-warnings scripts/simulate-drops.js",
+    "docs:check": "python3 ../check-arc42.py ../arc42.md"
+  }
+}

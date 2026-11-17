@@ -1,0 +1,198 @@
+{
+  "version": 1,
+  "home": "https://meeting-mind.com/",
+  "contact": "dpramsajan@meeting-mind.com",
+  "products": [
+    {
+      "id": "verichain",
+      "name": "VeriChain",
+      "url": "https://verichain.meeting-mind.com/",
+      "accent": "#35D47A",
+      "tagline": "A platform where autonomous AI agents run, act and transact, with every consequential action recorded in a log anyone can verify.",
+      "status": "Pre-release: specification frozen, core log and verifier built",
+      "short": "Agent action log"
+    },
+    {
+      "id": "vericrypt",
+      "name": "VeriCrypt",
+      "url": "https://vericrypt.meeting-mind.com/",
+      "accent": "#8B3A44",
+      "tagline": "An engine that inventories the cryptography in an estate, flags quantum-vulnerable assets, and produces signed reports anyone can verify offline.",
+      "status": "v2 evidence engine built and tested; later versions in design",
+      "short": "Post-quantum readiness"
+    },
+    {
+      "id": "sovereign-erp",
+      "name": "Sovereign ERP",
+      "url": "https://erp.meeting-mind.com/",
+      "accent": "#E8A617",
+      "tagline": "A ledger and period-close kernel whose rules are checked by model checking and formal specifications.",
+      "status": "Walking skeleton: period controller and ledger port, model-checked",
+      "short": "Model-checked ledger"
+    },
+    {
+      "id": "omc",
+      "name": "OMC",
+      "url": "https://omc.meeting-mind.com/",
+      "accent": "#7C6CF0",
+      "tagline": "A closed-loop system that measures and proves the financial value of work shared by people, AI models and agents.",
+      "status": "Design phase: walking skeleton on synthetic data",
+      "short": "Proven AI value"
+    },
+    {
+      "id": "agentseed",
+      "name": "AgentSeed",
+      "url": "https://agentseed.meeting-mind.com/",
+      "accent": "#FF7A59",
+      "tagline": "A programming language for autonomous agents, where safety rules are checked at compile time.",
+      "status": "v0.1.0",
+      "short": "Safe agent language"
+    }
+  ],
+  "roles": [
+    {
+      "id": "security",
+      "title": "CISO or compliance lead",
+      "blurb": "Find the cryptography in your estate, see its quantum exposure, and hand regulators reports they can verify.",
+      "links": [
+        {
+          "product": "vericrypt",
+          "tab": "overview",
+          "label": "VeriCrypt overview"
+        },
+        {
+          "product": "vericrypt",
+          "tab": "demo",
+          "label": "VeriCrypt demo"
+        }
+      ]
+    },
+    {
+      "id": "finance",
+      "title": "CFO or finance controller",
+      "blurb": "Prove what AI and automation are worth, and keep the ledger’s rules checked.",
+      "links": [
+        {
+          "product": "omc",
+          "tab": "overview",
+          "label": "OMC overview"
+        },
+        {
+          "product": "sovereign-erp",
+          "tab": "overview",
+          "label": "Sovereign ERP overview"
+        }
+      ]
+    },
+    {
+      "id": "audit",
+      "title": "Auditor or regulator",
+      "blurb": "Check the evidence yourself, offline, without trusting the vendor.",
+      "links": [
+        {
+          "product": "verichain",
+          "tab": "verify",
+          "label": "VeriChain: verify"
+        },
+        {
+          "product": "vericrypt",
+          "tab": "verify",
+          "label": "VeriCrypt: verify"
+        },
+        {
+          "product": "omc",
+          "tab": "verify",
+          "label": "OMC: verify"
+        }
+      ]
+    },
+    {
+      "id": "agents",
+      "title": "Building or running AI agents",
+      "blurb": "Run agents whose every consequential action is recorded in a log anyone can verify, and write them in a language whose safety rules the compiler checks.",
+      "links": [
+        {
+          "product": "verichain",
+          "tab": "overview",
+          "label": "VeriChain overview"
+        },
+        {
+          "product": "verichain",
+          "tab": "docs",
+          "label": "VeriChain docs"
+        },
+        {
+          "product": "agentseed",
+          "tab": "overview",
+          "label": "AgentSeed overview"
+        }
+      ]
+    },
+    {
+      "id": "research",
+      "title": "Language or safety researcher",
+      "blurb": "Read the specification, run the compiler and check the claims yourself.",
+      "links": [
+        {
+          "product": "agentseed",
+          "tab": "docs",
+          "label": "AgentSeed docs"
+        },
+        {
+          "product": "agentseed",
+          "tab": "verify",
+          "label": "AgentSeed: verify"
+        }
+      ]
+    },
+    {
+      "id": "partner",
+      "title": "Partner or investor",
+      "blurb": "Start a conversation about a pilot, an integration or a partnership.",
+      "links": [
+        {
+          "href": "https://wa.me/18687195236?text=Hello%2C%20I%27d%20like%20to%20speak%20to%20sales%20about%20a%20pilot%20or%20partnership.",
+          "label": "Contact sales"
+        }
+      ]
+    }
+  ],
+  "standards": [
+    "SCITT",
+    "COSE",
+    "RFC 6962 transparency logs",
+    "CycloneDX CBOM",
+    "EU AI Act Articles 12, 14, 26 and 50",
+    "DORA"
+  ],
+  "sectors": [
+    {
+      "title": "Enterprise",
+      "path": "/legacy/enterprise.html"
+    },
+    {
+      "title": "Finance",
+      "path": "/legacy/finance.html"
+    },
+    {
+      "title": "Government",
+      "path": "/legacy/government.html"
+    },
+    {
+      "title": "Energy",
+      "path": "/legacy/energy.html"
+    },
+    {
+      "title": "Small business",
+      "path": "/legacy/smb.html"
+    }
+  ],
+  "links": [
+    {
+      "id": "training",
+      "name": "Training",
+      "url": "https://meeting-mind.com/training/"
+    }
+  ],
+  "whatsapp": "18687195236"
+}

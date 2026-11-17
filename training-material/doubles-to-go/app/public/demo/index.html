@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Demo panel</title><link rel="stylesheet" href="/style.css">
+<style>main{max-width:860px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.grid{grid-template-columns:1fr}}code{background:#eee;padding:0 4px;border-radius:4px}</style></head>
+<body><header><h1>Demo panel</h1><p>Break things on purpose and watch the architecture cope. Not available when NODE_ENV=production.</p></header>
+<main><p><a href="/" target="_blank">Customer app</a> · <a href="/vendor/" target="_blank">Vendor console</a></p>
+<div class="grid"><div class="card"><h2 style="margin-top:0">Payment provider</h2><p class="mut">What happens to the payment result?</p><div id="pmodes"></div><p id="pdesc" class="mut"></p></div>
+<div class="card"><h2 style="margin-top:0">SMS gateway</h2><p>Gateway is <b id="sstate">…</b></p><button id="stoggle">Switch</button><h2>Outbox</h2><div id="outbox" class="mut">No messages yet.</div></div></div>
+<div class="card"><h2 style="margin-top:0">Confirmation queue</h2><div id="jobs" class="mut"></div><p class="mut">Orders: <b id="ocount">0</b></p></div></main>
+<script>
+const D={normal:'The webhook arrives once, as it should.',duplicate:'The same webhook arrives twice. The order is still paid only once (ADR-0005).',drop:'The webhook is lost. The order stays PendingPayment until the reconciliation check settles it (section 6.2, Q6).',late:'The webhook arrives about 2 seconds late. The customer waits on the status page.',outage:'The provider is down: payments cannot start and checks come back unknown. Orders stay pending, never failed (R1).'};
+const $=s=>document.querySelector(s);let sms=true;
+async function setMode(m){await fetch('/fake-provider/admin/mode',{method:'POST',body:JSON.stringify({mode:m})});tick()}
+$('#stoggle').onclick=async()=>{await fetch('/fake-sms/admin/mode',{method:'POST',body:JSON.stringify({up:!sms})});tick()};
+async function tick(){try{const s=await (await fetch('/api/demo/state')).json();sms=s.smsUp;
+$('#pmodes').replaceChildren(...Object.keys(D).map(m=>{const b=document.createElement('button');b.textContent=m;b.className=m===s.providerMode?'':'alt';b.style.margin='2px';b.onclick=()=>setMode(m);return b}));$('#pdesc').textContent=D[s.providerMode];
+$('#sstate').textContent=s.smsUp?'up':'DOWN';$('#ocount').textContent=s.orders;
+$('#jobs').textContent=s.jobs.length?s.jobs.map(j=>j.kind+' '+j.status+': '+j.n).join(' · '):'Queue is empty.';if(s.parked.length)$('#jobs').textContent+='  PARKED for review: '+s.parked.map(p=>p.kind+' ('+p.error+')').join(', ');
+const o=await (await fetch('/fake-sms/outbox')).json();$('#outbox').replaceChildren(...(o.messages.length?o.messages.slice().reverse().map(m=>{const d=document.createElement('div');d.textContent=m.to+': '+m.message;return d}):['No messages yet.']))}catch{}}
+tick();setInterval(tick,1500);
+</script></body></html>

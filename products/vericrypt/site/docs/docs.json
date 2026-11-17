@@ -1,0 +1,8 @@
+{
+  "groups": [
+    { "title": "Use", "items": [ { "title": "User manual", "md": "use/user-manual.md" } ] },
+    { "title": "Install", "items": [ { "title": "Installation manual", "md": "install/installation.md" } ] },
+    { "title": "Reference", "items": [ { "title": "Reference", "md": "reference/reference.md" } ] },
+    { "title": "Architecture", "items": [ { "title": "Architecture overview", "md": "architecture/overview.md" } ] }
+  ]
+}

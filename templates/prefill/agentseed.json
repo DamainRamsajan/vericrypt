@@ -1,0 +1,77 @@
+{
+  "name": "AgentSeed",
+  "accent": "#FF7A59",
+  "repo": "https://github.com/agentseedlanguage-cpu/agentseed",
+  "tagline": "A programming language for autonomous agents, where uncertainty, taint, cost and capability rules are checked at compile time.",
+  "audience": [
+    {
+      "role": "Agent engineers",
+      "concern": "Build agents whose safety rules are enforced by the compiler instead of added at runtime."
+    },
+    {
+      "role": "AI safety practitioners",
+      "concern": "Read, check and reproduce what an agent is allowed to do before it runs."
+    },
+    {
+      "role": "Programming-language researchers",
+      "concern": "Study an effect-tracked, type-safe language with a written specification and a conformance suite."
+    }
+  ],
+  "highlights": [
+    {
+      "title": "Effects must be discharged",
+      "text": "Effectful operations return a Computation that has to be discharged before its value can be used."
+    },
+    {
+      "title": "Capabilities are signed tokens",
+      "text": "Capability tokens are issued by the VM, signed with Ed25519, and can be attenuated and delegated."
+    },
+    {
+      "title": "Four grammar strata",
+      "text": "S0 Seed for beginners and sandboxed agents, S1 Core for production, S2 Full with self-evolution hooks, S3 System for trusted orchestrators with human sign-off."
+    },
+    {
+      "title": "Provenance you can replay",
+      "text": "Merkle-proofed, append-only logs support audit and deterministic replay."
+    },
+    {
+      "title": "Compiler and VM in Rust",
+      "text": "seedc compiles .seed source to .aslb bytecode; seedvm runs it deterministically. MIT licensed, with a published conformance suite."
+    }
+  ],
+  "verifyIt": "Run seed check on a program: the compiler type-checks it and verifies its effect, taint and contract rules without running it.",
+  "demo": {
+    "title": "Try the language",
+    "summary": "The in-browser compiler and VM are being built. Until then this page shows a labeled placeholder.",
+    "engine": "placeholder",
+    "sample": "hello.seed",
+    "command": "seed check hello.seed",
+    "expected": ""
+  },
+  "status": "v0.1.0",
+  "buildFromSource": {
+    "title": "Build from source",
+    "intro": "Build the seed command from source. Packaged installs are being confirmed.",
+    "steps": "git clone https://github.com/agentseedlanguage-cpu/agentseed\ncd agentseed\ncargo build --release -p seedc-cli\n./target/release/seed --version",
+    "note": "Needs Rust 1.85 or newer."
+  },
+  "faq": [
+    {
+      "q": "Which Rust version do I need?",
+      "a": "Rust 1.85 or newer. Run rustup update stable if the build complains about the version."
+    },
+    {
+      "q": "What is the difference between seed check, run and build?",
+      "a": "seed check type-checks and verifies without producing output. seed run compiles and runs on the VM. seed build writes the .aslb bytecode file."
+    },
+    {
+      "q": "Is there an in-browser playground?",
+      "a": "The project's own playground says in-browser compilation is coming soon. This site's Demo tab will use it when it exists."
+    }
+  ],
+  "limits": [
+    "Its guarantees apply to programs written in ASL, not to existing Python or JavaScript code.",
+    "It is version 0.1.0, and the in-browser compiler is not built yet.",
+    "Packaged installs are still being confirmed; today you build from source."
+  ]
+}

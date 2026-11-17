@@ -1,0 +1,81 @@
+/* Intellica kit: design tokens. Shared by every site in the family.
+   Each product sets only --accent (from site.json). Do not edit per product:
+   change it in the Intellica repo, then run `npm run sync`. */
+
+:root {
+  color-scheme: dark light;
+
+  /* Neutral base: carried over from the existing Intellica palette */
+  --bg: #080c16;
+  --surface: #0c1220;
+  --card: #0f1628;
+  --card-hi: #131d35;
+  --line: #1c2740;
+  --line-hi: #2a3a5c;
+  --text: #c8d4f0;
+  --text-hi: #e8eeff;
+  --muted: #7c8db5;
+  --good: #35d47a;
+  --warn: #e8a617;
+  --bad: #ff6b6b;
+
+  /* Per-product accent; --on-accent and --accent-ink are derived */
+  --accent: #00c8ff;
+  --on-accent: #04121a;
+  --accent-ink: color-mix(in srgb, var(--accent) 60%, white);
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: clamp(2rem, 4.5vw, 3.25rem);
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 72px;
+  --r: 3px;
+  --maxw: 1120px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f8fc;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-hi: #eef2fa;
+  --line: #d5dcea;
+  --line-hi: #b9c4dc;
+  --text: #26324d;
+  --text-hi: #0b1428;
+  --muted: #55658a;
+  --good: #12803f;
+  --warn: #8a5a00;
+  --bad: #b3261e;
+  --accent-ink: color-mix(in srgb, var(--accent) 60%, black);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f6f8fc;
+    --surface: #ffffff;
+    --card: #ffffff;
+    --card-hi: #eef2fa;
+    --line: #d5dcea;
+    --line-hi: #b9c4dc;
+    --text: #26324d;
+    --text-hi: #0b1428;
+    --muted: #55658a;
+    --good: #12803f;
+    --warn: #8a5a00;
+    --bad: #b3261e;
+    --accent-ink: color-mix(in srgb, var(--accent) 60%, black);
+  }
+}

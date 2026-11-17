@@ -1,0 +1,68 @@
+{
+  "id": "sovereign-erp",
+  "name": "Sovereign ERP",
+  "tagline": "A ledger and period-close kernel whose rules are checked by model checking and formal specifications.",
+  "accent": "#E8A617",
+  "status": "Walking skeleton: period controller and ledger port, model-checked",
+  "version": "",
+  "repo": "https://github.com/intellica-ai-llc/Sovereign-ERP",
+  "contact": "dpramsajan@meeting-mind.com",
+  "tabs": [
+    "overview",
+    "demo",
+    "download",
+    "docs",
+    "verify",
+    "support"
+  ],
+  "demo": {
+    "title": "Close a period",
+    "summary": "Drive the Period Controller and see the invariants refuse illegal moves. The in-browser demo is planned; this page shows a labeled placeholder until it ships.",
+    "engine": "placeholder",
+    "sample": "a small ledger and period calendar",
+    "command": "cargo test --workspace",
+    "expected": ""
+  },
+  "audience": [],
+  "highlights": [
+    {
+      "title": "Period close as a checked state machine",
+      "text": "The Period Controller decides close, reopen and adjustment moves, and its invariants are checked against a TLA+ specification in lockstep."
+    },
+    {
+      "title": "An engine-neutral ledger",
+      "text": "A Ledger Port interface with a conformance suite that any ledger engine adapter has to pass."
+    },
+    {
+      "title": "Seeded defects are caught",
+      "text": "Deliberately broken variants are run against the checks, and each one is caught with its shortest counterexample."
+    }
+  ],
+  "verifyIt": "Run the workspace tests and read the counts: the controller and the TLA+ transcription agree on every reachable state, and each seeded defect is caught with its shortest counterexample.",
+  "buildFromSource": {
+    "title": "Run from source",
+    "intro": "Sovereign ERP is a walking skeleton, so there is no binary to download. Run its checks.",
+    "steps": "git clone https://github.com/intellica-ai-llc/Sovereign-ERP\ncd Sovereign-ERP/code\ncargo test --workspace",
+    "note": "Needs Rust. In a Codespace, if cargo is missing, run Codespaces: Rebuild Container."
+  },
+  "faq": [
+    {
+      "q": "Can I run an ERP with this today?",
+      "a": "No. The repository is a walking skeleton: the Period Controller and the Ledger Port, checked against formal specifications. There is no production code yet."
+    },
+    {
+      "q": "How do I check the formal results myself?",
+      "a": "Run TLC on formal/PeriodClose.tla and formal/Ledger.tla and compile the Lean files. These were not re-run outside the author's environment, so they are the independent check."
+    },
+    {
+      "q": "cargo is not found in my Codespace.",
+      "a": "Run Codespaces: Rebuild Container from the Command Palette."
+    }
+  ],
+  "limits": [
+    "It is a walking skeleton: the Period Controller and the Ledger Port. There is no production code and no ERP to run yet.",
+    "The model checks are bounded and use small constants; multi-currency, consolidation, sub-ledger detail, time and concurrency are not modelled.",
+    "The TLA+ and Lean files have not been re-run outside the author's environment."
+  ],
+  "whatsapp": "18687195236"
+}

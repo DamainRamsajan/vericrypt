@@ -1,0 +1,86 @@
+{
+  "name": "VeriCrypt",
+  "accent": "#8B3A44",
+  "repo": "https://github.com/DamainRamsajan/vericrypt",
+  "tagline": "An engine that inventories the cryptography in an estate, flags quantum-vulnerable assets, and produces signed reports anyone can verify offline.",
+  "audience": [
+    {
+      "role": "Compliance leads and CISOs",
+      "concern": "Know which cryptography is exposed to quantum attack, what to fix first, and how to show regulators."
+    },
+    {
+      "role": "Regulators and auditors",
+      "concern": "Verify a compliance report offline, without trusting the vendor or the institution."
+    },
+    {
+      "role": "Security engineers",
+      "concern": "Run the engine on your own machines from one binary and keep the report and signing key under your control."
+    }
+  ],
+  "highlights": [
+    {
+      "title": "Finds and classifies cryptography",
+      "text": "Reads certificates and keys from folders and probes TLS endpoints. RSA, EC and Ed25519 keys are classified as quantum-vulnerable or resistant, and findings fire on real properties such as weak keys, SHA-1 signatures and plaintext private keys."
+    },
+    {
+      "title": "Dated against standards",
+      "text": "Applies NIST IR 8547 (draft) transition years and the CA/Browser Forum certificate-lifetime schedule to forecast what will need replacing."
+    },
+    {
+      "title": "Signed, tamper-evident reports",
+      "text": "Reports are signed with SLH-DSA-SHAKE-128f (the FIPS 205 algorithm) and carry a Merkle root. Editing a report is detected, and a report with no signature fails verification."
+    },
+    {
+      "title": "Machine-readable inventory",
+      "text": "Produces a CycloneDX 1.7 cryptographic bill of materials that validates against the official schema, plus an HTML report."
+    },
+    {
+      "title": "Built for gates",
+      "text": "A diff command compares two scans, and a fail-on threshold returns an exit code your pipeline can act on."
+    }
+  ],
+  "verifyIt": "Run vericrypt verify on a report with the signer's public key pinned. Then edit the report and verify again: verification fails.",
+  "demo": {
+    "title": "Verify a signed report",
+    "summary": "Check a report, then tamper with it and see verification fail. The in-browser verifier is planned; this page shows a labeled placeholder until it ships.",
+    "engine": "placeholder",
+    "sample": "a sample report.json",
+    "command": "vericrypt verify report.json --pubkey my-key.pub.json",
+    "expected": ""
+  },
+  "status": "v2 evidence engine built and tested; later versions in design",
+  "buildFromSource": {
+    "title": "Build from source",
+    "intro": "VeriCrypt has no packaged binaries yet. Build it from source (about 15 minutes the first time).",
+    "steps": "git clone https://github.com/DamainRamsajan/vericrypt.git\ncd vericrypt\ncargo build --release -p vericrypt\n./target/release/vericrypt --help",
+    "note": "Needs Rust and OpenSSL headers. Do not run cargo update: the lock file pins a dependency the signing library needs."
+  },
+  "faq": [
+    {
+      "q": "The build fails with 'linker cc not found'.",
+      "a": "Install the build tools: on Ubuntu or Debian, sudo apt install build-essential pkg-config libssl-dev clang."
+    },
+    {
+      "q": "The build fails mentioning signature or slh_dsa.",
+      "a": "You probably ran cargo update. Restore Cargo.lock; it pins signature 2.3.0-pre.4 because newer pre-releases break the signing library."
+    },
+    {
+      "q": "Why does 'vericrypt scan' print a warning?",
+      "a": "That is the old v1 command and is deprecated. Use vericrypt analyze."
+    },
+    {
+      "q": "Does it run on macOS, Windows or ARM?",
+      "a": "Only Ubuntu 24.04 (and WSL2) has been tested. macOS, native Windows and ARM are untested."
+    },
+    {
+      "q": "Is the report a compliance certification?",
+      "a": "No. VeriCrypt produces an observation-based inventory and findings. It does not certify compliance."
+    }
+  ],
+  "limits": [
+    "It produces an observation-based inventory and findings. It is not a compliance certification.",
+    "Not implemented yet: formal proofs, hardware attestation, revocation checking, certificate chain building, TLS version and cipher enumeration, SSH, code scanning, hybrid signatures and trusted timestamps.",
+    "Live TLS probing reads the leaf certificate only.",
+    "Only Ubuntu 24.04 and WSL2 have been tested; macOS, native Windows and ARM are untested."
+  ]
+}

@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your order</title><link rel="stylesheet" href="/style.css"></head>
+<body><header><h1>Your order</h1></header><main><div class="card" id="box">Loading…</div><p><a href="/">Order something else</a></p></main>
+<script>
+const id=new URLSearchParams(location.search).get('id');const box=document.getElementById('box');
+const say={PendingPayment:'Waiting for payment confirmation…',Paid:'Paid. The vendor is preparing your order.',Ready:'Ready for pickup!',Collected:'Collected. Enjoy!',Failed:'Payment failed, so the order was cancelled.'};
+async function poll(){try{const r=await fetch('/api/orders/'+encodeURIComponent(id));const o=await r.json();if(!r.ok){box.textContent=o.message||'Order not found.';return}
+box.replaceChildren();const t=document.createElement('h2');t.textContent=say[o.status]||o.status;box.append(t);
+const p=document.createElement('p');p.className='mut';p.textContent=o.vendor+' · TT$'+(o.totalCents/100).toFixed(2)+' · '+o.items.map(i=>i.qty+' × '+i.name).join(', ');box.append(p);
+if(o.status==='PendingPayment'){const b=document.createElement(o.paymentUrl?'a':'button');if(o.paymentUrl){b.href=o.paymentUrl;b.textContent='Go to the payment page'}else{b.textContent='Start payment';b.onclick=async()=>{await fetch('/api/orders/'+id+'/pay',{method:'POST'});poll()}}box.append(b)}
+if(!['Ready','Collected','Failed'].includes(o.status))setTimeout(poll,3000)}catch{box.textContent='Connection lost. Trying again…';setTimeout(poll,3000)}}
+poll();
+</script></body></html>

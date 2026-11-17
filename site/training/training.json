@@ -1,0 +1,817 @@
+{
+  "version": 1,
+  "note": "Source of truth for /training/. Pages are generated from this file by tools/build-training.mjs (npm run sync). Edit here, never in the generated HTML.",
+  "index": {
+    "title": "Training",
+    "headline": "Hands-on workshops for people who build and document systems.",
+    "lead": "Short, practical days that end with something you can use on Monday: a document, a method, a checklist. Taught in person, with a real system, with room to try things and get them wrong.",
+    "principles": [
+      {
+        "title": "See it done",
+        "text": "Every skill starts with a finished example, so you know what good looks like before you start."
+      },
+      {
+        "title": "Do it yourself",
+        "text": "Early exercises are mostly filled in. Later ones give you a template, then a blank page. The support fades as you grow."
+      },
+      {
+        "title": "Check with others",
+        "text": "You swap work with peers against a short checklist, and measure your own progress instead of taking our word for it."
+      }
+    ],
+    "honesty": "We say what a workshop will not do as plainly as what it will. If it is not a certification, we tell you. If the evidence is mixed, we tell you that too."
+  },
+  "workshops": [
+    {
+      "id": "arc42",
+      "path": "/training/arc42/",
+      "title": "arc42 in a Day",
+      "short": "arc42 in a Day",
+      "headline": "Architecture documentation that people and AI can act on.",
+      "lead": "arc42 is a free, open template for documenting software architecture. One hands-on day to write yours, for engineers at every level.",
+      "start": "2027-01-30T09:00:00-04:00",
+      "end": "2027-01-30T17:00:00-04:00",
+      "dateLong": "Saturday 30 January 2027",
+      "dateShort": "30 January 2027",
+      "time": "9:00 am to 5:00 pm",
+      "venue": "UWI St Augustine",
+      "region": "St Augustine",
+      "country": "TT",
+      "format": "In person, in teams of 3 to 4",
+      "price": {
+        "currency": "TTD",
+        "amount": 999,
+        "label": "TT$999",
+        "earlyUntil": "2026-12-01T03:59:59Z",
+        "earlyUntilLabel": "30 November 2026",
+        "standard": null,
+        "standardNote": "After that, the standard price is confirmed by email."
+      },
+      "included": "Full day, all materials.",
+      "contact": "dpramsajan@meeting-mind.com",
+      "whatsapp": "18687195236",
+      "affiliation": "This workshop is independent. It is built on the free arc42 template, which was created by Gernot Starke and Peter Hruschka, and is not affiliated with or endorsed by arc42. It does not lead to a certification.",
+      "strip": [
+        {
+          "k": "1 day",
+          "v": "Saturday 30 January"
+        },
+        {
+          "k": "12 sections",
+          "v": "drafted for your own system"
+        },
+        {
+          "k": "In person",
+          "v": "UWI St Augustine"
+        },
+        {
+          "k": "Teams of 3 to 4",
+          "v": "working on a real system"
+        }
+      ],
+      "sections": [
+        [
+          "Introduction and goals",
+          "Why does it exist, and what matters most?"
+        ],
+        [
+          "Constraints",
+          "What can’t we change?"
+        ],
+        [
+          "Context and scope",
+          "Who do we talk to?"
+        ],
+        [
+          "Solution strategy",
+          "What is our approach?"
+        ],
+        [
+          "Building blocks",
+          "What are the parts?"
+        ],
+        [
+          "Runtime",
+          "How do the parts interact?"
+        ],
+        [
+          "Deployment",
+          "Where does it run?"
+        ],
+        [
+          "Crosscutting concepts",
+          "What recurs everywhere?"
+        ],
+        [
+          "Decisions",
+          "Why this choice?"
+        ],
+        [
+          "Quality requirements",
+          "How good, measurably?"
+        ],
+        [
+          "Risks and debt",
+          "What could go wrong?"
+        ],
+        [
+          "Glossary",
+          "What do the words mean?"
+        ]
+      ],
+      "why": {
+        "pull": "AI tools can generate code, but they can’t read your intent. Documentation that records goals, contracts and decisions is how you hand it over.",
+        "what": [
+          "arc42 is a free, open template for documenting software and system architecture. Its twelve sections give each kind of architecture information a clear place: goals and constraints, context, building blocks, runtime behaviour, deployment, crosscutting concepts, decisions, quality scenarios, risks and a glossary.",
+          "It is a structure, not a method, and it doesn’t care about notation: Markdown, text-based diagrams or UML all work. It fits well as docs-as-code, kept in the repository and reviewed like source.",
+          "It is free to use, even commercially, with credit to its creators, Gernot Starke and Peter Hruschka."
+        ],
+        "now": [
+          {
+            "lead": "Teams lose context.",
+            "text": "People leave, systems grow and decisions fade. A consistent structure makes the why findable."
+          },
+          {
+            "lead": "AI tools only know what is written.",
+            "text": "Coding agents generate code quickly but guess at intent. Goals, contracts and recorded decisions are how you give it to them."
+          },
+          {
+            "lead": "Specifying and checking are gaining value.",
+            "text": "As more code is generated, stating what good looks like and verifying the result become the scarcer skills."
+          }
+        ]
+      },
+      "goals": [
+        {
+          "k": "Spend less on AI",
+          "h": "Cut wasted tokens",
+          "how": "AI coding tools start every session knowing nothing about your project. Without a written map they read lots of files and guess, and you pay for every token. A short, accurate architecture note (what the parts are, what each promises, what you decided and why) gives them what the code can’t tell.",
+          "ws": "You write the short version: a strategy table, block descriptions, one contract and one decision record. Then you test it with a prompt template and a simple three-way experiment.",
+          "real": "The evidence is mixed. A February 2026 ETH Zurich study reported that long, auto-generated context files lowered success and raised cost by over 20%. So the aim is short, human-written and specific, not more. Test it on your own tasks."
+        },
+        {
+          "k": "Build at work",
+          "h": "Build systems and integrations with fewer surprises",
+          "how": "Most integration trouble hides at the edges: who talks to whom, in what format, and what happens when it fails. arc42 gives you a context view, interface contracts, failure scenarios and decision records, so colleagues and vendors work from the same picture.",
+          "ws": "You draw the context and Level-1 views, write a contract with error modes, and trace one runtime scenario with a failure branch.",
+          "real": "It won’t design the system for you. It makes your design visible so it can be questioned before it is expensive to change."
+        },
+        {
+          "k": "Start something",
+          "h": "Turn an idea into a brief anyone can build from",
+          "how": "Founders and freelancers need to explain an idea to developers, clients and AI tools without it being misread. Quality goals, constraints such as budget, team and deadline, and a context view turn a vague idea into something others can build, price and challenge.",
+          "ws": "Use your own idea as the workshop case if you like. You leave with goals, constraints, a context view and a list of risks.",
+          "real": "A document doesn’t prove people will pay. Use it to sharpen the idea, then test the market."
+        },
+        {
+          "k": "Ride the AI wave",
+          "h": "Build the skills AI makes more valuable",
+          "how": "As AI writes more of the code, the scarce skills move towards deciding structure, stating what good looks like, spotting AI’s mistakes and recording why. Those are the skills this workshop practises.",
+          "ws": "In the AI lab, AI drafts sections from your notes, then your team red-teams the result and decides what to keep.",
+          "real": "This builds skill, not a job guarantee. You practise judging AI output, which stays useful whatever tools change."
+        }
+      ],
+      "without": [
+        {
+          "title": "Knowledge lives in heads",
+          "text": "Newcomers wait for someone to explain how things fit together."
+        },
+        {
+          "title": "Decisions get forgotten",
+          "text": "Teams re-debate old choices, or break them by accident."
+        },
+        {
+          "title": "Qualities stay vague",
+          "text": "“Fast” and “secure” mean different things to different people."
+        },
+        {
+          "title": "Machines read it too",
+          "text": "AI tools act on what is written and guess what isn’t."
+        }
+      ],
+      "able": [
+        {
+          "title": "Set the goals",
+          "text": "Identify stakeholders and write quality goals with numbers instead of adjectives."
+        },
+        {
+          "title": "Draw the system",
+          "text": "Sketch a context view and a Level-1 building-block view, then write one component contract."
+        },
+        {
+          "title": "Show behaviour",
+          "text": "Describe a runtime scenario with a failure branch, and a deployment view."
+        },
+        {
+          "title": "Record why",
+          "text": "Write an architecture decision record (ADR) that lists the road not taken."
+        },
+        {
+          "title": "Work with AI",
+          "text": "Let AI draft a section, then find and fix its mistakes."
+        },
+        {
+          "title": "Write for agents",
+          "text": "Shape documentation so both people and coding agents can use it."
+        }
+      ],
+      "dayIntro": "Each part has a finished example and then your turn. You build one document across the day: your own arc42 skeleton, section by section, for a real system your team knows.",
+      "day": [
+        {
+          "kind": "group",
+          "title": "Morning: foundations to strategy"
+        },
+        {
+          "t": "09:00",
+          "title": "Opening",
+          "text": "Why architecture goes undocumented, how we will learn, and the rules for using AI today. Form teams, choose your system and set up your tools, then take a short baseline quiz you will retake at the end.",
+          "tag": "You leave with: a team, a case and a working arc42 file"
+        },
+        {
+          "t": "09:30",
+          "title": "Foundations",
+          "text": "What architecture is, why it is a set of trade-offs, and what good documentation is not. Stakeholders and concerns, views, the C4 zoom levels, and the twelve arc42 sections. A quick Markdown and Mermaid warm-up.",
+          "tag": "Warm-up exercise"
+        },
+        {
+          "kind": "break",
+          "t": "10:05",
+          "title": "Break, 15 minutes"
+        },
+        {
+          "t": "10:20",
+          "title": "Section 1: goals, quality and stakeholders",
+          "text": "Write a requirements overview that names no technology, then turn vague qualities like “fast” and “secure” into scenarios with numbers. Find the stakeholders and what each expects.",
+          "tag": "Exercise 1 · one page, peer reviewed"
+        },
+        {
+          "t": "11:10",
+          "title": "Section 2: constraints",
+          "text": "Sort constraints from decisions from requirements with the three-question test, then write your own numbered constraints.",
+          "tag": "Exercise 2 · numbered constraints"
+        },
+        {
+          "t": "11:25",
+          "title": "Section 3: context and scope",
+          "text": "Treat your system as a black box. Draw the business context, then record the technical channels in an interface table.",
+          "tag": "Exercise 3 · context diagram and table"
+        },
+        {
+          "t": "11:55",
+          "title": "Section 4: solution strategy",
+          "text": "Turn each quality goal into an approach, a reason and the trade-off you accept. A neighbour reads only your table and guesses your architecture.",
+          "tag": "Exercise 4 · strategy table"
+        },
+        {
+          "kind": "break",
+          "t": "12:15",
+          "title": "Lunch, 45 minutes"
+        },
+        {
+          "kind": "group",
+          "title": "Afternoon: structure, behaviour and decisions"
+        },
+        {
+          "t": "13:00",
+          "title": "Section 5: building blocks",
+          "text": "Split the system into five to nine blocks, name their responsibilities and interfaces, then write a contract with pre-conditions, post-conditions, invariants and error modes for your riskiest block.",
+          "tag": "Exercises 5a and 5b · Level-1 view and one contract"
+        },
+        {
+          "t": "13:50",
+          "title": "Sections 6 to 8: runtime, deployment, crosscutting",
+          "text": "Draw one scenario as a sequence diagram with a failure branch, map every block to where it runs, and name the rules that recur across blocks.",
+          "tag": "Exercises 6, 7 and 8"
+        },
+        {
+          "kind": "break",
+          "t": "14:35",
+          "title": "Break, 15 minutes"
+        },
+        {
+          "t": "14:50",
+          "title": "Section 9: decisions",
+          "text": "Write an architecture decision record with real alternatives and at least one honest negative consequence, so a new teammate understands why not the other option.",
+          "tag": "Exercise 9 · one ADR"
+        },
+        {
+          "t": "15:20",
+          "title": "Sections 10 to 12: quality, risks, glossary",
+          "text": "Grow your quality tree with a change scenario and a failure scenario, then list risks with mitigations and owners, and define your terms once.",
+          "tag": "Exercises 10 and 11"
+        },
+        {
+          "kind": "group",
+          "title": "Late afternoon: AI and agents"
+        },
+        {
+          "t": "15:40",
+          "title": "AI lab",
+          "text": "Have an assistant draft sections from your notes. Then red-team the result for ignored instructions, contradictions between sections and unsupported claims, and repair it, giving every AI line a verdict.",
+          "tag": "Exercise 12 · red-teamed AI draft"
+        },
+        {
+          "t": "16:20",
+          "title": "Agents as readers",
+          "text": "What humans and coding agents each need from documentation: short indexes, contracts, stable IDs and reasons. Turn an invariant into a test, and see how to check the effect on your own work."
+        },
+        {
+          "t": "16:35",
+          "title": "Close",
+          "text": "Check your skeleton against a checklist, walk the gallery, retake the quiz, rate your own progress and leave with a 30-day plan.",
+          "tag": "You leave with: a complete first-draft arc42"
+        }
+      ],
+      "leave": [
+        {
+          "title": "A complete skeleton",
+          "text": "All twelve arc42 sections drafted for your own system."
+        },
+        {
+          "title": "Reusable pieces",
+          "text": "A contract, an ADR and measurable quality scenarios you can copy into real work."
+        },
+        {
+          "title": "A repeatable method",
+          "text": "An AI prompt template, a red-team checklist and a 30-day plan."
+        }
+      ],
+      "learn": {
+        "intro": "The day is built on how people pick up a new skill: see it done, try it yourself, then check your work with someone else.",
+        "items": [
+          {
+            "title": "See it done",
+            "text": "For every section, a finished example from a real-world app, so you know what good looks like before you start."
+          },
+          {
+            "title": "Do it yourself",
+            "text": "Early exercises are mostly filled in. Later ones give you only a template, then a blank page, so the support fades as you grow."
+          },
+          {
+            "title": "Check with peers",
+            "text": "Swap drafts with another team using a short checklist, and retake the opening quiz at the end to see your own progress."
+          }
+        ]
+      },
+      "who": [
+        {
+          "lead": "New to architecture documentation.",
+          "text": "Every section starts with a finished example and early exercises are mostly filled in. If you can explain how an app works, you can follow along. No UML needed."
+        },
+        {
+          "lead": "Senior engineers, tech leads and architects.",
+          "text": "Go beyond the template: write quality scenarios with measurable response targets, interface contracts with invariants and error modes, and decision records that capture the road not taken. Then make the result useful to coding agents and keep it from drifting."
+        },
+        {
+          "lead": "Analysts, testers, managers and founders",
+          "text": "who need one shared picture between the business and the build."
+        }
+      ],
+      "whoNote": "Already fluent in arc42? Expect a quick pass through the template, with the depth in contracts, quality scenarios, the AI lab and agent-readable documentation.",
+      "facilitator": {
+        "name": "A practising architect",
+        "aka": "",
+        "role": "Solution architect and workshop facilitator, Intellica",
+        "facts": [
+          "30+ years in ICT",
+          "Workshop facilitator for decades",
+          "Former computer science lecturer",
+          "Caribbean-wide implementations",
+          "MSc, Strategic Business IT (Portsmouth)",
+          "PGDip, Software Engineering (Aston)"
+        ],
+        "bio": "Your facilitator has spent three decades turning complicated software and process ideas into things teams can actually use. As a solution architect, they have worked across Oracle, IBM, Microsoft, EMC, HP, Cisco and NetApp platforms on major system implementations throughout the Caribbean, and have explained difficult concepts in workshops for decades, including three years lecturing computer science in the mid-2000s. Today they lead Intellica’s work designing and operating production AI systems documented with arc42, C4 and architecture decision records, so that any team can pick up the build on day one.",
+        "links": []
+      },
+      "faq": [
+        {
+          "q": "What is arc42?",
+          "a": "A free, open template with twelve sections for writing down how a software system is built and why. It was created by Gernot Starke and Peter Hruschka."
+        },
+        {
+          "q": "Is this the official arc42 training?",
+          "a": "No. This is an independent workshop built on the free arc42 template. It is not affiliated with or endorsed by arc42, and it does not lead to a certification."
+        },
+        {
+          "q": "I’m an experienced engineer. What’s in it for me?",
+          "a": "The template is the easy part. The depth is in measurable quality scenarios, contracts with invariants and error modes, decision records with real alternatives, an AI lab where you red-team generated documentation, and designing docs that coding agents can use without drifting."
+        },
+        {
+          "q": "I’m new to this. Will I keep up?",
+          "a": "Yes. Every section starts with a finished example, early exercises are mostly filled in, and you work in a team. The support fades as you gain confidence."
+        },
+        {
+          "q": "Will this really cut my AI costs?",
+          "a": "It can, if you keep the documentation short and specific. Evidence so far is mixed, and long auto-generated context files can make things worse. The workshop shows you how to test the effect on your own work."
+        },
+        {
+          "q": "Where and when?",
+          "a": "Saturday 30 January 2027, 9:00 am to 5:00 pm at UWI St Augustine. Registered participants get the exact room by email before the day."
+        },
+        {
+          "q": "Do I need to know UML?",
+          "a": "No. Boxes, arrows and plain words are enough."
+        },
+        {
+          "q": "Which system do we document?",
+          "a": "One your team can explain from memory, such as a school library, a clinic booking system or a maxi-taxi tracker. Please don’t share confidential details."
+        },
+        {
+          "q": "Will we use AI?",
+          "a": "Yes, but you write the first draft yourselves. Then you use AI to find gaps, and you check every line it produces."
+        },
+        {
+          "q": "What should I bring?",
+          "a": "A laptop with a Markdown editor that previews Mermaid diagrams, or a shared document your team can edit."
+        },
+        {
+          "q": "Is it a certification?",
+          "a": "No. It is a practical workshop that ends with a document you can use."
+        }
+      ],
+      "sources": "arc42: docs.arc42.org. On context files for AI coding agents: a February 2026 ETH Zurich study (Gloaguen et al.) reported that long, LLM-generated context files lowered task success and raised inference cost by over 20%, as summarised by Little Bear Apps. Other analyses report benefits from concise, human-written files. Findings are early and vary by tool and task, so we teach you to test on your own work.",
+      "sourceLink": [
+        "Little Bear Apps",
+        "https://littlebearapps.com/blog/ai-context-files-what-to-include/"
+      ],
+      "guide": {
+        "intro": "Everything you need before, during and after the day. All the reading below is free and open, and none of it is required: an hour of preparation is plenty.",
+        "setup": [
+          "A laptop with a Markdown editor that previews Mermaid diagrams, or a shared document your team can edit",
+          "An empty file named arc42-team.md (we’ll paste the skeleton in together)",
+          "One system your team could explain from memory, picked or shortlisted",
+          "Your system’s name, a one-sentence purpose and three likely users, written down",
+          "Nothing confidential: no passwords, keys, personal data or client material"
+        ],
+        "levels": [
+          {
+            "title": "New to architecture documentation",
+            "time": "About 30 to 45 minutes",
+            "items": [
+              "Skim the twelve arc42 sections and read what each one is for",
+              "Try one Mermaid diagram in the live editor",
+              "Think of a system you know well and who uses it"
+            ]
+          },
+          {
+            "title": "Experienced engineer or architect",
+            "time": "About 60 to 90 minutes",
+            "items": [
+              "Read the arc42 guidance for sections 5 and 9, and a sample ADR",
+              "Bring a real constraint, quality goal and trade-off from your own work",
+              "Look at one docs-as-code example and decide what you would change"
+            ]
+          }
+        ],
+        "resources": [
+          [
+            "arc42 documentation",
+            "https://docs.arc42.org",
+            "The official guide to each of the twelve sections, with tips."
+          ],
+          [
+            "arc42 FAQ",
+            "https://faq.arc42.org",
+            "Short answers to common questions, including when not to use arc42."
+          ],
+          [
+            "Why arc42 and how it is structured",
+            "https://arc42.org/documentation/",
+            "An overview of the template and where everything lives."
+          ],
+          [
+            "The arc42 template on GitHub",
+            "https://github.com/arc42/arc42-template",
+            "Get it in Markdown or AsciiDoc and keep it in your repository."
+          ],
+          [
+            "arc42 examples",
+            "https://examples.arc42.org",
+            "Worked examples of real documentation."
+          ],
+          [
+            "arc42 quality model",
+            "https://quality.arc42.org",
+            "Quality labels and example scenarios to start from."
+          ],
+          [
+            "The C4 model",
+            "https://c4model.com",
+            "Context, containers, components and code: the zoom levels we use."
+          ],
+          [
+            "MADR",
+            "https://adr.github.io/madr/",
+            "A lean Markdown template for architecture decision records."
+          ],
+          [
+            "Mermaid documentation",
+            "https://mermaid.js.org",
+            "Text-based diagrams: graphs and sequence diagrams."
+          ],
+          [
+            "Mermaid live editor",
+            "https://mermaid.live",
+            "Try diagrams in your browser with nothing to install."
+          ],
+          [
+            "Markdown basic syntax",
+            "https://www.markdownguide.org/basic-syntax/",
+            "Headings, lists, tables and code blocks in one page."
+          ],
+          [
+            "Architecture as Code, an example",
+            "https://docs.spryker.com/docs/dg/dev/architecture/architecture-as-code",
+            "One team’s approach combining arc42, C4, ADRs and Mermaid."
+          ],
+          [
+            "AGENTS.md",
+            "https://agents.md",
+            "An open format for giving coding agents project instructions."
+          ],
+          [
+            "What goes in AI context files",
+            "https://littlebearapps.com/blog/ai-context-files-what-to-include/",
+            "A practical write-up on keeping them short, citing a 2026 ETH Zurich study."
+          ]
+        ],
+        "resourcesNote": "Links point to third-party sites that we don’t control. If one has moved, searching for its title will find it.",
+        "exercises": [
+          [
+            "1",
+            "Summary, quality goals, stakeholders",
+            "1",
+            "Three goals, each with a numbered scenario"
+          ],
+          [
+            "2",
+            "Constraints",
+            "2",
+            "Each passes the three-question test"
+          ],
+          [
+            "3",
+            "Context view",
+            "3",
+            "Every arrow is labelled, no internal parts"
+          ],
+          [
+            "4",
+            "Strategy table",
+            "4",
+            "A neighbour can guess your architecture"
+          ],
+          [
+            "5",
+            "Level-1 blocks and one contract",
+            "5",
+            "5 to 9 blocks and at least one error mode"
+          ],
+          [
+            "6",
+            "One runtime scenario",
+            "6",
+            "Includes a failure branch"
+          ],
+          [
+            "7",
+            "Deployment sketch",
+            "7",
+            "Mapping table is complete"
+          ],
+          [
+            "8",
+            "Crosscutting concepts",
+            "8",
+            "Each concept spans two or more blocks"
+          ],
+          [
+            "9",
+            "One ADR",
+            "9",
+            "Two options and one negative consequence"
+          ],
+          [
+            "10–11",
+            "Quality scenarios, risks, glossary",
+            "10–12",
+            "Numbers, mitigations and owners"
+          ],
+          [
+            "12",
+            "AI-drafted section, red-teamed",
+            "Any",
+            "Every AI line has a verdict"
+          ]
+        ],
+        "skeleton": "# <System name> — arc42 skeleton\n## 1. Introduction and Goals\n### 1.1 Requirements overview\n### 1.2 Quality goals (top 3–5, each with a scenario)\n### 1.3 Stakeholders (role, expectation)\n## 2. Constraints (ID, constraint, why, effect)\n## 3. Context and Scope\n### 3.1 Business context (diagram)\n### 3.2 Technical context (table)\n## 4. Solution Strategy (goal, approach, why, trade-off)\n## 5. Building Block View\n### 5.1 Level 1 (diagram + table)\n### 5.2 Contract: <block>\n## 6. Runtime View (scenario + failure branch)\n## 7. Deployment View (environments, mapping table)\n## 8. Crosscutting Concepts\n## 9. Architecture Decisions (ADR-0001…)\n## 10. Quality Requirements (tree + scenarios)\n## 11. Risks and Technical Debt\n## 12. Glossary",
+        "mermaid": "```mermaid\ngraph LR\n  A[Customer] --> B[Order app]\n  B -->|HTTPS| C[Payment provider]\n```\n\n```mermaid\nsequenceDiagram\n  Customer->>App: place order\n  App-->>Customer: confirmation\n```",
+        "terms": [
+          [
+            "Stakeholder and concern",
+            "A stakeholder is anyone with an interest in the system. A concern is something they care about, such as recovering a lost order."
+          ],
+          [
+            "Quality scenario",
+            "A testable statement of stimulus, response and metric, such as “95% of confirmations appear within 3 s at 300 orders per minute”."
+          ],
+          [
+            "Container and component",
+            "A container is something you start: an application or data store. A component is a grouping of related functionality behind an interface inside a container."
+          ],
+          [
+            "Contract",
+            "What a block promises and expects: pre-conditions, post-conditions, invariants and error modes."
+          ],
+          [
+            "ADR",
+            "An architecture decision record: one significant decision with its context, options, decision and consequences."
+          ],
+          [
+            "Idempotency",
+            "Repeating a request has the same effect as doing it once."
+          ]
+        ],
+        "aiRules": "Write a human draft first. Then ask AI why, and what’s missing, not only to write it. You decide: give every AI line a verdict of accepted, rejected or edited, with a reason. Use only your workshop case, and never paste passwords, keys, personal data or client-confidential details.",
+        "before": [
+          "All 12 headings present, even rough",
+          "Every quality goal has a scenario with a number",
+          "Every block in section 5 traces to a strategy or goal",
+          "Section 6 participants match section 5 names",
+          "At least one ADR with an alternative and a negative consequence",
+          "IDs (C1, ADR-0001) are referenced somewhere else"
+        ],
+        "thirty": "Week 1: finish sections 1–4 with your real team. Week 2: sections 5–6, one contract per critical block. Week 3: three ADRs, five scenarios, risks. Week 4: try the agent experiment (no docs, a short index plus two contracts, or the full arc42) and share what you find."
+      },
+      "course": {
+        "enabled": true,
+        "headline": "The arc42 workshop, as a course you can take at your own pace.",
+        "lead": "The same material as the live day, split into short lessons: slides you control, a transcript for every slide, questions that make you recall what you learned, and the Doubles-to-Go worked example to read and run.",
+        "honesty": "This is the workshop’s slides, notes and exercises turned into self-study lessons. It is not a certification, and it is not a presenter on camera. What it cannot give you is feedback on your own system: that is what the live day is for.",
+        "free": [
+          "part-0-opening",
+          "part-1-foundations"
+        ],
+        "price": {
+          "label": "TT$299",
+          "regular": "TT$399",
+          "note": "Launch price, 25% off the regular TT$399."
+        },
+        "priceNote": "Lifetime access to this edition. Includes every lesson and the worked-example material.",
+        "methods": [],
+        "method": [
+          {
+            "title": "Short lessons you control",
+            "text": "Each lesson is a few minutes of slides. You move at your own pace, go back, and stop when you like."
+          },
+          {
+            "title": "See it done, then do it",
+            "text": "Every part starts from a finished example, then asks you to try. The support fades as you go, as in the live day."
+          },
+          {
+            "title": "Pause and recall",
+            "text": "Each lesson ends by asking what you remember before it shows you. Reviews return at 1, 3, 7 and 21 days. Your progress is stored in this browser only."
+          },
+          {
+            "title": "Read, listen, or both",
+            "text": "Every slide has a transcript. A read-aloud voice is built in, and lessons with recorded narration play it."
+          }
+        ],
+        "evidence": [
+          "Retrieval practice and spacing are well studied, but the size of the effect varies. A 2024 study across nine STEM courses found a small average gain from spaced retrieval (about two percentage points) and not in every course (Bego and colleagues, International Journal of STEM Education). We use both because they cost you little, not because they guarantee a result."
+        ],
+        "faq": [
+          {
+            "q": "Is this the same as the live workshop?",
+            "a": "The material is the same. The live day adds feedback on your own system, work with other people, and a chance to ask questions as they come up."
+          },
+          {
+            "q": "How do I get access?",
+            "a": "Message sales on WhatsApp. We reply with how to pay, and send your access code when payment is confirmed."
+          },
+          {
+            "q": "Can I share my code?",
+            "a": "Please do not. The code is personal and your name appears on every lesson."
+          },
+          {
+            "q": "What if I lose my code or change device?",
+            "a": "Ask again and we will send it again."
+          },
+          {
+            "q": "What about refunds?",
+            "a": "Refund terms are confirmed in writing when you enquire, before you pay."
+          }
+        ],
+        "skip": [
+          "break",
+          "lunch"
+        ],
+        "modules": [
+          {
+            "title": "Start here",
+            "note": "Why architecture goes undocumented, and what good documentation is.",
+            "lessons": [
+              "part-0-opening",
+              "part-1-foundations"
+            ]
+          },
+          {
+            "title": "Morning: goals to strategy",
+            "note": "Sections 1 to 4. Write goals with numbers, find constraints, draw the context, state the strategy.",
+            "lessons": [
+              "part-2-1-goals",
+              "part-3-2-constraints",
+              "part-4-3-context",
+              "part-5-4-strategy",
+              "recall"
+            ]
+          },
+          {
+            "title": "Afternoon: structure, behaviour and decisions",
+            "note": "Sections 5 to 12. Building blocks and contracts, runtime, deployment, decisions, quality, risks.",
+            "lessons": [
+              "part-6-5-building-blocks",
+              "part-7-6-runtime",
+              "part-8-7-deployment",
+              "part-9-8-crosscutting-concepts",
+              "part-9b-see-it-run",
+              "part-10-9-decisions",
+              "part-11-10-quality-requirements",
+              "part-12-11-risks-and-12-glossary"
+            ]
+          },
+          {
+            "title": "AI and agents",
+            "note": "Red-team an AI draft, then write documentation that coding agents can use.",
+            "lessons": [
+              "part-13-ai-lab",
+              "part-14-agents-as-readers",
+              "part-15-close",
+              "appendix-quiz-and-quick-card"
+            ]
+          }
+        ],
+        "preview": {
+          "lesson": "part-1-foundations",
+          "slideTitle": "Trade-offs"
+        }
+      },
+      "example": {
+        "title": "Doubles-to-Go: a worked example you can read and run",
+        "lead": "The workshop teaches with one small, real system: a pre-order app for street-food vendors in Trinidad. You get its complete arc42 document and a working app built to match it, so you can see each section turn into code, and watch the design cope when things go wrong.",
+        "parts": [
+          {
+            "title": "The arc42 document",
+            "text": "All twelve sections: goals, constraints, context, strategy, building blocks with three contracts, runtime scenarios with failure branches, deployment, crosscutting concepts, six decisions, eleven quality scenarios, eight risks and three items of technical debt. Every one has a stable ID."
+          },
+          {
+            "title": "The working app",
+            "text": "One small Node service with no dependencies, plus plain web pages for customers and vendors. The payment provider and SMS gateway are faked inside it, so everything runs offline on your laptop."
+          },
+          {
+            "title": "Tests that guard the document",
+            "text": "33 tests check the contracts, the quality scenarios and the block boundaries. A checker fails if the arc42 uses an ID it never defines. Documentation and code are kept honest by the build."
+          },
+          {
+            "title": "An agent guide",
+            "text": "A short AGENTS.md tells a coding agent where to start, which rules never bend and which commands to run. It is the “agents as readers” idea, made concrete."
+          }
+        ],
+        "run": [
+          "cd app",
+          "npm start      # http://localhost:3000, with /vendor/ and /demo/",
+          "npm test       # 33 tests: contracts, scenarios, architecture rules",
+          "npm run simulate   # 1,000 customers with dropped connections",
+          "npm run docs:check # the arc42 checks its own consistency (needs python3)"
+        ],
+        "needs": "Node 22.13 or newer. Nothing else to install.",
+        "demos": [
+          "Order and pay, then watch the status reach Paid",
+          "Send the same order twice and get one order",
+          "Lose a payment confirmation and see it settle by itself",
+          "Switch the SMS gateway off and see the order still become Ready",
+          "Break a rule on purpose and watch a test name it"
+        ],
+        "limits": [
+          "It is a teaching example, not production software. Sign-in uses fixed demo tokens.",
+          "The arc42 describes two app instances, but the queue worker is not yet safe to run twice. That is recorded as risk R8, found while building the app.",
+          "Data retention is left for the business owner to confirm; no deletion job exists."
+        ],
+        "files": [
+          [
+            "Download the app and document (zip)",
+            "/training/arc42/example/doubles-to-go.zip"
+          ],
+          [
+            "Read the arc42 document (Markdown)",
+            "/training/arc42/example/arc42.md"
+          ]
+        ]
+      },
+      "hero": {
+        "title": "Master arc42: architecture docs people and AI can act on",
+        "highlight": "arc42"
+      }
+    }
+  ]
+}

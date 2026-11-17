@@ -1,0 +1,94 @@
+{
+  "id": "verichain",
+  "name": "VeriChain",
+  "tagline": "A platform where autonomous AI agents run, act and transact, with every consequential action recorded in a log anyone can verify.",
+  "accent": "#35D47A",
+  "status": "Pre-release: specification frozen, core log and verifier built",
+  "version": "",
+  "repo": "https://github.com/intellica-ai-llc/verichain",
+  "contact": "dpramsajan@meeting-mind.com",
+  "tabs": [
+    "overview",
+    "demo",
+    "download",
+    "docs",
+    "verify",
+    "support"
+  ],
+  "demo": {
+    "title": "Verify an evidence pack",
+    "summary": "Check a signed evidence pack, then tamper with it and watch the checks fail. The in-browser verifier is planned; this page shows a labeled placeholder until it ships.",
+    "engine": "placeholder",
+    "sample": "a demo evidence pack",
+    "command": "vcv verify pack.json --trust trust.json --policy policy.json --require-seals",
+    "expected": ""
+  },
+  "audience": [
+    {
+      "role": "Agent developers",
+      "concern": "Record what an agent is authorized to do and does, without building the accountability layer yourself."
+    },
+    {
+      "role": "Operators and enterprises",
+      "concern": "Run agents under policy, with audit-ready evidence, approvals and a kill switch."
+    },
+    {
+      "role": "Auditors, insurers and regulators",
+      "concern": "Verify what an agent did from an evidence pack, offline, against the minimum assurance you set."
+    },
+    {
+      "role": "Counterparties",
+      "concern": "Check an agent's authority and history without having to trust its operator."
+    }
+  ],
+  "highlights": [
+    {
+      "title": "Evidence you can check offline",
+      "text": "Actions are written to a witnessed, append-only log. Inclusion and consistency can be verified without contacting the operator."
+    },
+    {
+      "title": "Intent is recorded before effect",
+      "text": "A hosted agent’s intent is written down before any action takes place, so a missing record is itself visible."
+    },
+    {
+      "title": "Honest assurance levels",
+      "text": "Every record states its assurance (A0 to A3) and completeness (C0 to C3), and the verifier enforces the minimum you require."
+    },
+    {
+      "title": "Runs small, scales out",
+      "text": "Deployment topologies run from a single machine for development (T0) to federated operation (T3)."
+    }
+  ],
+  "verifyIt": "Build a demo evidence pack, verify it with vcv, then use the tamper buttons in the dashboard or edit one byte and verify again: the checks turn red.",
+  "buildFromSource": {
+    "title": "Build from source",
+    "intro": "VeriChain is pre-release and has no packaged binaries. Build the log daemon and the verifier from source.",
+    "steps": "git clone https://github.com/intellica-ai-llc/verichain\ncd verichain\ncargo build --release -p vcd -p vc-verify\n./target/release/vcv version",
+    "note": "Needs Rust (current stable)."
+  },
+  "faq": [
+    {
+      "q": "Is VeriChain available to use today?",
+      "a": "It is pre-release. The specification is frozen and the core log and verifier crates are built and tested. You can build it and run the local demo; there is no hosted service or packaged download yet."
+    },
+    {
+      "q": "What does a failed check mean?",
+      "a": "The verifier reports which check failed (for example the signature, an inclusion proof or the witness quorum). Exit code 1 means a check failed; the JSON report names it."
+    },
+    {
+      "q": "Why does the verifier need my own trust file?",
+      "a": "A pack carries its own trust anchors, which say nothing about who you trust. Without your trust and policy files the report only shows the pack is consistent with itself."
+    },
+    {
+      "q": "Can I run a pilot server on free hosting?",
+      "a": "The repository has a pilot runbook for Oracle Cloud Always Free with HTTPS, backups and monitoring. It is for testing only, with no SLA."
+    }
+  ],
+  "limits": [
+    "There is no packaged download, hosted service or in-browser verifier yet; you build from source.",
+    "Assurance level A3 (zero-knowledge proof) is research-gated and not available.",
+    "The verifier's WebAssembly build has not been verified, and an independent adversarial review is still pending.",
+    "Completeness depends on how an agent runs: the strongest guarantee (C3) applies to agents hosted on VeriChain; agents running beside it are observed, not guaranteed."
+  ],
+  "whatsapp": "18687195236"
+}

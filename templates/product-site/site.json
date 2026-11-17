@@ -1,0 +1,30 @@
+{
+  "id": "",
+  "name": "",
+  "tagline": "",
+  "accent": "#00C8FF",
+  "status": "",
+  "version": "",
+  "repo": "",
+  "contact": "dpramsajan@meeting-mind.com",
+  "tabs": [
+    "overview",
+    "demo",
+    "download",
+    "docs",
+    "verify",
+    "support"
+  ],
+  "demo": {
+    "title": "",
+    "summary": "",
+    "engine": "placeholder",
+    "sample": "",
+    "command": "",
+    "expected": ""
+  },
+  "audience": [],
+  "highlights": [],
+  "verifyIt": "",
+  "whatsapp": "18687195236"
+}

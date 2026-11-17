@@ -1,0 +1,90 @@
+{
+  "id": "omc",
+  "name": "OMC",
+  "tagline": "A closed-loop system that measures and proves the financial value of work shared by people, AI models and agents.",
+  "accent": "#7C6CF0",
+  "status": "Design phase: walking skeleton on synthetic data",
+  "version": "",
+  "repo": "https://github.com/DamainRamsajan/Operating-Margin-Controller-",
+  "contact": "dpramsajan@meeting-mind.com",
+  "tabs": [
+    "overview",
+    "demo",
+    "download",
+    "docs",
+    "verify",
+    "support"
+  ],
+  "demo": {
+    "title": "Qualify a model migration",
+    "summary": "Watch a confidence bound tighten as paired cases arrive, and end with a signed verdict. The in-browser demo is planned; this page shows a labeled placeholder until it ships.",
+    "engine": "placeholder",
+    "sample": "synthetic paired cases",
+    "command": "python scripts/demo.py",
+    "expected": ""
+  },
+  "audience": [
+    {
+      "role": "CIO office",
+      "concern": "Switch a model or vendor with evidence that outcomes did not get worse."
+    },
+    {
+      "role": "CFO and finance controller",
+      "concern": "See what AI work costs and delivers, in numbers finance can recompute."
+    },
+    {
+      "role": "Compliance and data protection",
+      "concern": "Show who or what acted, with what authority, and what human access took place."
+    },
+    {
+      "role": "Auditors",
+      "concern": "Verify statements with the public verifier, schema and test vectors."
+    }
+  ],
+  "highlights": [
+    {
+      "title": "Four entry audits",
+      "text": "Migration qualification, outcome billing audit and vendor bake-off, action authority audit, and human access and disclosure compliance audit."
+    },
+    {
+      "title": "Numbers finance can re-run",
+      "text": "Statements can be re-derived from signed inputs with a pinned estimator, so a result does not rest on trust."
+    },
+    {
+      "title": "Bounded risk",
+      "text": "A kill switch returns traffic to the baseline, so a trial never leaves you without a safe fallback."
+    },
+    {
+      "title": "Your data stays in your tenant",
+      "text": "The measurement runs in the customer’s tenant; a hosted control plane coordinates it."
+    }
+  ],
+  "verifyIt": "Run the demo, then verify its signed statements and hash chain with the standalone verifier and the public test vectors.",
+  "buildFromSource": {
+    "title": "Run from source",
+    "intro": "OMC is in its design phase and has no packaged release. Run the walking-skeleton demo.",
+    "steps": "git clone https://github.com/DamainRamsajan/Operating-Margin-Controller-\ncd Operating-Margin-Controller-\npip install -e \".[dev,spike]\"\npython scripts/demo.py",
+    "note": "Needs Python 3. Results come from synthetic data only."
+  },
+  "faq": [
+    {
+      "q": "Has OMC been validated on real data?",
+      "a": "Not yet. Every result so far comes from synthetic worlds with planted ground truth. The repository's limitations page lists what to read before relying on any result."
+    },
+    {
+      "q": "Why was my case held instead of promoted or rejected?",
+      "a": "The bounds are valid but conservative, so close calls stay on hold until there is more evidence. The 'unclear' scenario in the demo shows this."
+    },
+    {
+      "q": "Which signatures are used?",
+      "a": "Ed25519 only today. Post-quantum signing and transparency-service registration are on the backlog."
+    }
+  ],
+  "limits": [
+    "Every result so far comes from synthetic data; nothing has been validated on real tickets.",
+    "The statistical bounds assume cases come from a fixed distribution over the audit window; drift can invalidate a certificate.",
+    "The bounds are valid but conservative, so close calls are held rather than promoted.",
+    "The statistics are the author's own implementation and need independent statistical review."
+  ],
+  "whatsapp": "18687195236"
+}
